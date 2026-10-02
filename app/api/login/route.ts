@@ -13,6 +13,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'جميع الحقول مطلوبة' })
     }
 
+    console.log('🔑 Login attempt for:', username)
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
     const { data: users, error } = await supabase
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
       .limit(1)
 
     if (error) {
-      console.error('Login error:', error)
+      console.error('❌ Login error:', error)
       return NextResponse.json({ success: false, message: 'خطأ: ' + error.message })
     }
 
@@ -57,7 +59,7 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('❌ Login error:', error)
     return NextResponse.json({ success: false, message: 'خطأ في الخادم' }, { status: 500 })
   }
 }
