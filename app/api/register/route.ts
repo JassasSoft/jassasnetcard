@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = 'https://otkczodeibqlipcnvbrbz.supabase.co'
+// الـ URL الصحيح يتطابق مع المفتاح
+const SUPABASE_URL = 'https://otkczodeibqlipcnvqs.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a2N6b2RlaWJxbGlwY25udnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDA5NDQsImV4cCI6MjEwNjI3Njk0NH0.9mZswsFjdsb6yCv5tk2UuLejJVpJZoggw1ydGHlN6z8'
 
 export async function POST(request: Request) {
@@ -14,11 +15,10 @@ export async function POST(request: Request) {
     }
 
     console.log('🔑 Starting registration for:', email)
+    console.log('🌐 Using URL:', SUPABASE_URL)
 
-    // إنشاء عميل Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-    // التحقق من وجود المستخدم
     const { data: existingUsers, error: checkError } = await supabase
       .from('users')
       .select('id')
@@ -27,14 +27,13 @@ export async function POST(request: Request) {
 
     if (checkError) {
       console.error('Check error:', checkError)
-      return NextResponse.json({ success: false, message: 'خطأ في التحقق: ' + checkError.message })
+      return NextResponse.json({ success: false, message: 'خطأ: ' + checkError.message })
     }
 
     if (existingUsers && existingUsers.length > 0) {
       return NextResponse.json({ success: false, message: 'البريد مستخدم بالفعل' })
     }
 
-    // إنشاء المستخدم
     const { data: newUser, error: insertError } = await supabase
       .from('users')
       .insert([{
@@ -49,13 +48,12 @@ export async function POST(request: Request) {
 
     if (insertError) {
       console.error('Insert error:', insertError)
-      return NextResponse.json({ success: false, message: 'خطأ في إنشاء المستخدم: ' + insertError.message })
+      return NextResponse.json({ success: false, message: 'خطأ: ' + insertError.message })
     }
 
     console.log('✅ User created:', newUser.id)
 
-    // إنشاء الاشتراك
-    const { error: subError } = await supabase
+    await supabase
       .from('subscriptions')
       .insert([{
         user_id: newUser.id,
@@ -64,10 +62,6 @@ export async function POST(request: Request) {
         cards_remaining: 500,
         total_cards_printed: 0
       }])
-
-    if (subError) {
-      console.error('Subscription error:', subError)
-    }
 
     return NextResponse.json({
       success: true,
@@ -83,6 +77,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Registration error:', error)
-    return NextResponse.json({ success: false, message: 'خطأ في الخادم: ' + error.message }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'خطأ: ' + error.message }, { status: 500 })
   }
 }
