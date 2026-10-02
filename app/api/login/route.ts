@@ -10,10 +10,8 @@ export async function POST(request: Request) {
     const { username, password } = body
 
     if (!username || !password) {
-      return NextResponse.json({ success: false, message: 'جميع الحقول مطلوبة' })
+      return NextResponse.json({ success: false, message: 'جميع الحقول مطلوبة' }, { status: 400 })
     }
-
-    console.log('🔑 Login attempt for:', username)
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
@@ -24,8 +22,7 @@ export async function POST(request: Request) {
       .limit(1)
 
     if (error) {
-      console.error('❌ Login error:', error)
-      return NextResponse.json({ success: false, message: 'خطأ: ' + error.message })
+      return NextResponse.json({ success: false, message: 'خطأ: ' + error.message }, { status: 500 })
     }
 
     if (!users || users.length === 0) {
@@ -59,7 +56,6 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
-    console.error('❌ Login error:', error)
     return NextResponse.json({ success: false, message: 'خطأ في الخادم' }, { status: 500 })
   }
 }
