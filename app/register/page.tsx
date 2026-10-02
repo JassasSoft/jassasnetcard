@@ -57,8 +57,7 @@ export default function RegisterPage() {
           {t.haveAccount} <a href="/login" style={{ color: "#00ffff", textDecoration: "none", fontWeight: "bold" }}>{t.loginLink}</a>
         </p>
       </div>
+      <InstallPrompt />
     </div>
-    <InstallPrompt />
-  </div>
   )
 }
