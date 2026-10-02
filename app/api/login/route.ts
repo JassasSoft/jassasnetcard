@@ -4,8 +4,6 @@ export async function POST(request: Request) {
   try {
     const { username, password } = await request.json()
 
-    // هنا هنتحقق من قاعدة البيانات
-    // مؤقتاً: بيانات تجريبية
     if (username === 'admin' && password === 'admin123') {
       return NextResponse.json({
         success: true,

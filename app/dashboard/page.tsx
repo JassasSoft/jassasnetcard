@@ -12,11 +12,11 @@ export default function DashboardPage() {
   useEffect(() => {
     const userData = localStorage.getItem('user')
     if (!userData) {
-      router.push('/login')
+      window.location.href = '/login'
     } else {
       setUser(JSON.parse(userData))
     }
-  }, [router])
+  }, [])
 
   const sendMikrotikCommand = async () => {
     setLoading(true)
@@ -37,7 +37,7 @@ export default function DashboardPage() {
         setResult('❌ ' + data.message)
       }
     } catch (error) {
-      setResult(' خطأ في الاتصال')
+      setResult('❌ خطأ في الاتصال')
     } finally {
       setLoading(false)
     }
@@ -45,7 +45,7 @@ export default function DashboardPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('user')
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   if (!user) {
@@ -78,7 +78,9 @@ export default function DashboardPage() {
           alignItems: 'center',
           marginBottom: '30px',
           paddingBottom: '20px',
-          borderBottom: '2px solid rgba(0, 255, 255, 0.2)'
+          borderBottom: '2px solid rgba(0, 255, 255, 0.2)',
+          flexWrap: 'wrap',
+          gap: '10px'
         }}>
           <div>
             <h1 style={{ color: '#00ffff', fontSize: '28px', margin: 0 }}>
@@ -180,7 +182,7 @@ export default function DashboardPage() {
             fontSize: '16px',
             cursor: 'pointer'
           }}>
-            👥 إدارة المستخدمين
+             إدارة المستخدمين
           </button>
 
           <button style={{
@@ -192,7 +194,7 @@ export default function DashboardPage() {
             fontSize: '16px',
             cursor: 'pointer'
           }}>
-            🌐 إدارة الشبكات
+             إدارة الشبكات
           </button>
 
           <button style={{
