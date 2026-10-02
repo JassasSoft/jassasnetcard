@@ -2,33 +2,32 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const commands: string = body.commands || ''
-
+    const { commands, type } = await request.json()
+    
     if (!commands) {
-      return NextResponse.json({
-        success: false,
-        message: 'لا توجد أوامر'
-      })
+      return NextResponse.json({ success: false, message: 'No commands provided' })
     }
 
-    console.log('📡 الأوامر المستلمة:', commands)
+    console.log(' MikroTik Commands:', commands)
+    console.log('📡 Type:', type || 'user')
 
     const commandList = commands.split('\n').filter((cmd: string) => cmd.trim())
 
-    console.log(`✅ تم استلام ${commandList.length} أمر`)
-
+    // هنا هنضيف الكود الفعلي للربط مع MikroTik API
+    // حالياً: محاكاة النجاح
+    
     return NextResponse.json({
       success: true,
       message: `تم إرسال ${commandList.length} أمر بنجاح`,
-      commands: commandList
+      commands: commandList,
+      timestamp: new Date().toISOString()
     })
 
   } catch (error) {
-    console.error('❌ خطأ:', error)
+    console.error('❌ MikroTik API Error:', error)
     return NextResponse.json({
       success: false,
-      message: 'خطأ في الخادم'
+      message: 'Server error processing commands'
     }, { status: 500 })
   }
 }
