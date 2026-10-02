@@ -2,14 +2,18 @@
 import { useState, useEffect } from "react"
 
 export default function DashboardPage() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<any>(null)
   const [commands, setCommands] = useState("")
   const [result, setResult] = useState("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const userData = localStorage.getItem("user")
-    else { setUser(JSON.parse(userData)) }
+    if (!userData) {
+      window.location.href = "/login"
+    } else {
+      setUser(JSON.parse(userData))
+    }
   }, [])
 
   const sendCommand = async () => {
@@ -22,11 +26,16 @@ export default function DashboardPage() {
         body: JSON.stringify({ commands })
       })
       const data = await res.json()
-      setResult(data.success ? "Success: " + data.message : "Error: " + data.message)
-    } catch (e) { setResult("Connection error") }
-    finally { setLoading(false) }
+      setResult(data.success ? "✅ " + data.message : "❌ " + data.message)
+    } catch (e) {
+      setResult("❌ Connection error")
+    }
+    setLoading(false)
   }
 
+  if (!user) {
+    return <div style={{ padding: "20px", color: "white" }}>Loading...</div>
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0e27", padding: "20px", fontFamily: "Arial" }}>
@@ -40,7 +49,7 @@ export default function DashboardPage() {
         <button onClick={sendCommand} disabled={loading} style={{ width: "100%", padding: "15px", background: loading ? "#666" : "#00ffff", color: "#0a0e27", fontSize: "18px", fontWeight: "bold", borderRadius: "10px", border: "none", cursor: "pointer", marginTop: "15px" }}>
           {loading ? "Sending..." : "Send Commands"}
         </button>
-        {result && <div style={{ marginTop: "15px", padding: "15px", background: result.includes("Success") ? "rgba(0,255,0,0.2)" : "rgba(255,0,0,0.2)", border: "2px solid " + (result.includes("Success") ? "#00ff00" : "#ff0000"), borderRadius: "10px", color: result.includes("Success") ? "#00ff00" : "#ff0000", textAlign: "center", fontWeight: "bold" }}>{result}</div>}
+        {result && <div style={{ marginTop: "15px", padding: "15px", background: result.includes("✅") ? "rgba(0,255,0,0.2)" : "rgba(255,0,0,0.2)", border: "2px solid " + (result.includes("✅") ? "#00ff00" : "#ff0000"), borderRadius: "10px", color: result.includes("✅") ? "#00ff00" : "#ff0000", textAlign: "center", fontWeight: "bold" }}>{result}</div>}
       </div>
     </div>
   )
