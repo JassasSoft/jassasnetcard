@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://otkczodeibqlipcnvbrbz.supabase.co'
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const SUPABASE_URL = 'https://otkczodeibqlipcnvbrbz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a2N6b2RlaWJxbGlwY25udnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDA5NDQsImV4cCI6MjEwNjI3Njk0NH0.9mZswsFjdsb6yCv5tk2UuLejJVpJZoggw1ydGHlN6z8'
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +10,6 @@ export async function POST(request: Request) {
 
     if (!username || !password) {
       return NextResponse.json({ success: false, message: 'جميع الحقول مطلوبة' })
-    }
-
-    if (!SUPABASE_KEY) {
-      return NextResponse.json({ success: false, message: 'Supabase key not configured' })
     }
 
     // البحث عن المستخدم
@@ -60,6 +56,7 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
+    console.error('Login error:', error)
     return NextResponse.json({ success: false, message: 'خطأ في الخادم' }, { status: 500 })
   }
 }

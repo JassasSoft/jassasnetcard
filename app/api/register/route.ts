@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://otkczodeibqlipcnvbrbz.supabase.co'
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+// المفاتيح مكتوبة مباشرة - لا تعتمد على environment variables
+const SUPABASE_URL = 'https://otkczodeibqlipcnvbrbz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a2N6b2RlaWJxbGlwY25udnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDA5NDQsImV4cCI6MjEwNjI3Njk0NH0.9mZswsFjdsb6yCv5tk2UuLejJVpJZoggw1ydGHlN6z8'
 
 export async function POST(request: Request) {
   try {
@@ -12,9 +13,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'البريد وكلمة المرور مطلوبان' })
     }
 
-    if (!SUPABASE_KEY) {
-      return NextResponse.json({ success: false, message: 'Supabase key not configured' })
-    }
+    console.log('🔑 Using Supabase URL:', SUPABASE_URL)
+    console.log('🔑 Key length:', SUPABASE_KEY.length)
 
     // التحقق من وجود المستخدم
     const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=id`, {
@@ -50,13 +50,15 @@ export async function POST(request: Request) {
 
     if (!insertRes.ok) {
       const err = await insertRes.text()
-      return NextResponse.json({ success: false, message: 'خطأ: ' + err })
+      console.error('Insert error:', err)
+      return NextResponse.json({ success: false, message: 'خطأ في إنشاء المستخدم: ' + err })
     }
 
     const newUser = (await insertRes.json())[0]
+    console.log('✅ User created:', newUser.id)
 
     // إنشاء الاشتراك
-    await fetch(`${SUPABASE_URL}/rest/v1/subscriptions`, {
+    const subRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_KEY,
@@ -72,6 +74,10 @@ export async function POST(request: Request) {
       })
     })
 
+    if (!subRes.ok) {
+      console.error('Subscription error:', await subRes.text())
+    }
+
     return NextResponse.json({
       success: true,
       user: {
@@ -85,6 +91,7 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
+    console.error('Registration error:', error)
     return NextResponse.json({ success: false, message: 'خطأ في الخادم: ' + error }, { status: 500 })
   }
 }
