@@ -3,14 +3,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ full_name?: string } | null>(null)
   const [mikrotikCommands, setMikrotikCommands] = useState('')
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    // التحقق من تسجيل الدخول
     const userData = localStorage.getItem('user')
     if (!userData) {
       router.push('/login')
@@ -33,12 +32,12 @@ export default function DashboardPage() {
       const data = await response.json()
 
       if (data.success) {
-        setResult('✅ تم إرسال الأوامر بنجاح!')
+        setResult('✅ ' + data.message)
       } else {
-        setResult('❌ خطأ: ' + data.message)
+        setResult('❌ ' + data.message)
       }
     } catch (error) {
-      setResult('❌ خطأ في الاتصال')
+      setResult(' خطأ في الاتصال')
     } finally {
       setLoading(false)
     }
@@ -50,7 +49,11 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return <div style={{ padding: '20px', color: 'white' }}>جاري التحميل...</div>
+    return (
+      <div style={{ padding: '20px', color: 'white', textAlign: 'center' }}>
+        جاري التحميل...
+      </div>
+    )
   }
 
   return (
@@ -69,7 +72,6 @@ export default function DashboardPage() {
         padding: '30px',
         boxShadow: '0 0 40px rgba(0, 255, 255, 0.2)'
       }}>
-        {/* Header */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -79,18 +81,10 @@ export default function DashboardPage() {
           borderBottom: '2px solid rgba(0, 255, 255, 0.2)'
         }}>
           <div>
-            <h1 style={{
-              color: '#00ffff',
-              fontSize: '28px',
-              margin: 0
-            }}>
+            <h1 style={{ color: '#00ffff', fontSize: '28px', margin: 0 }}>
               🎯 لوحة التحكم
             </h1>
-            <p style={{
-              color: '#94a3b8',
-              fontSize: '16px',
-              margin: '5px 0 0'
-            }}>
+            <p style={{ color: '#94a3b8', fontSize: '16px', margin: '5px 0 0' }}>
               مرحباً، {user.full_name || 'مدير النظام'}
             </p>
           </div>
@@ -107,24 +101,19 @@ export default function DashboardPage() {
               fontWeight: 'bold'
             }}
           >
-             تسجيل الخروج
+            تسجيل الخروج
           </button>
         </div>
 
-        {/* MikroTik Commands Section */}
         <div style={{ marginBottom: '30px' }}>
-          <h2 style={{
-            color: '#00ffff',
-            fontSize: '22px',
-            marginBottom: '15px'
-          }}>
+          <h2 style={{ color: '#00ffff', fontSize: '22px', marginBottom: '15px' }}>
             🔧 إرسال أوامر MikroTik
           </h2>
           
           <textarea
             value={mikrotikCommands}
             onChange={(e) => setMikrotikCommands(e.target.value)}
-            placeholder="أدخل أوامر MikroTik هنا (كل أمر في سطر)&#10;مثال:&#10;/user add name=test password=123 group=full&#10;/ip service enable api"
+            placeholder="أدخل أوامر MikroTik هنا (كل أمر في سطر)&#10;مثال:&#10;/user add name=test password=123 group=full"
             style={{
               width: '100%',
               minHeight: '200px',
@@ -136,7 +125,8 @@ export default function DashboardPage() {
               fontSize: '14px',
               fontFamily: 'monospace',
               outline: 'none',
-              resize: 'vertical'
+              resize: 'vertical',
+              boxSizing: 'border-box'
             }}
           />
 
@@ -176,7 +166,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Quick Actions */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -189,8 +178,7 @@ export default function DashboardPage() {
             borderRadius: '10px',
             color: '#00ffff',
             fontSize: '16px',
-            cursor: 'pointer',
-            textAlign: 'center'
+            cursor: 'pointer'
           }}>
             👥 إدارة المستخدمين
           </button>
@@ -202,8 +190,7 @@ export default function DashboardPage() {
             borderRadius: '10px',
             color: '#a855f7',
             fontSize: '16px',
-            cursor: 'pointer',
-            textAlign: 'center'
+            cursor: 'pointer'
           }}>
             🌐 إدارة الشبكات
           </button>
@@ -215,10 +202,9 @@ export default function DashboardPage() {
             borderRadius: '10px',
             color: '#ffa500',
             fontSize: '16px',
-            cursor: 'pointer',
-            textAlign: 'center'
+            cursor: 'pointer'
           }}>
-             الإحصائيات
+            📊 الإحصائيات
           </button>
 
           <button style={{
@@ -228,8 +214,7 @@ export default function DashboardPage() {
             borderRadius: '10px',
             color: '#00ff00',
             fontSize: '16px',
-            cursor: 'pointer',
-            textAlign: 'center'
+            cursor: 'pointer'
           }}>
             ⚙️ الإعدادات
           </button>

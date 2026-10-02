@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { commands } = await request.json()
+    const body = await request.json()
+    const commands: string = body.commands || ''
 
     if (!commands) {
       return NextResponse.json({
@@ -11,13 +12,9 @@ export async function POST(request: Request) {
       })
     }
 
-    // هنا هنضيف كود الربط الفعلي مع MikroTik
-    // مؤقتاً: محاكاة نجاح العملية
-    
-    console.log(' الأوامر المستلمة:', commands)
+    console.log('📡 الأوامر المستلمة:', commands)
 
-    // تقسيم الأوامر (كل سطر أمر)
-    const commandList = commands.split('\n').filter(cmd => cmd.trim())
+    const commandList = commands.split('\n').filter((cmd: string) => cmd.trim())
 
     console.log(`✅ تم استلام ${commandList.length} أمر`)
 
