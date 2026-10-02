@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-// المفاتيح مكتوبة مباشرة - لا تعتمد على environment variables
 const SUPABASE_URL = 'https://otkczodeibqlipcnvbrbz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a2N6b2RlaWJxbGlwY25udnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDA5NDQsImV4cCI6MjEwNjI3Njk0NH0.9mZswsFjdsb6yCv5tk2UuLejJVpJZoggw1ydGHlN6z8'
 
@@ -13,69 +13,60 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'البريد وكلمة المرور مطلوبان' })
     }
 
-    console.log('🔑 Using Supabase URL:', SUPABASE_URL)
-    console.log('🔑 Key length:', SUPABASE_KEY.length)
+    console.log('🔑 Starting registration for:', email)
+
+    // إنشاء عميل Supabase
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
     // التحقق من وجود المستخدم
-    const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=id`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    const existingUsers = await checkRes.json()
+    const { data: existingUsers, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .limit(1)
+
+    if (checkError) {
+      console.error('Check error:', checkError)
+      return NextResponse.json({ success: false, message: 'خطأ في التحقق: ' + checkError.message })
+    }
 
     if (existingUsers && existingUsers.length > 0) {
       return NextResponse.json({ success: false, message: 'البريد مستخدم بالفعل' })
     }
 
     // إنشاء المستخدم
-    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify({
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert([{
         full_name: fullName,
         email: email,
         phone: phone || '',
         password_hash: password,
         role: 'customer'
-      })
-    })
+      }])
+      .select()
+      .single()
 
-    if (!insertRes.ok) {
-      const err = await insertRes.text()
-      console.error('Insert error:', err)
-      return NextResponse.json({ success: false, message: 'خطأ في إنشاء المستخدم: ' + err })
+    if (insertError) {
+      console.error('Insert error:', insertError)
+      return NextResponse.json({ success: false, message: 'خطأ في إنشاء المستخدم: ' + insertError.message })
     }
 
-    const newUser = (await insertRes.json())[0]
     console.log('✅ User created:', newUser.id)
 
     // إنشاء الاشتراك
-    const subRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+    const { error: subError } = await supabase
+      .from('subscriptions')
+      .insert([{
         user_id: newUser.id,
         plan_type: 'trial',
         status: 'active',
         cards_remaining: 500,
         total_cards_printed: 0
-      })
-    })
+      }])
 
-    if (!subRes.ok) {
-      console.error('Subscription error:', await subRes.text())
+    if (subError) {
+      console.error('Subscription error:', subError)
     }
 
     return NextResponse.json({
@@ -92,6 +83,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Registration error:', error)
-    return NextResponse.json({ success: false, message: 'خطأ في الخادم: ' + error }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'خطأ في الخادم: ' + error.message }, { status: 500 })
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = 'https://otkczodeibqlipcnvbrbz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a2N6b2RlaWJxbGlwY25udnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDA5NDQsImV4cCI6MjEwNjI3Njk0NH0.9mZswsFjdsb6yCv5tk2UuLejJVpJZoggw1ydGHlN6z8'
@@ -12,15 +13,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'جميع الحقول مطلوبة' })
     }
 
+    console.log('🔑 Login attempt for:', username)
+
+    // إنشاء عميل Supabase
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
     // البحث عن المستخدم
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/users?or=(email.eq.${encodeURIComponent(username)},full_name.eq.${encodeURIComponent(username)})&select=*&limit=1`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    const users = await res.json()
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('*')
+      .or(`email.eq.${username},full_name.eq.${username}`)
+      .limit(1)
+
+    if (error) {
+      console.error('Login error:', error)
+      return NextResponse.json({ success: false, message: 'خطأ في البحث: ' + error.message })
+    }
 
     if (!users || users.length === 0) {
       return NextResponse.json({ success: false, message: 'بيانات الدخول غير صحيحة' })
@@ -33,14 +41,12 @@ export async function POST(request: Request) {
     }
 
     // جلب الاشتراك
-    const subRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    const subscriptions = await subRes.json()
+    const { data: subscriptions } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .limit(1)
+
     const subscription = subscriptions && subscriptions.length > 0 ? subscriptions[0] : null
 
     return NextResponse.json({
