@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import Logo from "@/components/Logo"
+import InstallPrompt from "@/components/InstallPrompt"
 import { translations } from "@/lib/translations"
 
 export default function LoginPage() {
@@ -54,5 +55,7 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+    <InstallPrompt />
+  </div>
   )
 }

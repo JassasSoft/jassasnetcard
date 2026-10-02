@@ -1,36 +1,47 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://otkczodeibqlipcnvbrbz.supabase.co'
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json()
+    const body = await request.json()
+    const { username, password } = body
 
     if (!username || !password) {
       return NextResponse.json({ success: false, message: 'جميع الحقول مطلوبة' })
     }
 
     // البحث عن المستخدم
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', username)
-      .single()
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/users?or=(email.eq.${encodeURIComponent(username)},full_name.eq.${encodeURIComponent(username)})&select=*&limit=1`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    const users = await res.json()
 
-    if (error || !user) {
+    if (!users || users.length === 0) {
       return NextResponse.json({ success: false, message: 'بيانات الدخول غير صحيحة' })
     }
 
-    // التحقق من كلمة المرور
+    const user = users[0]
+
     if (user.password_hash !== password) {
       return NextResponse.json({ success: false, message: 'بيانات الدخول غير صحيحة' })
     }
 
     // جلب الاشتراك
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+    const subRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    const subscriptions = await subRes.json()
+    const subscription = subscriptions && subscriptions.length > 0 ? subscriptions[0] : null
 
     return NextResponse.json({
       success: true,

@@ -1,52 +1,72 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://otkczodeibqlipcnvbrbz.supabase.co'
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export async function POST(request: Request) {
   try {
-    const { fullName, email, phone, password } = await request.json()
+    const body = await request.json()
+    const { fullName, email, phone, password } = body
 
     if (!email || !password) {
       return NextResponse.json({ success: false, message: 'البريد وكلمة المرور مطلوبان' })
     }
 
     // التحقق من وجود المستخدم
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single()
+    const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=id`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    const existingUsers = await checkRes.json()
 
-    if (existingUser) {
+    if (existingUsers && existingUsers.length > 0) {
       return NextResponse.json({ success: false, message: 'البريد مستخدم بالفعل' })
     }
 
     // إنشاء المستخدم
-    const { data: newUser, error } = await supabase
-      .from('users')
-      .insert([{
+    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
         full_name: fullName,
         email: email,
-        phone: phone,
+        phone: phone || '',
         password_hash: password,
         role: 'customer'
-      }])
-      .select()
-      .single()
+      })
+    })
 
-    if (error) {
-      return NextResponse.json({ success: false, message: 'خطأ في إنشاء المستخدم' })
+    if (!insertRes.ok) {
+      const err = await insertRes.text()
+      return NextResponse.json({ success: false, message: 'خطأ: ' + err })
     }
 
-    // إنشاء اشتراك تجريبي مع 500 كرت
-    await supabase
-      .from('subscriptions')
-      .insert([{
+    const newUser = (await insertRes.json())[0]
+
+    // إنشاء الاشتراك
+    await fetch(`${SUPABASE_URL}/rest/v1/subscriptions`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
         user_id: newUser.id,
         plan_type: 'trial',
         status: 'active',
         cards_remaining: 500,
         total_cards_printed: 0
-      }])
+      })
+    })
 
     return NextResponse.json({
       success: true,
@@ -61,6 +81,6 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
-    return NextResponse.json({ success: false, message: 'خطأ في الخادم' }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'خطأ في الخادم: ' + error }, { status: 500 })
   }
 }

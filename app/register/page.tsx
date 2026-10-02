@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import Logo from "@/components/Logo"
+import InstallPrompt from "@/components/InstallPrompt"
 import { translations } from "@/lib/translations"
 
 export default function RegisterPage() {
@@ -57,5 +58,7 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+    <InstallPrompt />
+  </div>
   )
 }
