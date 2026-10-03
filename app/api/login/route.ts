@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = 'https://dccjryybmmnqmvuqriky.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjY2pyeXlibW1ucW12dXFyaWt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTU3NjgsImV4cCI6MjEwNjU5MTc2OH0.v-OcU2DMyvCPrAtqk5c-bkiZ8DzQOnQqH7rXSb-TuRQ'
+const SUPABASE_URL = 'https://kxjmzluxsmbyvjlvznwd.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4am16bHV4c21ieXZqbHZ6bndkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTkyOTMsImV4cCI6MjEwNjU5NTI5M30.DKxmlh34ZjSrfQTUJIE5-Bmw0zBUVKYLXn9wVkS4kgA'
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       .limit(1)
 
     if (error) {
-      console.error('❌ Login error:', error)
       return NextResponse.json({ success: false, message: 'خطأ: ' + error.message }, { status: 500 })
     }
 
@@ -57,7 +56,6 @@ export async function POST(request: Request) {
     })
 
   } catch (error: any) {
-    console.error('❌ Login error:', error)
     return NextResponse.json({ success: false, message: 'خطأ في الخادم' }, { status: 500 })
   }
 }
