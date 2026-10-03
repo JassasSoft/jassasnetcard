@@ -11,15 +11,19 @@ export default function PrintCardsPage() {
 
   const [formData, setFormData] = useState({
     networkName: 'Jassas Net',
+    cardPrefix: '86',
     cardNumberLength: 12,
     cardValue: '1',
     duration: '1',
     durationType: 'hour',
+    capacityType: 'limited',
     capacity: '500',
-    capacityUnlimited: false,
+    capacityUnit: 'MB',
+    expiryType: 'limited',
     expiryTime: '12',
-    expiryType: 'hour',
+    expiryUnit: 'hour',
     cardStyle: 'colored',
+    cardEffect: 'gradient',
     colorScheme: 'blue-gold',
     cardShape: 'rectangle',
     quantity: 10,
@@ -46,19 +50,21 @@ export default function PrintCardsPage() {
 
   const durationLabels = { hour: 'ساعة', day: 'يوم', week: 'أسبوع', month: 'شهر' }
 
-  const generateCardNumber = (length) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let result = ''
-    for (let i = 0; i < length; i++) {
+  const generateSmartCardNumber = (prefix, length) => {
+    const chars = '0123456789'
+    let result = prefix
+    const remainingLength = length - prefix.length
+    for (let i = 0; i < remainingLength; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length))
     }
     return result
   }
 
   const calculateExpiry = () => {
+    if (formData.expiryType === 'unlimited') return 'غير محدد'
     const now = new Date()
     const amount = parseInt(formData.expiryTime)
-    switch(formData.expiryType) {
+    switch(formData.expiryUnit) {
       case 'hour': now.setHours(now.getHours() + amount); break
       case 'day': now.setDate(now.getDate() + amount); break
       case 'week': now.setDate(now.getDate() + (amount * 7)); break
@@ -70,23 +76,25 @@ export default function PrintCardsPage() {
   const generateCards = () => {
     const cards = []
     const qty = parseInt(formData.quantity) || 1
-    const expiryDate = calculateExpiry()
     const durationText = formData.duration + ' ' + durationLabels[formData.durationType]
+    const capacityText = formData.capacityType === 'unlimited' ? 'غير محدود' : formData.capacity + ' ' + formData.capacityUnit
     const colors = formData.cardStyle === 'colored' ? colorSchemes[formData.colorScheme] : { bg: '#ffffff', accent: '#333333', text: '#000000', border: '#cccccc' }
 
     for (let i = 0; i < qty; i++) {
       cards.push({
         id: 'JNC-' + Date.now() + '-' + i,
-        cardNumber: generateCardNumber(formData.cardNumberLength),
+        cardNumber: generateSmartCardNumber(formData.cardPrefix, formData.cardNumberLength),
         password: Math.random().toString(36).substr(2, 10).toUpperCase(),
         value: formData.cardValue,
         duration: durationText,
-        capacity: formData.capacityUnlimited ? 'غير محدود' : formData.capacity + ' MB',
-        expiryDate: expiryDate,
+        capacity: capacityText,
+        expiryDate: calculateExpiry(),
+        expiryType: formData.expiryType,
         network: formData.networkName,
         specialOffer: formData.specialOffer,
         qrEnabled: formData.enableQR,
         cardStyle: formData.cardStyle,
+        cardEffect: formData.cardEffect,
         cardShape: formData.cardShape,
         colors: colors,
         createdAt: new Date().toLocaleString('ar-EG')
@@ -94,6 +102,13 @@ export default function PrintCardsPage() {
     }
     setPrintedCards(cards)
     setShowPreview(true)
+  }
+
+  const getCardEffect = (effect, colors) => {
+    if (effect === '3d') return { boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3)' }
+    if (effect === 'gradient') return { background: `linear-gradient(135deg, ${colors.bg} 0%, ${colors.accent} 100%)` }
+    if (effect === 'glow') return { boxShadow: `0 0 30px ${colors.accent}40, 0 0 60px ${colors.accent}20` }
+    return {}
   }
 
   const getShapeStyle = (shape) => {
@@ -125,18 +140,24 @@ export default function PrintCardsPage() {
 
         <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(0,255,255,0.2)', marginBottom: '20px' }}>
 
-          {/* قيمة الكرت - مباشر */}
+          {/* قيمة الكرت */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>💰 قيمة الكرت (جنيه)</label>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}> قيمة الكرت (جنيه)</label>
             <input type="number" value={formData.cardValue} onChange={(e) => setFormData({...formData, cardValue: e.target.value})} style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
           </div>
 
-          {/* عدد أرقام الكرت - مباشر */}
+          {/* بداية رقم الكرت */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>🔢 بداية رقم الكرت</label>
+            <input type="text" value={formData.cardPrefix} onChange={(e) => setFormData({...formData, cardPrefix: e.target.value})} placeholder="مثال: 86" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
+          </div>
+
+          {/* عدد أرقام الكرت */}
           <div style={{ marginBottom: '20px' }}>
             <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>🔢 عدد أرقام الكرت</label>
             <input type="number" value={formData.cardNumberLength} onChange={(e) => setFormData({...formData, cardNumberLength: parseInt(e.target.value) || 12})} min="6" max="20" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
             <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(0,255,255,0.1)', borderRadius: '8px', color: '#00ffff', fontSize: '13px' }}>
-              💡 مثال: {generateCardNumber(formData.cardNumberLength)}
+              💡 مثال: {generateSmartCardNumber(formData.cardPrefix, formData.cardNumberLength)}
             </div>
           </div>
 
@@ -147,38 +168,48 @@ export default function PrintCardsPage() {
             </button>
           </div>
 
-          {/* السعة - مباشر */}
+          {/* السعة */}
           <div style={{ marginBottom: '20px' }}>
             <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>💾 السعة</label>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-              <input type="checkbox" checked={formData.capacityUnlimited} onChange={(e) => setFormData({...formData, capacityUnlimited: e.target.checked})} style={{ width: '20px', height: '20px' }} />
-              <label style={{ color: '#e2e8f0' }}>غير محدود</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+              <button onClick={() => setFormData({...formData, capacityType: 'limited'})} style={{ padding: '12px', background: formData.capacityType === 'limited' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.capacityType === 'limited' ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>
+                محدود
+              </button>
+              <button onClick={() => setFormData({...formData, capacityType: 'unlimited'})} style={{ padding: '12px', background: formData.capacityType === 'unlimited' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.capacityType === 'unlimited' ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>
+                غير محدود
+              </button>
             </div>
-            {!formData.capacityUnlimited && (
-              <input type="number" value={formData.capacity} onChange={(e) => setFormData({...formData, capacity: e.target.value})} placeholder="مثال: 500 MB" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
+            {formData.capacityType === 'limited' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
+                <input type="number" value={formData.capacity} onChange={(e) => setFormData({...formData, capacity: e.target.value})} placeholder="الرقم" style={{ padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px' }} />
+                <select value={formData.capacityUnit} onChange={(e) => setFormData({...formData, capacityUnit: e.target.value})} style={{ padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px' }}>
+                  <option value="MB">ميجا</option>
+                  <option value="GB">جيجا</option>
+                </select>
+              </div>
             )}
           </div>
 
           {/* زمن الانتهاء - منبثق */}
           <div style={{ marginBottom: '20px' }}>
             <button onClick={() => setShowExpiryPopup(true)} style={{ width: '100%', padding: '14px', background: 'rgba(0,255,255,0.1)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', textAlign: 'right' }}>
-              ⏰ زمن الانتهاء: {formData.expiryTime} {durationLabels[formData.expiryType]} (ينتهي: {calculateExpiry()})
+              ⏰ زمن الانتهاء: {formData.expiryType === 'unlimited' ? 'مفتوح' : formData.expiryTime + ' ' + durationLabels[formData.expiryUnit]}
             </button>
           </div>
 
-          {/* اسم الشبكة - مباشر */}
+          {/* اسم الشبكة */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>🌐 اسم الشبكة</label>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}> اسم الشبكة</label>
             <input type="text" value={formData.networkName} onChange={(e) => setFormData({...formData, networkName: e.target.value})} style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
           </div>
 
-          {/* عرض خاص - مباشر */}
+          {/* عرض خاص */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}> عرض خاص (اختياري)</label>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>🎁 عرض خاص (اختياري)</label>
             <textarea value={formData.specialOffer} onChange={(e) => setFormData({...formData, specialOffer: e.target.value})} rows="2" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '14px', boxSizing: 'border-box' }} />
           </div>
 
-          {/* QR Code - مباشر */}
+          {/* QR Code */}
           <div style={{ marginBottom: '20px', padding: '15px', background: 'rgba(0,255,255,0.05)', borderRadius: '12px' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <input type="checkbox" checked={formData.enableQR} onChange={(e) => setFormData({...formData, enableQR: e.target.checked})} style={{ width: '20px', height: '20px' }} />
@@ -189,11 +220,11 @@ export default function PrintCardsPage() {
           {/* التصميم - منبثق */}
           <div style={{ marginBottom: '20px' }}>
             <button onClick={() => setShowDesignPopup(true)} style={{ width: '100%', padding: '14px', background: 'rgba(0,255,255,0.1)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', textAlign: 'right' }}>
-              🎨 تصميم الكرت: {formData.cardStyle === 'colored' ? 'ملون' : 'عادي'}
+              🎨 تصميم الكرت: {formData.cardStyle === 'colored' ? 'ملون' : 'عادي'} | {formData.cardEffect === '3d' ? '3D' : formData.cardEffect === 'gradient' ? 'مدرج' : formData.cardEffect === 'glow' ? 'موهح' : 'عادي'}
             </button>
           </div>
 
-          {/* الكمية - مباشر */}
+          {/* الكمية */}
           <div style={{ marginBottom: '25px' }}>
             <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>📦 الكمية</label>
             <input type="number" value={formData.quantity} onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})} min="1" max="100" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
@@ -208,14 +239,24 @@ export default function PrintCardsPage() {
         {printedCards.length > 0 && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ color: '#00ffff', margin: 0, fontSize: '22px' }}> الكروت المطبوعة ({printedCards.length})</h2>
+              <h2 style={{ color: '#00ffff', margin: 0, fontSize: '22px' }}>📋 الكروت المطبوعة ({printedCards.length})</h2>
               <button onClick={() => setShowPreview(true)} style={{ padding: '10px 20px', background: 'rgba(0,255,255,0.2)', color: '#00ffff', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>
                 عرض الكل
               </button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
               {printedCards.slice(0, 6).map((card, index) => (
-                <div key={index} style={{ background: card.cardStyle === 'colored' ? `linear-gradient(135deg, ${card.colors.bg} 0%, ${card.colors.accent} 100%)` : '#fff', ...getShapeStyle(card.cardShape), padding: '20px', color: card.colors.text, position: 'relative', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: `3px solid ${card.colors.border}` }}>
+                <div key={index} style={{ 
+                  background: card.cardStyle === 'colored' ? (card.cardEffect === 'gradient' ? `linear-gradient(135deg, ${card.colors.bg} 0%, ${card.colors.accent} 100%)` : card.colors.bg) : '#fff', 
+                  ...getShapeStyle(card.cardShape),
+                  ...getCardEffect(card.cardEffect, card.colors),
+                  padding: '20px', 
+                  color: card.colors.text, 
+                  position: 'relative', 
+                  overflow: 'hidden', 
+                  boxShadow: card.cardEffect === '3d' ? '0 10px 30px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3)' : card.cardEffect === 'glow' ? `0 0 30px ${card.colors.accent}40` : '0 10px 30px rgba(0,0,0,0.3)',
+                  border: `3px solid ${card.colors.border}` 
+                }}>
                   <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '40px', opacity: '0.08', fontWeight: 'bold', whiteSpace: 'nowrap' }}>JassasNetCard</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', position: 'relative', zIndex: 1 }}>
                     <h3 style={{ margin: 0, fontSize: '18px', color: card.cardStyle === 'colored' ? card.colors.accent : '#1e3c72' }}>{card.network}</h3>
@@ -230,8 +271,7 @@ export default function PrintCardsPage() {
                   <div style={{ fontSize: '11px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
                     <div>⏱️ {card.duration}</div>
                     <div>💾 {card.capacity}</div>
-                    <div> {card.value} جنيه</div>
-                    <div>⏰ {card.expiryDate}</div>
+                    <div>💰 {card.value} جنيه</div>
                   </div>
                   {card.specialOffer && <div style={{ marginTop: '10px', padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', fontSize: '10px', position: 'relative', zIndex: 1 }}>🎁 {card.specialOffer}</div>}
                 </div>
@@ -275,27 +315,42 @@ export default function PrintCardsPage() {
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1000 }}>
             <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: '25px', padding: '30px', maxWidth: '500px', width: '100%', border: '2px solid rgba(0,255,255,0.3)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                <h2 style={{ color: '#00ffff', margin: 0 }}> زمن انتهاء الكرت</h2>
+                <h2 style={{ color: '#00ffff', margin: 0 }}>⏰ زمن انتهاء الكرت</h2>
                 <button onClick={() => setShowExpiryPopup(false)} style={{ background: 'rgba(255,0,0,0.2)', color: '#ff0000', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontSize: '20px', cursor: 'pointer' }}>✕</button>
               </div>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>الرقم</label>
-                <input type="number" value={formData.expiryTime} onChange={(e) => setFormData({...formData, expiryTime: e.target.value})} min="1" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-              </div>
-              <div style={{ marginBottom: '20px' }}>
                 <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>النوع</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  {['hour', 'day', 'week', 'month'].map(type => (
-                    <button key={type} onClick={() => setFormData({...formData, expiryType: type})} style={{ padding: '15px', background: formData.expiryType === type ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.expiryType === type ? '#0f172a' : '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
-                      {durationLabels[type]}
-                    </button>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <button onClick={() => setFormData({...formData, expiryType: 'limited'})} style={{ padding: '15px', background: formData.expiryType === 'limited' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.expiryType === 'limited' ? '#0f172a' : '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    محدد
+                  </button>
+                  <button onClick={() => setFormData({...formData, expiryType: 'unlimited'})} style={{ padding: '15px', background: formData.expiryType === 'unlimited' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.expiryType === 'unlimited' ? '#0f172a' : '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    مفتوح (غير محدد)
+                  </button>
                 </div>
               </div>
+              {formData.expiryType === 'limited' && (
+                <>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>الرقم</label>
+                    <input type="number" value={formData.expiryTime} onChange={(e) => setFormData({...formData, expiryTime: e.target.value})} min="1" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>النوع</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      {['hour', 'day', 'week', 'month'].map(type => (
+                        <button key={type} onClick={() => setFormData({...formData, expiryUnit: type})} style={{ padding: '15px', background: formData.expiryUnit === type ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.expiryUnit === type ? '#0f172a' : '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+                          {durationLabels[type]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
               <div style={{ padding: '15px', background: 'rgba(0,255,255,0.1)', borderRadius: '12px', marginBottom: '20px', color: '#00ffff', textAlign: 'center' }}>
-                <div style={{ fontSize: '14px', marginBottom: '5px' }}>سينتهي الكرت بعد:</div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{formData.expiryTime} {durationLabels[formData.expiryType]}</div>
-                <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.8 }}>التاريخ: {calculateExpiry()}</div>
+                <div style={{ fontSize: '14px', marginBottom: '5px' }}>ينتهي الكرت بعد:</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{formData.expiryType === 'unlimited' ? 'غير محدد' : formData.expiryTime + ' ' + durationLabels[formData.expiryUnit]}</div>
+                {formData.expiryType !== 'unlimited' && <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.8 }}>التاريخ: {calculateExpiry()}</div>}
               </div>
               <button onClick={() => setShowExpiryPopup(false)} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #00ffff, #00bfff)', color: '#0f172a', fontSize: '16px', fontWeight: 'bold', borderRadius: '12px', border: 'none', cursor: 'pointer' }}>حفظ</button>
             </div>
@@ -334,6 +389,19 @@ export default function PrintCardsPage() {
                 </div>
               )}
               <div style={{ marginBottom: '20px' }}>
+                <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>التأثير</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px' }}>
+                  {['plain', '3d', 'gradient', 'glow'].map(effect => (
+                    <button key={effect} onClick={() => setFormData({...formData, cardEffect: effect})} style={{ padding: '12px', background: formData.cardEffect === effect ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardEffect === effect ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                      {effect === 'plain' && 'عادي'}
+                      {effect === '3d' && '3D'}
+                      {effect === 'gradient' && 'مدرج'}
+                      {effect === 'glow' && 'موهح'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
                 <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>شكل الحواف</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                   {['rectangle', 'square', 'rounded'].map(shape => (
@@ -360,7 +428,18 @@ export default function PrintCardsPage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
                 {printedCards.map((card, index) => (
-                  <div key={index} style={{ background: card.cardStyle === 'colored' ? `linear-gradient(135deg, ${card.colors.bg} 0%, ${card.colors.accent} 100%)` : '#fff', ...getShapeStyle(card.cardShape), padding: '15px', color: card.colors.text, position: 'relative', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: `3px solid ${card.colors.border}`, animation: 'fadeIn 0.5s ease-in' }}>
+                  <div key={index} style={{ 
+                    background: card.cardStyle === 'colored' ? (card.cardEffect === 'gradient' ? `linear-gradient(135deg, ${card.colors.bg} 0%, ${card.colors.accent} 100%)` : card.colors.bg) : '#fff', 
+                    ...getShapeStyle(card.cardShape),
+                    ...getCardEffect(card.cardEffect, card.colors),
+                    padding: '15px', 
+                    color: card.colors.text, 
+                    position: 'relative', 
+                    overflow: 'hidden', 
+                    boxShadow: card.cardEffect === '3d' ? '0 10px 30px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3)' : card.cardEffect === 'glow' ? `0 0 30px ${card.colors.accent}40` : '0 10px 30px rgba(0,0,0,0.3)',
+                    border: `3px solid ${card.colors.border}`,
+                    animation: 'fadeIn 0.5s ease-in'
+                  }}>
                     <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '30px', opacity: '0.08', fontWeight: 'bold', whiteSpace: 'nowrap' }}>JassasNetCard</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', position: 'relative', zIndex: 1 }}>
                       <h3 style={{ margin: 0, fontSize: '16px', color: card.cardStyle === 'colored' ? card.colors.accent : '#1e3c72' }}>{card.network}</h3>
@@ -376,7 +455,6 @@ export default function PrintCardsPage() {
                       <div>⏱️ {card.duration}</div>
                       <div>💾 {card.capacity}</div>
                       <div>💰 {card.value} جنيه</div>
-                      <div>⏰ {card.expiryDate}</div>
                     </div>
                   </div>
                 ))}
