@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = 'https://kxjmzluxsmbyvjlvznwd.supabase.co'
-const SUPABASE_KEY = const SUPABASE_KEY = '...'
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4am16bHV4c21ieXZqbHZ6bndkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTkyOTMsImV4cCI6MjEwNjU5NTI5M30.DKxmlh34ZjSrfQTUJIE5-Bmw0zBUVKYLXn9wVkS4kgA'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -11,9 +12,6 @@ export async function POST(request: Request) {
     if (!email || !password) {
       return NextResponse.json({ success: false, message: 'البريد وكلمة المرور مطلوبان' }, { status: 400 })
     }
-
-    console.log('🔑 Using key length:', SUPABASE_KEY.length)
-    console.log('🌐 URL:', SUPABASE_URL)
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
@@ -24,7 +22,6 @@ export async function POST(request: Request) {
       .limit(1)
 
     if (checkError) {
-      console.error('❌ Check error:', checkError)
       return NextResponse.json({ success: false, message: 'خطأ: ' + checkError.message }, { status: 500 })
     }
 
@@ -45,11 +42,8 @@ export async function POST(request: Request) {
       .single()
 
     if (insertError) {
-      console.error('❌ Insert error:', insertError)
       return NextResponse.json({ success: false, message: 'خطأ: ' + insertError.message }, { status: 500 })
     }
-
-    console.log('✅ User created:', newUser.id)
 
     await supabase
       .from('subscriptions')
@@ -74,7 +68,6 @@ export async function POST(request: Request) {
     })
 
   } catch (error: any) {
-    console.error('❌ Fatal error:', error)
     return NextResponse.json({ success: false, message: 'خطأ: ' + error.message }, { status: 500 })
   }
 }
