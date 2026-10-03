@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - $(network-name)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #ffd700;
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .welcome {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome h2 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .quote {
+            background: rgba(255, 215, 0, 0.1);
+            border-right: 4px solid #ffd700;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .quote p {
+            color: #ffd700;
+            font-size: 16px;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn-connect {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        .card-info {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .card-info h3 {
+            color: #00ff88;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .info-item {
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+        
+        .info-item strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🌟 $(network-name)</h1>
+            <p>نظام إدارة شبكات المايكروتك</p>
+        </div>
+        
+        <div class="welcome">
+            <h2>مرحباً بك في شبكتنا</h2>
+        </div>
+        
+        <div class="quote">
+            <p>✨ "العلم نور والجهل ظلام" ✨</p>
+        </div>
+        
+        $(if error)
+        <div class="error">
+            $(error)
+        </div>
+        $(endif)
+        
+        <form name="sendin" action="$(link-login-only)" method="post">
+            <input type="hidden" name="username" />
+            <input type="hidden" name="password" />
+            <input type="hidden" name="dst" value="$(link-orig)" />
+            <input type="hidden" name="popup" value="true" />
+            
+            <div class="form-group">
+                <label>🎫 رقم الكرت (Username)</label>
+                <input type="text" name="username" placeholder="أدخل رقم الكرت" required />
+            </div>
+            
+            <div class="form-group">
+                <label> كلمة المرور (Password)</label>
+                <input type="password" name="password" placeholder="أدخل كلمة المرور" required />
+            </div>
+            
+            <button type="submit" class="btn-connect">🚀 اتصال بالإنترنت</button>
+        </form>
+        
+        <div class="card-info">
+            <h3> معلومات الكرت</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>⏱️ المدة</strong>
+                    <span>1 ساعة</span>
+                </div>
+                <div class="info-item">
+                    <strong>⬇️ التحميل</strong>
+                    <span>غير محدود</span>
+                </div>
+                <div class="info-item">
+                    <strong>⬆️ التنزيل</strong>
+                    <span>غير محدود</span>
+                </div>
+                <div class="info-item">
+                    <strong>💾 السعة</strong>
+                    <span>500 MB</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by MikroTik RouterOS | JassasNetCard</p>
+        </div>
+    </div>
+    
+    <script>
+        document.forms.sendin.username.value = document.login.username.value;
+        document.forms.sendin.password.value = document.login.password.value;
+    </script>
+</body>
+</html>
