@@ -1,4 +1,4 @@
-"use client"
+code = '''"use client"
 import { useState, useEffect } from 'react'
 
 export default function PrintCardsPage() {
@@ -657,3 +657,19 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم التحديث الشامل بنجاح!')
+print('')
+print('الميزات الجديدة:')
+print('1. ✅ رقم الكرت بأرقام فقط (0-9)')
+print('2. ✅ ميزة "يوجد شحن" مع نص مخصص')
+print('3. ✅ QR Code يظهر فعلياً (SVG)')
+print('4. ✅ تحسين تأثير التوهج (animation)')
+print('5. ✅ التحكم في حجم الخط (اسم الشبكة، رقم الكرت، المعلومات)')
+print('6. ✅ خيارات الخطوط (5 أنواع)')
+print('7. ✅ خيارات الإطارات (متصل/متقطع/منقط + السمك)')
+print('8. ✅ معاينة مباشرة لكل الخيارات')
