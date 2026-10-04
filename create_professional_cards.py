@@ -1,4 +1,4 @@
-"use client"
+code = r'''"use client"
 import { useState, useEffect } from 'react'
 
 export default function PrintCardsPage() {
@@ -422,3 +422,23 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم إنشاء نظام طباعة الكروت الاحترافي بنجاح!')
+print('')
+print('المميزات:')
+print('✅ عدد أرقام الكرت قابل للتحديد (6-20 رقم)')
+print('✅ جميع الخيارات في نوافذ منبثقة')
+print('✅ المدة: ساعة/يوم/أسبوع/شهر')
+print('✅ السعة: ميجا/جيجا أو غير محدود')
+print('✅ زمن الانتهاء: محدد أو مفتوح')
+print('✅ السعر اختياري')
+print('✅ اسم الشبكة في إطار فخم')
+print('✅ 10 أنظمة ألوان')
+print('✅ 4 تأثيرات: عادي/3D/مظل/موهج')
+print('✅ 3 أشكال: مستطيل/مربع/مدور')
+print('✅ QR Code اختياري')
+print('✅ علامة مائية')
