@@ -1,4 +1,4 @@
-"use client"
+code = '''"use client"
 import { useState, useEffect, useRef } from 'react'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
@@ -824,3 +824,19 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم إنشاء النظام الاحترافي النهائي!')
+print('')
+print('الإصلاحات:')
+print('1. ✅ استخدام html2canvas + jsPDF (يدعم العربية)')
+print('2. ✅ إطارات واضحة لكل خانة في الكرت')
+print('3. ✅ ألوان متناسقة واحترافية')
+print('4. ✅ QR Code حقيقي')
+print('5. ✅ خيارات ألوان الكتابة (4 ألوان)')
+print('6. ✅ لون الإطار قابل للتخصيص')
+print('7. ✅ تأثيرات 3D/مظل/موهج/مدرج')
+print('8. ✅ تصدير PDF مع العربية')
