@@ -1,4 +1,4 @@
-"use client"
+code = '''"use client"
 import { useState, useEffect, useRef } from 'react'
 import { jsPDF } from 'jspdf'
 
@@ -797,3 +797,19 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم إنشاء النظام النهائي الشامل!')
+print('')
+print('الميزات الجديدة:')
+print('1. ✅ QR Code حقيقي (نمط QR قياسي)')
+print('2. ✅ خيارات ألوان الكتابة (4 ألوان)')
+print('3. ✅ دمج QR + شحن في خانة واحدة')
+print('4. ✅ تصدير PDF (jsPDF)')
+print('5. ✅ عدد الكروت في الصفحة (55-100)')
+print('6. ✅ أحجام ورق متعددة (A4, A5, Letter)')
+print('7. ✅ الخانات تظهر فقط عند الاختيار')
+print('8. ✅ تصميم عرضي احترافي')
