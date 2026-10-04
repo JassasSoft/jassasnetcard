@@ -1,4 +1,4 @@
-"use client"
+code = '''"use client"
 import { useState, useEffect } from 'react'
 
 export default function PrintCardsPage() {
@@ -778,3 +778,18 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم إنشاء النظام الاحترافي النهائي!')
+print('')
+print('الميزات الجديدة:')
+print('1. ✅ كروت عرضية (aspect-ratio: 1.7/1)')
+print('2. ✅ QR Code جانبي بحجم قابل للتعديل')
+print('3. ✅ QR Code حقيقي يحتوي على رقم الكرت')
+print('4. ✅ Sliders لكل حجم خط (شبكة، رقم، معلومات، عناوين)')
+print('5. ✅ 5 أنواع خطوط')
+print('6. ✅ معاينة مباشرة في نافذة التصميم')
+print('7. ✅ تصميم فخم مع backdrop-filter و shadows')
