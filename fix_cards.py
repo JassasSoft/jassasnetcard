@@ -1,4 +1,4 @@
-"use client"
+code = r'''"use client"
 import { useState, useEffect, useRef } from 'react'
 
 export default function PrintCardsPage() {
@@ -447,3 +447,17 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم إنشاء النظام المحسّن بنجاح!')
+print('')
+print('الإصلاحات:')
+print('✅ مشكلة الكيبورد - استخدام useRef للحفاظ على focus')
+print('✅ تأثير 3D - perspective + rotateX/Y + inset shadows')
+print('✅ تأثير مظل - translateY + deep shadow')
+print('✅ تأثير موهج - glow effect حول الكرت')
+print('✅ الأشكال - borderRadius صحيح لكل شكل')
+print('✅ مؤشرات بصرية - أيقونات + أسهم + hover effects')
