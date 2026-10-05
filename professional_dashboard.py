@@ -1,4 +1,4 @@
-"use client"
+dashboard_code = '''"use client"
 import { useState, useEffect } from 'react'
 
 export default function DashboardPage() {
@@ -484,3 +484,9 @@ export default function DashboardPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(dashboard_code)
+
+print('✅ Dashboard الاحترافي الموحد تم إنشاؤه!')
