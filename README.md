@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎫 Jassas Net Card | نظام إدارة كروت الإنترنت الاحترافي
 
-## Getting Started
+نظام متكامل وفاخر لإدارة وطباعة كروت شبكات المايكروتك (MikroTik)، مبني بأحدث التقنيات لضمان السرعة، الأمان، وسهولة الاستخدام.
 
-First, run the development server:
+## 🚀 المميزات الرئيسية
 
+- ✅ **طباعة جماعية:** دعم طباعة من 1 إلى 10,000 كرت دفعة واحدة.
+- ✅ **QR Code حقيقي:** توليد أكواد استجابة سريعة قابلة للمسح والاتصال الفوري.
+- ✅ **تصدير PDF احترافي:** تصدير الكروت بجودة عالية متوافقة مع أحجام الورق (A4, A5, Letter).
+- ✅ **تصميم فاخر:** 10 أنظمة ألوان، 5 تأثيرات (عادي، مدرج، 3D، مظل، موهج)، و 3 أشكال للكرت.
+- ✅ **تحكم كامل:** تخصيص أحجام وألوان الخطوط، الإطارات، وإظهار بيانات الشحن والعروض.
+- ✅ **لوحة تحكم (Dashboard):** إحصائيات فورية، فحص حالة الكروت، وإدارة الأجهزة.
+- ✅ **PWA:** يعمل كتطبيق على الهاتف والكمبيوتر مع دعم الوضع الليلي/النهاري.
+
+## 🛠️ التقنيات المستخدمة
+
+- **Frontend:** Next.js 14 (App Router)
+- **Styling:** CSS-in-JS (مخصص لأداء عالي وتصميم متجاوب)
+- **Database & Auth:** Supabase (PostgreSQL)
+- **Hosting:** Vercel
+- **PDF Generation:** Window Print API (لدعم اللغة العربية 100%)
+
+## 📦 التثبيت والتشغيل المحلي
+
+1. استنساخ المستودع:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+   git clone https://github.com/JassasSoft/jassasnetcard.git
+   cd jassasnetcard
+```
+2. تثبيت الحزم:
+```bash
+   npm install
+```
+3. إعداد المتغيرات البيئية:
+```bash
+   cp .env.example .env.local
+   # قم بتعديل الملف وإضافة مفاتيح Supabase الخاصة بك
+```
+4. تشغيل مشروع التطوير:
+```bash
+   npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌐 الروابط المباشرة
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **الموقع الإلكتروني:** [jassasnetcard.vercel.app](https://jassasnetcard.vercel.app)
+- **قاعدة البيانات:** Supabase Dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📱 كيفية استخدام النظام
 
-## Learn More
+1. قم بتسجيل الدخول إلى لوحة التحكم.
+2. انتقل إلى صفحة "طباعة كروت الإنترنت".
+3. أدخل اسم الشبكة، بداية الكود، وعدد الأرقام.
+4. اختر المدة، السعة، وتصميم الكرت (الألوان، الأشكال، الخطوط).
+5. اضغط على "إنشاء الكروت" ثم "معاينة" أو "تصدير PDF".
 
-To learn more about Next.js, take a look at the following resources:
+## 🤝 المساهمة
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+نرحب بمساهماتكم! يرجى فتح Issue لمناقشة أي ميزة جديدة أو إرسال Pull Request.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 الرخصة
 
-## Deploy on Vercel
+هذا المشروع مرخص تحت رخصة MIT.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+**تطوير:** JassasSoft | جميع الحقوق محفوظة © 2024
