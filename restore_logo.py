@@ -1,4 +1,5 @@
-"use client"
+# تحديث صفحة طباعة الكروت بالشعار الأصلي
+code = '''"use client"
 import { useState, useEffect } from 'react'
 
 export default function PrintCardsPage() {
@@ -699,3 +700,9 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم استعادة الشعار الأصلي Jassas Net Card!')
