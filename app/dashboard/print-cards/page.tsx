@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 export default function PrintCardsPage() {
   const [user, setUser] = useState<any>(null)
   const [printedCards, setPrintedCards] = useState<any[]>([])
-  const [showPreview, setShowPreview] = useState(true)
-  const [activeTab, setActiveTab] = useState('settings')
+  const [activeSection, setActiveSection] = useState('basic')
 
   const [formData, setFormData] = useState({
     profile: 'DEFAULT',
@@ -32,6 +31,7 @@ export default function PrintCardsPage() {
     colorScheme: 'blue-gold',
     cardShape: 'rectangle',
     enableQR: true,
+    qrSize: 50,
     rechargeText: '',
     specialOffer: '',
     networkFontSize: 20,
@@ -65,14 +65,6 @@ export default function PrintCardsPage() {
     'pure-green': { bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', accent: '#32CD32', text: '#ffffff', border: '#32CD32' },
     'black-gold': { bg: 'linear-gradient(135deg, #232526 0%, #414345 100%)', accent: '#FFD700', text: '#FFD700', border: '#FFD700' },
     'white-blue': { bg: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)', accent: '#0066cc', text: '#0066cc', border: '#0066cc' }
-  }
-
-  const fontFamilies: any = {
-    'default': 'Segoe UI, Tahoma, Arial, sans-serif',
-    'arabic': 'Arial, Tahoma, sans-serif',
-    'mono': 'Courier New, monospace',
-    'serif': 'Georgia, serif',
-    'sans': 'Helvetica, Arial, sans-serif'
   }
 
   const timeLabels: any = { hour: 'ساعة', day: 'يوم', week: 'أسبوع', month: 'شهر' }
@@ -164,6 +156,7 @@ export default function PrintCardsPage() {
         price: formData.cardPrice,
         distributor: formData.distributor,
         qrEnabled: formData.enableQR,
+        qrSize: formData.qrSize,
         rechargeText: formData.rechargeText,
         specialOffer: formData.specialOffer,
         cardStyle: formData.cardStyle,
@@ -182,51 +175,10 @@ export default function PrintCardsPage() {
         borderWidth: formData.borderWidth,
         borderStyle: formData.borderStyle,
         borderColor: formData.borderColor,
-        fontFamily: fontFamilies[formData.fontFamily]
+        fontFamily: 'Arial, Tahoma, sans-serif'
       })
     }
     setPrintedCards(cards)
-  }
-
-  const getCardStyle = (card: any) => {
-    const c = card.colors
-    let bg = c.bg
-    if (card.cardStyle === 'colored' && card.cardEffect === 'gradient') {
-      bg = c.bg
-    } else if (card.cardStyle === 'plain') {
-      bg = '#ffffff'
-    }
-    let radius = '15px'
-    if (card.cardShape === 'square') radius = '10px'
-    if (card.cardShape === 'rounded') radius = '25px'
-    let shadow = '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(0,0,0,0.1)'
-    let border = card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
-    let extraStyle: any = {}
-    if (card.cardEffect === '3d') {
-      shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
-      border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
-    } else if (card.cardEffect === 'shadow') {
-      shadow = '0 25px 60px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.4)'
-    } else if (card.cardEffect === 'glow') {
-      shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
-      border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
-    }
-    return {
-      background: bg,
-      boxShadow: shadow,
-      borderRadius: radius,
-      border: border,
-      color: c.text,
-      padding: '15px',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: card.fontFamily,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      minHeight: '220px',
-      ...extraStyle
-    }
   }
 
   const exportToPDF = () => {
@@ -243,11 +195,6 @@ export default function PrintCardsPage() {
     printedCards.forEach((card: any) => {
       const c = card.colors
       let bg = c.bg
-      if (card.cardStyle === 'colored' && card.cardEffect === 'gradient') {
-        bg = c.bg
-      } else if (card.cardStyle === 'plain') {
-        bg = '#ffffff'
-      }
       let radius = '12px'
       if (card.cardShape === 'square') radius = '8px'
       if (card.cardShape === 'rounded') radius = '18px'
@@ -259,7 +206,7 @@ export default function PrintCardsPage() {
               <div style="font-size: ${card.networkFontSize}px; color: ${card.networkColor}; font-weight: bold;">${card.network}</div>
             </div>
             ${card.qrEnabled ? `<div style="background: #fff; padding: 3px; border-radius: 6px; margin-left: 8px; border: 2px solid ${c.accent};">
-              <svg width="50" height="50" viewBox="0 0 50 50">
+              <svg width="${card.qrSize}" height="${card.qrSize}" viewBox="0 0 50 50">
                 ${generateRealQR(card.username).map((row: any[], rowIdx: number) => row.map((cell: number, colIdx: number) => cell === 1 ? `<rect x="${colIdx * 2}" y="${rowIdx * 2}" width="2" height="2" fill="#000"/>` : '').join('')).join('')}
               </svg>
             </div>` : ''}
@@ -280,7 +227,7 @@ export default function PrintCardsPage() {
               <div style="font-weight: bold; color: ${card.infoColor};">${card.cardTime}</div>
             </div>
             <div style="background: rgba(0,0,0,0.3); padding: 6px; border-radius: 8px; text-align: center; border: 1px solid ${c.accent};">
-              <div style="font-size: 8px; color: ${card.labelColor}; margin-bottom: 3px;">💾 البيانات</div>
+              <div style="font-size: 8px; color: ${card.labelColor}; margin-bottom: 3px;"> البيانات</div>
               <div style="font-weight: bold; color: ${card.infoColor};">${card.dataPackage}</div>
             </div>
             <div style="background: rgba(0,0,0,0.3); padding: 6px; border-radius: 8px; text-align: center; border: 1px solid ${c.accent};">
@@ -290,11 +237,11 @@ export default function PrintCardsPage() {
           </div>
           ${card.distributor ? `<div style="text-align: center; margin-top: 8px; font-size: 10px; color: ${card.labelColor}; background: rgba(255,255,255,0.1); padding: 4px; border-radius: 6px;">الموزع: ${card.distributor}</div>` : ''}
           ${card.rechargeText ? `<div style="background: linear-gradient(135deg, #00ff00, #00cc00); color: #fff; padding: 5px; border-radius: 8px; text-align: center; margin-top: 6px; font-size: 10px; font-weight: bold; border: 1px solid #00ff00;">⚡ ${card.rechargeText}</div>` : ''}
-          ${card.specialOffer ? `<div style="background: rgba(255,215,0,0.2); color: #FFD700; padding: 5px; border-radius: 8px; text-align: center; margin-top: 6px; font-size: 10px; border: 1px solid #FFD700;"> ${card.specialOffer}</div>` : ''}
+          ${card.specialOffer ? `<div style="background: rgba(255,215,0,0.2); color: #FFD700; padding: 5px; border-radius: 8px; text-align: center; margin-top: 6px; font-size: 10px; border: 1px solid #FFD700;">🎁 ${card.specialOffer}</div>` : ''}
         </div>
       `
     })
-    printWindow.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>كروت ${formData.networkName}</title><style>@page { size: A4; margin: 8mm; } * { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: Arial, Tahoma, sans-serif; background: #fff; padding: 10px; } .cards-grid { display: grid; grid-template-columns: repeat(${formData.colsCount || 3}, 1fr); gap: 8px; } .card { page-break-inside: avoid; } @media print { body { padding: 0; } .no-print { display: none !important; } }</style></head><body><div class="no-print" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 25px; text-align: center; margin-bottom: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);"><h2 style="margin-bottom: 15px; font-size: 22px;">️ لتصدير PDF</h2><p style="margin-bottom: 15px; font-size: 16px;">اضغط Ctrl+P ثم اختر "حفظ كـ PDF"</p><button onclick="window.print()" style="padding: 15px 35px; background: linear-gradient(135deg, #00ffff, #00bfff); color: #0f172a; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin: 10px; box-shadow: 0 5px 20px rgba(0,255,255,0.3);">🖨️ طباعة / حفظ PDF</button><button onclick="window.close()" style="padding: 15px 35px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin: 10px; box-shadow: 0 5px 20px rgba(239,68,68,0.3);">إغلاق</button></div><div class="cards-grid">${cardsHTML}</div></body></html>`)
+    printWindow.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>كروت ${formData.networkName}</title><style>@page { size: A4; margin: 8mm; } * { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: Arial, Tahoma, sans-serif; background: #fff; padding: 10px; } .cards-grid { display: grid; grid-template-columns: repeat(${formData.colsCount || 3}, 1fr); gap: 8px; } .card { page-break-inside: avoid; } @media print { body { padding: 0; } .no-print { display: none !important; } }</style></head><body><div class="no-print" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 25px; text-align: center; margin-bottom: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);"><h2 style="margin-bottom: 15px; font-size: 22px;">🖨️ لتصدير PDF</h2><p style="margin-bottom: 15px; font-size: 16px;">اضغط Ctrl+P ثم اختر "حفظ كـ PDF"</p><button onclick="window.print()" style="padding: 15px 35px; background: linear-gradient(135deg, #00ffff, #00bfff); color: #0f172a; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin: 10px; box-shadow: 0 5px 20px rgba(0,255,255,0.3);">️ طباعة / حفظ PDF</button><button onclick="window.close()" style="padding: 15px 35px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin: 10px; box-shadow: 0 5px 20px rgba(239,68,68,0.3);">إغلاق</button></div><div class="cards-grid">${cardsHTML}</div></body></html>`)
     printWindow.document.close()
   }
 
@@ -302,124 +249,89 @@ export default function PrintCardsPage() {
     return <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #1e293b)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><div style={{ textAlign: 'center' }}><div style={{ width: '60px', height: '60px', border: '5px solid #00ffff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div><p style={{ fontSize: '18px' }}>جاري التحميل...</p></div><style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>
   }
 
-  const previewCard = printedCards.length > 0 ? printedCards[0] : {
-    username: generateUsername(formData.usernamePrefix, formData.usernameLength),
-    password: 'AB12CD34EF',
-    validity: formData.validity + ' ' + validityLabels[formData.validityType],
-    userDuration: formData.userDuration + ' ' + validityLabels[formData.userDurationType],
-    dataPackage: formData.dataPackage === 'unlimited' ? 'بدون حد' : formData.dataAmount + ' ' + formData.dataUnit,
-    network: formData.networkName,
-    cardTime: formData.cardTime + ' ' + timeLabels[formData.cardTimeType],
-    price: formData.cardPrice,
-    distributor: formData.distributor,
-    qrEnabled: formData.enableQR,
-    rechargeText: formData.rechargeText,
-    specialOffer: formData.specialOffer,
-    cardStyle: formData.cardStyle,
-    cardEffect: formData.cardEffect,
-    cardShape: formData.cardShape,
-    colors: formData.cardStyle === 'colored' ? colorSchemes[formData.colorScheme] : { bg: '#ffffff', accent: '#333333', text: '#000000', border: '#cccccc' },
-    usernameColor: formData.usernameColor,
-    networkFontSize: formData.networkFontSize,
-    cardNumberFontSize: formData.cardNumberFontSize,
-    infoFontSize: formData.infoFontSize,
-    labelFontSize: formData.labelFontSize,
-    networkColor: formData.networkColor,
-    cardNumberColor: formData.cardNumberColor,
-    infoColor: formData.infoColor,
-    labelColor: formData.labelColor,
-    borderWidth: formData.borderWidth,
-    borderStyle: formData.borderStyle,
-    borderColor: formData.borderColor,
-    fontFamily: fontFamilies[formData.fontFamily]
-  }
-
-  const InputField = ({ label, children }: { label: string, children: any }) => (
-    <div style={{ marginBottom: '18px' }}>
-      <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>{label}</label>
-      {children}
+  const InputRow = ({ label, children, icon = '' }: { label: string, children: any, icon?: string }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', padding: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid rgba(0,255,255,0.2)', transition: 'all 0.3s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#00ffff'; e.currentTarget.style.background = 'rgba(0,0,0,0.4)' }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,255,0.2)'; e.currentTarget.style.background = 'rgba(0,0,0,0.3)' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+        {children}
+      </div>
+      <div style={{ color: '#e2e8f0', fontWeight: 'bold', fontSize: '14px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {icon && <span>{icon}</span>}
+        {label}
+      </div>
     </div>
   )
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2d3748 100%)', padding: '20px', fontFamily: 'Segoe UI, Tahoma' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
         
-        {/* الشعار الاحترافي */}
-        <div style={{ textAlign: 'center', marginBottom: '30px', padding: '25px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '25px', boxShadow: '0 15px 50px rgba(102,126,234,0.4)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-50%', right: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)', animation: 'pulse 3s ease-in-out infinite' }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '10px' }}>
-              <div style={{ fontSize: '50px', filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))' }}>📶</div>
-              <div>
-                <h1 style={{ color: '#FFD700', fontSize: '42px', margin: '0 0 5px 0', fontWeight: 'bold', textShadow: '0 3px 15px rgba(0,0,0,0.5)', letterSpacing: '1px' }}>Jassas Net Card</h1>
-                <p style={{ color: '#fff', fontSize: '15px', margin: 0, opacity: 0.9 }}>نظام إدارة شبكات المايكروتك الاحترافي</p>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '15px', flexWrap: 'wrap' }}>
-              <span style={{ background: 'rgba(255,215,0,0.2)', padding: '6px 18px', borderRadius: '25px', color: '#FFD700', fontSize: '12px', fontWeight: 'bold', border: '1px solid rgba(255,215,0,0.4)' }}>⚡ سرعة عالية</span>
-              <span style={{ background: 'rgba(255,215,0,0.2)', padding: '6px 18px', borderRadius: '25px', color: '#FFD700', fontSize: '12px', fontWeight: 'bold', border: '1px solid rgba(255,215,0,0.4)' }}>🛡️ استقرار دائم</span>
-              <span style={{ background: 'rgba(255,215,0,0.2)', padding: '6px 18px', borderRadius: '25px', color: '#FFD700', fontSize: '12px', fontWeight: 'bold', border: '1px solid rgba(255,215,0,0.4)' }}>🌐 تغطية واسعة</span>
-              <span style={{ background: 'rgba(255,215,0,0.2)', padding: '6px 18px', borderRadius: '25px', color: '#FFD700', fontSize: '12px', fontWeight: 'bold', border: '1px solid rgba(255,215,0,0.4)' }}>♾️ غير محدود</span>
+        {/* الشعار */}
+        <div style={{ textAlign: 'center', marginBottom: '25px', padding: '20px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '20px', boxShadow: '0 10px 40px rgba(102,126,234,0.4)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+            <div style={{ fontSize: '40px' }}>📶</div>
+            <div>
+              <h1 style={{ color: '#FFD700', fontSize: '32px', margin: '0 0 3px 0', fontWeight: 'bold', textShadow: '0 3px 10px rgba(0,0,0,0.5)' }}>Jassas Net Card</h1>
+              <p style={{ color: '#fff', fontSize: '13px', margin: 0, opacity: 0.9 }}>نظام إدارة شبكات المايكروتك الاحترافي</p>
             </div>
           </div>
-          <style>{`@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0.8; } }`}</style>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '15px' }}>
+        {/* الأقسام */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: 'rgba(255,255,255,0.05)', padding: '6px', borderRadius: '12px', flexWrap: 'wrap' }}>
           {[
-            { id: 'settings', icon: '⚙️', label: 'إعدادات الكرت' },
-            { id: 'preview', icon: '️', label: 'المعاينة' },
-            { id: 'design', icon: '', label: 'التصميم' }
-          ].map(tab => (
+            { id: 'basic', icon: '⚙️', label: 'الأساسية' },
+            { id: 'numbers', icon: '🔢', label: 'الأرقام' },
+            { id: 'design', icon: '🎨', label: 'التصميم' },
+            { id: 'extra', icon: '', label: 'إضافي' }
+          ].map(section => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
               style={{
-                flex: 1,
-                padding: '14px',
-                background: activeTab === tab.id ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'transparent',
-                color: activeTab === tab.id ? '#0f172a' : '#e2e8f0',
+                flex: '1 1 calc(50% - 4px)',
+                padding: '12px',
+                background: activeSection === section.id ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'transparent',
+                color: activeSection === section.id ? '#0f172a' : '#e2e8f0',
                 border: 'none',
-                borderRadius: '12px',
-                fontSize: '15px',
-                fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: activeSection === section.id ? 'bold' : 'normal',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
+                gap: '6px',
                 transition: 'all 0.3s',
-                boxShadow: activeTab === tab.id ? '0 5px 20px rgba(0,255,255,0.3)' : 'none'
+                minWidth: '120px'
               }}
             >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
+              <span>{section.icon}</span>
+              <span>{section.label}</span>
             </button>
           ))}
         </div>
 
         {/* المحتوى */}
-        {activeTab === 'settings' && (
-          <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '25px', padding: '30px', border: '2px solid rgba(0,255,255,0.2)', boxShadow: '0 15px 50px rgba(0,0,0,0.3)' }}>
-            <h2 style={{ color: '#00ffff', marginBottom: '25px', fontSize: '26px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '32px' }}>⚙️</span> إعدادات الكرت
-            </h2>
+        <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(0,255,255,0.2)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
+          
+          {activeSection === 'basic' && (
+            <>
+              <h2 style={{ color: '#00ffff', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span>⚙️</span> الإعدادات الأساسية
+              </h2>
+              
+              <InputRow label="البروفايل" icon="👤">
+                <select value={formData.profile} onChange={(e) => setFormData({...formData, profile: e.target.value})} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }}>
+                  <option value="DEFAULT">DEFAULT</option>
+                  <option value="PREMIUM">PREMIUM</option>
+                  <option value="BASIC">BASIC</option>
+                </select>
+              </InputRow>
 
-            <InputField label="البروفايل">
-              <select value={formData.profile} onChange={(e) => setFormData({...formData, profile: e.target.value})} style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px' }}>
-                <option value="DEFAULT">DEFAULT</option>
-                <option value="PREMIUM">PREMIUM</option>
-                <option value="BASIC">BASIC</option>
-              </select>
-            </InputField>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <InputField label="الصلاحية">
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input type="number" value={formData.validity} onChange={(e) => setFormData({...formData, validity: e.target.value})} min="1" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }} />
-                  <select value={formData.validityType} onChange={(e) => setFormData({...formData, validityType: e.target.value})} style={{ flex: 2, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }}>
+              <InputRow label="الصلاحية" icon="✓">
+                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                  <input type="number" value={formData.validity} onChange={(e) => setFormData({...formData, validity: e.target.value})} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+                  <select value={formData.validityType} onChange={(e) => setFormData({...formData, validityType: e.target.value})} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                     <option value="no-expiry">بدون مدة</option>
                     <option value="hour">ساعة</option>
                     <option value="day">يوم</option>
@@ -427,306 +339,250 @@ export default function PrintCardsPage() {
                     <option value="month">شهر</option>
                   </select>
                 </div>
-              </InputField>
+              </InputRow>
 
-              <InputField label="باقة البيانات">
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <select value={formData.dataPackage} onChange={(e) => setFormData({...formData, dataPackage: e.target.value})} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }}>
-                    <option value="unlimited">بدون حد</option>
-                    <option value="limited">محدد</option>
-                  </select>
-                  {formData.dataPackage === 'limited' && (
-                    <>
-                      <input type="number" value={formData.dataAmount} onChange={(e) => setFormData({...formData, dataAmount: e.target.value})} min="1" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }} />
-                      <select value={formData.dataUnit} onChange={(e) => setFormData({...formData, dataUnit: e.target.value})} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }}>
-                        <option value="MB">MB</option>
-                        <option value="GB">GB</option>
-                      </select>
-                    </>
-                  )}
-                </div>
-              </InputField>
-            </div>
-
-            <InputField label="اسم الشبكة">
-              <input type="text" value={formData.networkName} onChange={(e) => setFormData({...formData, networkName: e.target.value})} style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-            </InputField>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <InputField label="وقت الكرت">
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input type="number" value={formData.cardTime} onChange={(e) => setFormData({...formData, cardTime: e.target.value})} min="1" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }} />
-                  <select value={formData.cardTimeType} onChange={(e) => setFormData({...formData, cardTimeType: e.target.value})} style={{ flex: 2, padding: '12px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px' }}>
+              <InputRow label="مدة المستخدم" icon="⏱️">
+                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                  <input type="number" value={formData.userDuration} onChange={(e) => setFormData({...formData, userDuration: e.target.value})} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+                  <select value={formData.userDurationType} onChange={(e) => setFormData({...formData, userDurationType: e.target.value})} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                    <option value="no-expiry">بدون مدة</option>
                     <option value="hour">ساعة</option>
                     <option value="day">يوم</option>
                     <option value="week">أسبوع</option>
                     <option value="month">شهر</option>
                   </select>
                 </div>
-              </InputField>
+              </InputRow>
 
-              <InputField label="سعر الكرت">
-                <input type="number" value={formData.cardPrice} onChange={(e) => setFormData({...formData, cardPrice: e.target.value})} style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-              </InputField>
-            </div>
-
-            <InputField label="الموزع (اختياري)">
-              <input type="text" value={formData.distributor} onChange={(e) => setFormData({...formData, distributor: e.target.value})} placeholder="عبدالرحمن" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-            </InputField>
-
-            <InputField label="بداية اسم المستخدم (أرقام فقط)">
-              <input type="text" value={formData.usernamePrefix} onChange={(e) => setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')})} placeholder="86" maxLength="5" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-            </InputField>
-
-            <InputField label={`عدد أرقام اسم المستخدم: ${formData.usernameLength}`}>
-              <input type="range" min="6" max="20" value={formData.usernameLength} onChange={(e) => setFormData({...formData, usernameLength: parseInt(e.target.value)})} style={{ width: '100%' }} />
-              <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(0,255,255,0.1)', borderRadius: '10px', color: '#00ffff', fontSize: '14px', textAlign: 'center', border: '1px solid rgba(0,255,255,0.2)' }}>
-                💡 مثال: <strong style={{ fontFamily: 'monospace', fontSize: '16px' }}>{generateUsername(formData.usernamePrefix, formData.usernameLength)}</strong>
-              </div>
-            </InputField>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-              <InputField label="عدد الكروت">
-                <input type="number" value={formData.cardsCount} onChange={(e) => setFormData({...formData, cardsCount: parseInt(e.target.value) || 100})} min="1" max="10000" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-              </InputField>
-              <InputField label="عدد الأعمدة">
-                <input type="number" value={formData.colsCount} onChange={(e) => setFormData({...formData, colsCount: parseInt(e.target.value) || 3})} min="1" max="10" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-              </InputField>
-            </div>
-
-            <div style={{ padding: '20px', background: 'rgba(0,255,255,0.05)', borderRadius: '15px', border: '1px solid rgba(0,255,255,0.2)', marginBottom: '20px' }}>
-              <h3 style={{ color: '#00ffff', margin: '0 0 15px 0', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span>⚙️</span> خيارات إضافية
-              </h3>
-              <div style={{ marginBottom: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                  <input type="checkbox" checked={formData.enableQR} onChange={(e) => setFormData({...formData, enableQR: e.target.checked})} style={{ width: '22px', height: '22px', cursor: 'pointer' }} />
-                  <label style={{ color: '#e2e8f0', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', margin: 0 }}>تفعيل QR Code</label>
-                </div>
-              </div>
-              <div>
-                <InputField label="نص الشحن (اختياري - اكتب أي شيء)">
-                  <input type="text" value={formData.rechargeText} onChange={(e) => setFormData({...formData, rechargeText: e.target.value})} placeholder="مثال: بنكك، تحويل، يوجد شحن..." style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-                </InputField>
-              </div>
-              <InputField label="عرض خاص (اختياري)">
-                <textarea value={formData.specialOffer} onChange={(e) => setFormData({...formData, specialOffer: e.target.value})} rows="2" placeholder="مثال: للتواصل: 0123456789" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '14px', boxSizing: 'border-box', resize: 'vertical' }} />
-              </InputField>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <button onClick={generateCards} style={{ padding: '20px', background: 'linear-gradient(135deg, #00ffff, #00bfff)', color: '#0f172a', fontSize: '18px', fontWeight: 'bold', borderRadius: '15px', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(0,255,255,0.4)', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                🖨️ إنشاء الكروت
-              </button>
-              <button onClick={exportToPDF} disabled={printedCards.length === 0} style={{ padding: '20px', background: printedCards.length > 0 ? 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' : '#666', color: '#fff', fontSize: '18px', fontWeight: 'bold', borderRadius: '15px', border: 'none', cursor: printedCards.length > 0 ? 'pointer' : 'not-allowed', boxShadow: printedCards.length > 0 ? '0 10px 30px rgba(238,90,111,0.4)' : 'none', transition: 'transform 0.2s' }} onMouseEnter={(e) => { if (printedCards.length > 0) e.currentTarget.style.transform = 'translateY(-3px)' }} onMouseLeave={(e) => { if (printedCards.length > 0) e.currentTarget.style.transform = 'translateY(0)' }}>
-                 تصدير PDF
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'preview' && showPreview && (
-          <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '25px', padding: '30px', border: '2px solid rgba(0,255,255,0.2)', boxShadow: '0 15px 50px rgba(0,0,0,0.3)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-              <h2 style={{ color: '#00ffff', margin: 0, fontSize: '26px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '32px' }}>👁️</span> معاينة الكرت (مباشرة)
-              </h2>
-              <button onClick={() => setShowPreview(false)} style={{ background: 'rgba(255,0,0,0.2)', color: '#ff0000', border: '2px solid rgba(255,0,0,0.4)', borderRadius: '50%', width: '40px', height: '40px', fontSize: '20px', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-              <div style={getCardStyle(previewCard)}>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '28px', opacity: '0.05', fontWeight: 'bold', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, textShadow: '0 5px 15px rgba(0,0,0,0.3)' }}>JassasNetCard</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: '12px' }}>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
-                    <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, marginBottom: '4px' }}>🌐 الشبكة</div>
-                    <h3 style={{ margin: 0, fontSize: previewCard.networkFontSize + 'px', color: previewCard.networkColor, fontWeight: 'bold', lineHeight: 1.2, textShadow: '0 3px 10px rgba(0,0,0,0.4)' }}>{previewCard.network}</h3>
-                  </div>
-                  {(previewCard.qrEnabled || previewCard.rechargeText) && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
-                      {previewCard.qrEnabled && (
-                        <div style={{ background: '#fff', borderRadius: '10px', padding: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', border: '2px solid ' + previewCard.colors.accent }}>
-                          <QRCode cardNumber={previewCard.username} size={55} />
-                        </div>
-                      )}
-                      {previewCard.rechargeText && (
-                        <div style={{ background: 'linear-gradient(135deg, #00ff00, #00cc00)', borderRadius: '10px', padding: '6px 10px', boxShadow: '0 4px 15px rgba(0,255,0,0.4)', border: '1px solid #00ff00' }}>
-                          <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold', whiteSpace: 'nowrap', textShadow: '0 2px 5px rgba(0,0,0,0.3)' }}> {previewCard.rechargeText}</div>
-                        </div>
-                      )}
-                    </div>
+              <InputRow label="باقة البيانات" icon="💾">
+                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                  <select value={formData.dataPackage} onChange={(e) => setFormData({...formData, dataPackage: e.target.value})} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                    <option value="unlimited">بدون حد</option>
+                    <option value="limited">محدد</option>
+                  </select>
+                  {formData.dataPackage === 'limited' && (
+                    <>
+                      <input type="number" value={formData.dataAmount} onChange={(e) => setFormData({...formData, dataAmount: e.target.value})} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+                      <select value={formData.dataUnit} onChange={(e) => setFormData({...formData, dataUnit: e.target.value})} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                        <option value="MB">MB</option>
+                        <option value="GB">GB</option>
+                      </select>
+                    </>
                   )}
                 </div>
-                <div style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '12px', position: 'relative', zIndex: 1, border: '2px dashed ' + previewCard.colors.accent, marginBottom: '10px', boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.3)' }}>
-                  <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px' }}>👤 اسم المستخدم</div>
-                  <div style={{ fontSize: previewCard.cardNumberFontSize + 'px', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center', letterSpacing: '3px', color: previewCard.usernameColor, textShadow: '0 3px 10px rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px' }}>{previewCard.username}</div>
-                  <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px', marginTop: '10px' }}>🔑 كلمة المرور</div>
-                  <div style={{ fontSize: (previewCard.cardNumberFontSize - 2) + 'px', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center', letterSpacing: '2px', color: previewCard.cardNumberColor, textShadow: '0 3px 10px rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px' }}>{previewCard.password}</div>
+              </InputRow>
+
+              <InputRow label="اسم الشبكة" icon="🌐">
+                <input type="text" value={formData.networkName} onChange={(e) => setFormData({...formData, networkName: e.target.value})} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+
+              <InputRow label="وقت الكرت" icon="⏰">
+                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                  <input type="number" value={formData.cardTime} onChange={(e) => setFormData({...formData, cardTime: e.target.value})} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+                  <select value={formData.cardTimeType} onChange={(e) => setFormData({...formData, cardTimeType: e.target.value})} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                    <option value="hour">ساعة</option>
+                    <option value="day">يوم</option>
+                    <option value="week">أسبوع</option>
+                    <option value="month">شهر</option>
+                  </select>
                 </div>
-                <div style={{ fontSize: previewCard.infoFontSize + 'px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                    <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏱️ الصلاحية</div>
-                    <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.validity}</div>
-                  </div>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                    <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏰ الوقت</div>
-                    <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.cardTime}</div>
-                  </div>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                    <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💾 البيانات</div>
-                    <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.dataPackage}</div>
-                  </div>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                    <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💰 السعر</div>
-                    <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.price}</div>
-                  </div>
-                </div>
-                {previewCard.distributor && <div style={{ textAlign: 'center', marginTop: '8px', fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, position: 'relative', zIndex: 1, background: 'rgba(255,255,255,0.1)', padding: '5px', borderRadius: '8px' }}>الموزع: {previewCard.distributor}</div>}
-                {previewCard.specialOffer && <div style={{ marginTop: '8px', padding: '6px', background: 'rgba(255,215,0,0.2)', borderRadius: '8px', fontSize: previewCard.labelFontSize + 'px', textAlign: 'center', position: 'relative', zIndex: 1, color: '#FFD700', border: '1px solid rgba(255,215,0,0.4)' }}>🎁 {previewCard.specialOffer}</div>}
+              </InputRow>
+
+              <InputRow label="سعر الكرت" icon="💰">
+                <input type="number" value={formData.cardPrice} onChange={(e) => setFormData({...formData, cardPrice: e.target.value})} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+
+              <InputRow label="الموزع" icon="">
+                <input type="text" value={formData.distributor} onChange={(e) => setFormData({...formData, distributor: e.target.value})} placeholder="عبدالرحمن" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+            </>
+          )}
+
+          {activeSection === 'numbers' && (
+            <>
+              <h2 style={{ color: '#00ffff', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span>🔢</span> إعدادات الأرقام
+              </h2>
+
+              <InputRow label="بداية اسم المستخدم" icon="🔢">
+                <input type="text" value={formData.usernamePrefix} onChange={(e) => setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')})} placeholder="86" maxLength="5" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+
+              <InputRow label={`عدد الأرقام: ${formData.usernameLength}`} icon="">
+                <input type="range" min="6" max="20" value={formData.usernameLength} onChange={(e) => setFormData({...formData, usernameLength: parseInt(e.target.value)})} style={{ flex: 1 }} />
+              </InputRow>
+
+              <div style={{ padding: '12px', background: 'rgba(0,255,255,0.1)', borderRadius: '10px', color: '#00ffff', fontSize: '14px', textAlign: 'center', marginBottom: '15px', border: '1px solid rgba(0,255,255,0.2)' }}>
+                 مثال: <strong style={{ fontFamily: 'monospace', fontSize: '16px' }}>{generateUsername(formData.usernamePrefix, formData.usernameLength)}</strong>
               </div>
-            </div>
+
+              <InputRow label="لون اسم المستخدم" icon="🎨">
+                <input type="color" value={formData.usernameColor} onChange={(e) => setFormData({...formData, usernameColor: e.target.value})} style={{ flex: 1, height: '45px', border: 'none', borderRadius: '8px', cursor: 'pointer' }} />
+              </InputRow>
+
+              <InputRow label="عدد الكروت" icon="📦">
+                <input type="number" value={formData.cardsCount} onChange={(e) => setFormData({...formData, cardsCount: parseInt(e.target.value) || 100})} min="1" max="10000" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+
+              <InputRow label="عدد الأعمدة" icon="">
+                <input type="number" value={formData.colsCount} onChange={(e) => setFormData({...formData, colsCount: parseInt(e.target.value) || 3})} min="1" max="10" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+            </>
+          )}
+
+          {activeSection === 'design' && (
+            <>
+              <h2 style={{ color: '#00ffff', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span>🎨</span> تصميم الكرت
+              </h2>
+
+              <InputRow label="نوع التصميم" icon="🎭">
+                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                  <button onClick={() => setFormData({...formData, cardStyle: 'plain'})} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'plain' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'plain' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>عادي</button>
+                  <button onClick={() => setFormData({...formData, cardStyle: 'colored'})} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'colored' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'colored' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ملون</button>
+                </div>
+              </InputRow>
+
+              {formData.cardStyle === 'colored' && (
+                <InputRow label="نظام الألوان" icon="🌈">
+                  <select value={formData.colorScheme} onChange={(e) => setFormData({...formData, colorScheme: e.target.value})} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                    {Object.keys(colorSchemes).map((key: string) => (
+                      <option key={key} value={key}>
+                        {key === 'blue-gold' && 'أزرق ذهبي'}
+                        {key === 'purple-silver' && 'بنفسجي فضي'}
+                        {key === 'green-gold' && 'أخضر ذهبي'}
+                        {key === 'red-black' && 'أحمر أسود'}
+                        {key === 'orange-dark' && 'برتقالي داكن'}
+                        {key === 'blue-green' && 'أزرق أخضر'}
+                        {key === 'pure-blue' && 'أزرق صافي'}
+                        {key === 'pure-green' && 'أخضر صافي'}
+                        {key === 'black-gold' && 'أسود ذهبي'}
+                        {key === 'white-blue' && 'أبيض أزرق'}
+                      </option>
+                    ))}
+                  </select>
+                </InputRow>
+              )}
+
+              <InputRow label="التأثير" icon="✨">
+                <select value={formData.cardEffect} onChange={(e) => setFormData({...formData, cardEffect: e.target.value})} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                  <option value="plain">عادي</option>
+                  <option value="gradient">مدرج</option>
+                  <option value="3d">3D</option>
+                  <option value="shadow">مظل</option>
+                  <option value="glow">موهج</option>
+                </select>
+              </InputRow>
+
+              <InputRow label="شكل الكرت" icon="📱">
+                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                  <button onClick={() => setFormData({...formData, cardShape: 'rectangle'})} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rectangle' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rectangle' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مستطيل</button>
+                  <button onClick={() => setFormData({...formData, cardShape: 'square'})} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'square' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'square' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مربع</button>
+                  <button onClick={() => setFormData({...formData, cardShape: 'rounded'})} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rounded' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rounded' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مدور</button>
+                </div>
+              </InputRow>
+
+              <InputRow label="نوع الإطار" icon="框">
+                <select value={formData.borderStyle} onChange={(e) => setFormData({...formData, borderStyle: e.target.value})} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+                  <option value="solid">متصل ━</option>
+                  <option value="dashed">متقطع ┄</option>
+                  <option value="dotted">منقط ┈</option>
+                </select>
+              </InputRow>
+
+              <InputRow label={`سمك الإطار: ${formData.borderWidth}px`} icon="">
+                <input type="range" min="1" max="8" value={formData.borderWidth} onChange={(e) => setFormData({...formData, borderWidth: parseInt(e.target.value)})} style={{ flex: 1 }} />
+              </InputRow>
+            </>
+          )}
+
+          {activeSection === 'extra' && (
+            <>
+              <h2 style={{ color: '#00ffff', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span>➕</span> خيارات إضافية
+              </h2>
+
+              <InputRow label="QR Code" icon="📱">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                  <input type="checkbox" checked={formData.enableQR} onChange={(e) => setFormData({...formData, enableQR: e.target.checked})} style={{ width: '22px', height: '22px', cursor: 'pointer' }} />
+                  <span style={{ color: '#e2e8f0', fontSize: '14px' }}>تفعيل</span>
+                </div>
+              </InputRow>
+
+              {formData.enableQR && (
+                <InputRow label={`حجم QR: ${formData.qrSize}px`} icon="📐">
+                  <input type="range" min="40" max="80" value={formData.qrSize} onChange={(e) => setFormData({...formData, qrSize: parseInt(e.target.value)})} style={{ flex: 1 }} />
+                </InputRow>
+              )}
+
+              <InputRow label="نص الشحن" icon="⚡">
+                <input type="text" value={formData.rechargeText} onChange={(e) => setFormData({...formData, rechargeText: e.target.value})} placeholder="بنكك، تحويل، يوجد شحن..." style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+              </InputRow>
+
+              <InputRow label="عرض خاص" icon="🎁">
+                <textarea value={formData.specialOffer} onChange={(e) => setFormData({...formData, specialOffer: e.target.value})} rows="2" placeholder="للتواصل: 0123456789" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '14px', resize: 'vertical', textAlign: 'center' }} />
+              </InputRow>
+            </>
+          )}
+
+          {/* أزرار الإنشاء */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '25px' }}>
+            <button onClick={generateCards} style={{ padding: '18px', background: 'linear-gradient(135deg, #00ffff, #00bfff)', color: '#0f172a', fontSize: '17px', fontWeight: 'bold', borderRadius: '12px', border: 'none', cursor: 'pointer', boxShadow: '0 8px 25px rgba(0,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              🖨️ إنشاء الكروت
+            </button>
+            <button onClick={exportToPDF} disabled={printedCards.length === 0} style={{ padding: '18px', background: printedCards.length > 0 ? 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' : '#666', color: '#fff', fontSize: '17px', fontWeight: 'bold', borderRadius: '12px', border: 'none', cursor: printedCards.length > 0 ? 'pointer' : 'not-allowed', boxShadow: printedCards.length > 0 ? '0 8px 25px rgba(238,90,111,0.4)' : 'none', transition: 'all 0.3s' }} onMouseEnter={(e) => { if (printedCards.length > 0) e.currentTarget.style.transform = 'translateY(-3px)' }} onMouseLeave={(e) => { if (printedCards.length > 0) e.currentTarget.style.transform = 'translateY(0)' }}>
+              📄 تصدير PDF
+            </button>
           </div>
-        )}
+        </div>
 
-        {activeTab === 'design' && (
-          <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '25px', padding: '30px', border: '2px solid rgba(0,255,255,0.2)', boxShadow: '0 15px 50px rgba(0,0,0,0.3)' }}>
-            <h2 style={{ color: '#00ffff', marginBottom: '25px', fontSize: '26px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '32px' }}></span> تصميم الكرت
-            </h2>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '15px' }}>نوع التصميم</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <button onClick={() => setFormData({...formData, cardStyle: 'plain'})} style={{ padding: '15px', background: formData.cardStyle === 'plain' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardStyle === 'plain' ? '#0f172a' : '#fff', border: formData.cardStyle === 'plain' ? '2px solid #00ffff' : '2px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>عادي (أبيض)</button>
-                <button onClick={() => setFormData({...formData, cardStyle: 'colored'})} style={{ padding: '15px', background: formData.cardStyle === 'colored' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardStyle === 'colored' ? '#0f172a' : '#fff', border: formData.cardStyle === 'colored' ? '2px solid #00ffff' : '2px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>ملون (متدرج)</button>
-              </div>
-            </div>
-
-            {formData.cardStyle === 'colored' && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '15px' }}>نظام الألوان</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  {Object.entries(colorSchemes).map(([key, val]: [string, any]) => (
-                    <button key={key} onClick={() => setFormData({...formData, colorScheme: key})} style={{ padding: '12px', background: val.bg, border: formData.colorScheme === key ? '3px solid #fff' : '2px solid transparent', borderRadius: '12px', color: '#fff', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 5px 15px rgba(0,0,0,0.3)', transition: 'all 0.3s' }}>
-                      {key === 'blue-gold' && 'أزرق ذهبي'}
-                      {key === 'purple-silver' && 'بنفسجي فضي'}
-                      {key === 'green-gold' && 'أخضر ذهبي'}
-                      {key === 'red-black' && 'أحمر أسود'}
-                      {key === 'orange-dark' && 'برتقالي داكن'}
-                      {key === 'blue-green' && 'أزرق أخضر'}
-                      {key === 'pure-blue' && 'أزرق صافي'}
-                      {key === 'pure-green' && 'أخضر صافي'}
-                      {key === 'black-gold' && 'أسود ذهبي'}
-                      {key === 'white-blue' && 'أبيض أزرق'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '15px' }}>التأثير</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                {['plain', 'gradient', '3d', 'shadow', 'glow'].map((effect: string) => (
-                  <button key={effect} onClick={() => setFormData({...formData, cardEffect: effect})} style={{ padding: '14px', background: formData.cardEffect === effect ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardEffect === effect ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>
-                    {effect === 'plain' && 'عادي'}
-                    {effect === 'gradient' && 'مدرج'}
-                    {effect === '3d' && '3D'}
-                    {effect === 'shadow' && 'مظل'}
-                    {effect === 'glow' && 'موهج'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '15px' }}>شكل الكرت</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                <button onClick={() => setFormData({...formData, cardShape: 'rectangle'})} style={{ padding: '14px', background: formData.cardShape === 'rectangle' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardShape === 'rectangle' ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>مستطيل</button>
-                <button onClick={() => setFormData({...formData, cardShape: 'square'})} style={{ padding: '14px', background: formData.cardShape === 'square' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardShape === 'square' ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>مربع</button>
-                <button onClick={() => setFormData({...formData, cardShape: 'rounded'})} style={{ padding: '14px', background: formData.cardShape === 'rounded' ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.cardShape === 'rounded' ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>مدور</button>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '15px' }}>نوع الإطار</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                {['solid', 'dashed', 'dotted'].map((style: string) => (
-                  <button key={style} onClick={() => setFormData({...formData, borderStyle: style})} style={{ padding: '14px', background: formData.borderStyle === style ? 'linear-gradient(135deg, #00ffff, #00bfff)' : 'rgba(255,255,255,0.1)', color: formData.borderStyle === style ? '#0f172a' : '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}>
-                    {style === 'solid' && 'متصل ━'}
-                    {style === 'dashed' && 'متقطع '}
-                    {style === 'dotted' && 'منقط ┈'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <InputField label={`سمك الإطار: ${formData.borderWidth}px`}>
-              <input type="range" min="1" max="8" value={formData.borderWidth} onChange={(e) => setFormData({...formData, borderWidth: parseInt(e.target.value)})} style={{ width: '100%' }} />
-            </InputField>
-          </div>
-        )}
-
-        {printedCards.length > 0 && activeTab !== 'preview' && (
-          <div style={{ marginTop: '30px', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '25px', padding: '30px', border: '2px solid rgba(0,255,255,0.2)', boxShadow: '0 15px 50px rgba(0,0,0,0.3)' }}>
-            <h2 style={{ color: '#00ffff', marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>📋 الكروت المُنشأة ({printedCards.length})</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+        {/* معاينة الكروت */}
+        {printedCards.length > 0 && (
+          <div style={{ marginTop: '25px', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(0,255,255,0.2)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
+            <h2 style={{ color: '#00ffff', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold' }}>📋 الكروت المُنشأة ({printedCards.length})</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '15px' }}>
               {printedCards.slice(0, 6).map((card: any, index: number) => (
-                <div key={index} style={getCardStyle(card)}>
-                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '28px', opacity: '0.05', fontWeight: 'bold', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0 }}>JassasNetCard</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: '12px' }}>
-                    <div style={{ flex: 1, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor, marginRight: (card.qrEnabled || card.rechargeText) ? '10px' : '0', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.9, marginBottom: '4px' }}>🌐 الشبكة</div>
-                      <h3 style={{ margin: 0, fontSize: card.networkFontSize + 'px', color: card.networkColor, fontWeight: 'bold', lineHeight: 1.2, textShadow: '0 3px 10px rgba(0,0,0,0.4)' }}>{card.network}</h3>
+                <div key={index} style={{ background: card.colors.bg, borderRadius: '15px', border: `${card.borderWidth}px ${card.borderStyle} ${card.colors.accent}`, padding: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', minHeight: '220px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <div style={{ flex: 1, background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '10px', textAlign: 'center', border: `2px solid ${card.colors.accent}` }}>
+                      <div style={{ fontSize: '10px', color: card.colors.text, opacity: 0.9 }}>🌐 الشبكة</div>
+                      <div style={{ fontSize: '18px', color: card.networkColor, fontWeight: 'bold' }}>{card.network}</div>
                     </div>
-                    {(card.qrEnabled || card.rechargeText) && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
-                        {card.qrEnabled && (
-                          <div style={{ background: '#fff', borderRadius: '10px', padding: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', border: '2px solid ' + card.colors.accent }}>
-                            <QRCode cardNumber={card.username} size={55} />
-                          </div>
-                        )}
-                        {card.rechargeText && (
-                          <div style={{ background: 'linear-gradient(135deg, #00ff00, #00cc00)', borderRadius: '10px', padding: '6px 10px', boxShadow: '0 4px 15px rgba(0,255,0,0.4)', border: '1px solid #00ff00' }}>
-                            <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold', whiteSpace: 'nowrap', textShadow: '0 2px 5px rgba(0,0,0,0.3)' }}>⚡ {card.rechargeText}</div>
-                          </div>
-                        )}
+                    {card.qrEnabled && (
+                      <div style={{ background: '#fff', padding: '3px', borderRadius: '6px', marginLeft: '8px', border: `2px solid ${card.colors.accent}` }}>
+                        <QRCode cardNumber={card.username} size={card.qrSize} />
                       </div>
                     )}
                   </div>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '12px', position: 'relative', zIndex: 1, border: '2px dashed ' + card.colors.accent, marginBottom: '10px', boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.3)' }}>
-                    <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px' }}> اسم المستخدم</div>
-                    <div style={{ fontSize: card.cardNumberFontSize + 'px', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center', letterSpacing: '3px', color: card.usernameColor, textShadow: '0 3px 10px rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px' }}>{card.username}</div>
-                    <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px', marginTop: '10px' }}>🔑 كلمة المرور</div>
-                    <div style={{ fontSize: (card.cardNumberFontSize - 2) + 'px', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center', letterSpacing: '2px', color: card.cardNumberColor, textShadow: '0 3px 10px rgba(0,0,0,0.5)', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px' }}>{card.password}</div>
+                  <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '10px', margin: '10px 0', border: `2px dashed ${card.colors.accent}`, textAlign: 'center' }}>
+                    <div style={{ fontSize: '9px', color: card.labelColor, marginBottom: '5px' }}> اسم المستخدم</div>
+                    <div style={{ fontSize: '20px', color: card.usernameColor, fontWeight: 'bold', fontFamily: 'monospace', letterSpacing: '2px' }}>{card.username}</div>
+                    <div style={{ fontSize: '9px', color: card.labelColor, margin: '8px 0 5px 0' }}>🔑 كلمة المرور</div>
+                    <div style={{ fontSize: '16px', color: card.cardNumberColor, fontWeight: 'bold', fontFamily: 'monospace', letterSpacing: '2px' }}>{card.password}</div>
                   </div>
-                  <div style={{ fontSize: card.infoFontSize + 'px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + card.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.8, marginBottom: '3px' }}>الصلاحية</div>
-                      <div style={{ fontWeight: 'bold', color: card.infoColor, fontSize: (card.infoFontSize - 1) + 'px' }}>{card.validity}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '8px', textAlign: 'center', border: `1px solid ${card.colors.accent}` }}>
+                      <div style={{ fontSize: '8px', color: card.labelColor }}>⏱️ المدة</div>
+                      <div style={{ fontWeight: 'bold', color: card.infoColor }}>{card.validity}</div>
                     </div>
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + card.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.8, marginBottom: '3px' }}>الوقت</div>
-                      <div style={{ fontWeight: 'bold', color: card.infoColor, fontSize: (card.infoFontSize - 1) + 'px' }}>{card.cardTime}</div>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '8px', textAlign: 'center', border: `1px solid ${card.colors.accent}` }}>
+                      <div style={{ fontSize: '8px', color: card.labelColor }}> الوقت</div>
+                      <div style={{ fontWeight: 'bold', color: card.infoColor }}>{card.cardTime}</div>
                     </div>
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + card.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.8, marginBottom: '3px' }}>البيانات</div>
-                      <div style={{ fontWeight: 'bold', color: card.infoColor, fontSize: (card.infoFontSize - 1) + 'px' }}>{card.dataPackage}</div>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '8px', textAlign: 'center', border: `1px solid ${card.colors.accent}` }}>
+                      <div style={{ fontSize: '8px', color: card.labelColor }}>💾 البيانات</div>
+                      <div style={{ fontWeight: 'bold', color: card.infoColor }}>{card.dataPackage}</div>
                     </div>
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + card.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.8, marginBottom: '3px' }}>السعر</div>
-                      <div style={{ fontWeight: 'bold', color: card.infoColor, fontSize: (card.infoFontSize - 1) + 'px' }}>{card.price}</div>
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '8px', textAlign: 'center', border: `1px solid ${card.colors.accent}` }}>
+                      <div style={{ fontSize: '8px', color: card.labelColor }}>💰 السعر</div>
+                      <div style={{ fontWeight: 'bold', color: card.infoColor }}>{card.price}</div>
                     </div>
                   </div>
-                  {card.distributor && <div style={{ textAlign: 'center', marginTop: '8px', fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.9, position: 'relative', zIndex: 1, background: 'rgba(255,255,255,0.1)', padding: '5px', borderRadius: '8px' }}>الموزع: {card.distributor}</div>}
-                  {card.specialOffer && <div style={{ marginTop: '8px', padding: '6px', background: 'rgba(255,215,0,0.2)', borderRadius: '8px', fontSize: card.labelFontSize + 'px', textAlign: 'center', position: 'relative', zIndex: 1, color: '#FFD700', border: '1px solid rgba(255,215,0,0.4)' }}>🎁 {card.specialOffer}</div>}
+                  {card.rechargeText && <div style={{ background: 'linear-gradient(135deg, #00ff00, #00cc00)', color: '#fff', padding: '5px', borderRadius: '8px', textAlign: 'center', marginTop: '8px', fontSize: '10px', fontWeight: 'bold' }}>⚡ {card.rechargeText}</div>}
+                  {card.specialOffer && <div style={{ background: 'rgba(255,215,0,0.2)', color: '#FFD700', padding: '5px', borderRadius: '8px', textAlign: 'center', marginTop: '8px', fontSize: '10px' }}>🎁 {card.specialOffer}</div>}
                 </div>
               ))}
             </div>
-            {printedCards.length > 6 && (
-              <button onClick={() => setActiveTab('preview')} style={{ width: '100%', padding: '16px', background: 'rgba(0,255,255,0.1)', color: '#00ffff', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '15px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,255,255,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-                عرض كل الكروت ({printedCards.length}) - اضغط للمعاينة
-              </button>
-            )}
           </div>
         )}
       </div>
