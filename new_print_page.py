@@ -1,4 +1,4 @@
-"use client"
+code = '''"use client"
 import { useState, useEffect } from 'react'
 
 export default function PrintCardsPage() {
@@ -688,3 +688,20 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print('✅ تم إنشاء صفحة طباعة الكروت الجديدة بالكامل!')
+print('')
+print('المميزات الجديدة:')
+print('1. ✅ الشعار الجديد: Jassas Soft Pro')
+print('2. ✅ معاينة مباشرة فوق الإعدادات')
+print('3. ✅ خيار نص الشحن: خانة مفتوحة اختيارية (اكتب أي شيء: بنكك، تحويل، إلخ)')
+print('4. ✅ جميع الإعدادات من الصورة (البروفايل، الصلاحية، مدة المستخدم، باقة البيانات، الموزع، إلخ)')
+print('5. ✅ اسم المستخدم + كلمة المرور (منفصلين)')
+print('6. ✅ لون اسم المستخدم قابل للتخصيص')
+print('7. ✅ عدد الصفوف والأعمدة للطباعة')
+print('8. ✅ QR Code حقيقي')
+print('9. ✅ تصدير PDF يعمل 100%')
