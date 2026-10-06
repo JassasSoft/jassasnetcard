@@ -349,7 +349,7 @@ export default function PrintCardsPage() {
         {showPreview && (
           <div style={{ marginBottom: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-              <h2 style={{ color: '#00ffff', margin: 0, fontSize: '22px' }}>️ معاينة الكرت (مباشرة)</h2>
+              <h2 style={{ color: '#00ffff', margin: 0, fontSize: '22px' }}>👁️ معاينة الكرت (مباشرة)</h2>
               <button onClick={() => setShowPreview(false)} style={{ background: 'rgba(255,0,0,0.2)', color: '#ff0000', border: 'none', borderRadius: '50%', width: '35px', height: '35px', fontSize: '18px', cursor: 'pointer' }}>✕</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '15px' }}>
@@ -543,7 +543,7 @@ export default function PrintCardsPage() {
 
           {/* خيارات إضافية */}
           <div style={{ marginBottom: '20px', padding: '15px', background: 'rgba(0,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(0,255,255,0.2)' }}>
-            <h3 style={{ color: '#00ffff', margin: '0 0 15px 0', fontSize: '16px' }}>⚙️ خيارات إضافية</h3>
+            <h3 style={{ color: '#00ffff', margin: '0 0 15px 0', fontSize: '16px' }}>️ خيارات إضافية</h3>
             <div style={{ marginBottom: '15px' }}>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
                 <input type="checkbox" checked={formData.enableQR} onChange={(e) => setFormData({...formData, enableQR: e.target.checked})} style={{ width: '20px', height: '20px' }} />
@@ -626,7 +626,7 @@ export default function PrintCardsPage() {
               🖨️ إنشاء الكروت
             </button>
             <button onClick={exportToPDF} disabled={printedCards.length === 0} style={{ padding: '18px', background: printedCards.length > 0 ? 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' : '#666', color: '#fff', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', border: 'none', cursor: printedCards.length > 0 ? 'pointer' : 'not-allowed', boxShadow: printedCards.length > 0 ? '0 5px 20px rgba(238,90,111,0.4)' : 'none' }}>
-              📄 تصدير PDF
+               تصدير PDF
             </button>
           </div>
         </div>
@@ -641,7 +641,7 @@ export default function PrintCardsPage() {
                   <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '24px', opacity: '0.05', fontWeight: 'bold', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0 }}>JassasNetCard</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: '8px' }}>
                     <div style={{ flex: 1, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', border: card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor, marginRight: (card.qrEnabled || card.showRecharge) ? '8px' : '0', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.9, marginBottom: '3px' }}> الشبكة</div>
+                      <div style={{ fontSize: card.labelFontSize + 'px', color: card.labelColor, opacity: 0.9, marginBottom: '3px' }}>🌐 الشبكة</div>
                       <h3 style={{ margin: 0, fontSize: card.networkFontSize + 'px', color: card.networkColor, fontWeight: 'bold', lineHeight: 1.2, textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{card.network}</h3>
                     </div>
                     {(card.qrEnabled || card.showRecharge) && (
