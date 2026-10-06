@@ -1,4 +1,330 @@
-"use client"
+import os
+
+# التأكد من وجود المجلدات
+os.makedirs('app/login', exist_ok=True)
+os.makedirs('app/dashboard/print-cards', exist_ok=True)
+
+# ==========================================
+# 1. صفحة تسجيل الدخول (Login Page)
+# ==========================================
+login_code = '''"use client"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    // محاكاة تسجيل الدخول (استبدل هذا بمنطق Supabase الفعلي لاحقاً)
+    setTimeout(() => {
+      if (email && password) {
+        const mockUser = {
+          fullName: 'مهندس جاسر',
+          email: email,
+          cardsRemaining: 500,
+          role: 'admin'
+        }
+        localStorage.setItem('user', JSON.stringify(mockUser))
+        router.push('/dashboard')
+      } else {
+        setError('الرجاء إدخال البريد الإلكتروني وكلمة المرور')
+      }
+      setLoading(false)
+    }, 1000)
+  }
+
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e3c72 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif'
+    }}>
+      <div style={{ 
+        background: 'rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: '24px',
+        padding: '40px',
+        width: '100%',
+        maxWidth: '450px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '10px' }}>📶</div>
+          <h1 style={{ color: '#FFD700', fontSize: '28px', margin: '0 0 8px 0', fontWeight: 'bold' }}>Jassas Net Card</h1>
+          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>نظام إدارة شبكات المايكروتك الاحترافي</p>
+        </div>
+
+        {error && (
+          <div style={{ 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            border: '1px solid rgba(239, 68, 68, 0.3)', 
+            color: '#fca5a5', 
+            padding: '12px', 
+            borderRadius: '12px', 
+            marginBottom: '20px',
+            fontSize: '14px',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>البريد الإلكتروني</label>
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@jassas.net"
+              style={{ 
+                width: '100%', 
+                padding: '14px', 
+                background: 'rgba(0, 0, 0, 0.3)', 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                borderRadius: '12px', 
+                color: '#fff', 
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 0.3s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#FFD700'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+            />
+          </div>
+
+          <div style={{ marginBottom: '30px' }}>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>كلمة المرور</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{ 
+                width: '100%', 
+                padding: '14px', 
+                background: 'rgba(0, 0, 0, 0.3)', 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                borderRadius: '12px', 
+                color: '#fff', 
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 0.3s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#FFD700'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+            />
+          </div>
+
+          <button 
+            type="submit"
+            disabled={loading}
+            style={{ 
+              width: '100%', 
+              padding: '16px', 
+              background: loading ? '#666' : 'linear-gradient(135deg, #FFD700 0%, #d4af37 100%)', 
+              color: '#0f172a', 
+              border: 'none', 
+              borderRadius: '12px', 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: '0 10px 25px -5px rgba(255, 215, 0, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)' }}
+            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(0)' }}
+          >
+            {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+          </button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '24px', color: '#64748b', fontSize: '13px' }}>
+          جميع الحقوق محفوظة © 2024 Jassas Soft
+        </div>
+      </div>
+    </div>
+  )
+}
+'''
+
+# ==========================================
+# 2. صفحة لوحة التحكم (Dashboard Page)
+# ==========================================
+dashboard_code = '''"use client"
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function DashboardPage() {
+  const router = useRouter()
+  const [user, setUser] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState('home')
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      setUser(JSON.parse(userData))
+    } else {
+      router.push('/login')
+    }
+  }, [router])
+
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: '50px', height: '50px', border: '4px solid #FFD700', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
+          <p>جاري التحميل...</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    router.push('/login')
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', fontFamily: 'Segoe UI, Tahoma, Arial', paddingBottom: '80px' }}>
+      {/* الهيدر */}
+      <div style={{ background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', padding: '25px 20px', borderRadius: '0 0 30px 30px', boxShadow: '0 10px 30px rgba(30, 60, 114, 0.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', margin: '0 0 5px 0', fontSize: '14px' }}>مرحباً بك،</p>
+            <h1 style={{ color: '#FFD700', margin: 0, fontSize: '26px', fontWeight: 'bold' }}>{user.fullName}</h1>
+          </div>
+          <button onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px' }}>
+            🚪 خروج
+          </button>
+        </div>
+
+        {/* بطاقة الرصيد */}
+        <div style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', borderRadius: '20px', padding: '25px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.8)', margin: '0 0 8px 0', fontSize: '15px' }}>رصيدك من الكروت</p>
+              <h2 style={{ color: '#fff', margin: 0, fontSize: '48px', fontWeight: 'bold', lineHeight: 1 }}>{user.cardsRemaining || 0}</h2>
+              <p style={{ color: 'rgba(255,255,255,0.6)', margin: '8px 0 0 0', fontSize: '13px' }}>كرت متاح للطباعة</p>
+            </div>
+            <div style={{ width: '70px', height: '70px', background: 'rgba(255, 215, 0, 0.2)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '35px' }}>
+              💳
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* المحتوى الرئيسي */}
+      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        {activeTab === 'home' && (
+          <>
+            {/* الإحصائيات */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '28px' }}>📊</span>
+                  <span style={{ color: '#3b82f6', fontSize: '12px', fontWeight: 'bold' }}>إجمالي</span>
+                </div>
+                <h3 style={{ color: '#fff', margin: 0, fontSize: '32px', fontWeight: 'bold' }}>3,015</h3>
+                <p style={{ color: 'rgba(255,255,255,0.6)', margin: '5px 0 0 0', fontSize: '12px' }}>كرت تم إنشاؤه</p>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '28px' }}>👥</span>
+                  <span style={{ color: '#10b981', fontSize: '12px', fontWeight: 'bold' }}>متصلين</span>
+                </div>
+                <h3 style={{ color: '#fff', margin: 0, fontSize: '32px', fontWeight: 'bold' }}>12</h3>
+                <p style={{ color: 'rgba(255,255,255,0.6)', margin: '5px 0 0 0', fontSize: '12px' }}>مستخدم الآن</p>
+              </div>
+            </div>
+
+            {/* الأزرار الرئيسية */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
+              <button onClick={() => router.push('/dashboard/print-cards')} style={{ background: 'linear-gradient(135deg, #00ffff, #00bfff)', color: '#0f172a', border: 'none', borderRadius: '18px', padding: '25px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 10px 30px rgba(0,255,255,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '32px' }}>🖨️</span>
+                طباعة كروت
+              </button>
+              
+              <button style={{ background: 'linear-gradient(135deg, #3b82f6, #1e40af)', color: '#fff', border: 'none', borderRadius: '18px', padding: '25px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 10px 30px rgba(59,130,246,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '32px' }}>🔍</span>
+                فحص كرت
+              </button>
+            </div>
+
+            {/* روابط إضافية */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <button style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', borderRadius: '18px', padding: '20px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '28px' }}>🌐</span>
+                إعدادات MikroTik
+              </button>
+              
+              <button style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', color: '#25D366', borderRadius: '18px', padding: '20px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '28px' }}>💬</span>
+                تواصل معنا
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* شريط التنقل السفلي */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '12px 0', zIndex: 1000 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', maxWidth: '600px', margin: '0 auto' }}>
+          {[
+            { id: 'home', icon: '🏠', label: 'الرئيسية' },
+            { id: 'cards', icon: '🎫', label: 'الكروت' },
+            { id: 'settings', icon: '⚙️', label: 'الإعدادات' },
+            { id: 'profile', icon: '👤', label: 'حسابي' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: activeTab === tab.id ? '#FFD700' : 'rgba(255,255,255,0.5)',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 15px',
+                transform: activeTab === tab.id ? 'scale(1.1)' : 'scale(1)',
+                transition: 'all 0.3s'
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>{tab.icon}</span>
+              <span style={{ fontSize: '11px', fontWeight: activeTab === tab.id ? 'bold' : 'normal' }}>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+'''
+
+# ==========================================
+# 3. صفحة طباعة الكروت (Print Cards Page) - Full Option
+# ==========================================
+print_cards_code = '''"use client"
 import { useState, useEffect } from 'react'
 
 export default function PrintCardsPage() {
@@ -625,3 +951,21 @@ export default function PrintCardsPage() {
     </div>
   )
 }
+'''
+
+# كتابة الملفات
+with open('app/login/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(login_code)
+
+with open('app/dashboard/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(dashboard_code)
+
+with open('app/dashboard/print-cards/page.tsx', 'w', encoding='utf-8') as f:
+    f.write(print_cards_code)
+
+print('✅ تم استعادة وتحديث جميع الصفحات الأساسية بنجاح!')
+print('📁 Login Page: app/login/page.tsx')
+print('📁 Dashboard Page: app/dashboard/page.tsx')
+print('📁 Print Cards Page: app/dashboard/print-cards/page.tsx')
+print('')
+print('الآن قم بتنفيذ: git add . && git commit -m "Full option restore" && git push')

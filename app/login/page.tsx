@@ -1,50 +1,153 @@
 "use client"
-import { useState } from "react"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [message, setMessage] = useState("")
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
-    setMessage("")
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-      })
-      const data = await response.json()
-      if (data.success) {
-        setMessage("Welcome " + data.user.fullName)
-        localStorage.setItem("user", JSON.stringify(data.user))
-        setTimeout(() => { window.location.href = "/dashboard" }, 1500)
+    setError('')
+
+    // محاكاة تسجيل الدخول (استبدل هذا بمنطق Supabase الفعلي لاحقاً)
+    setTimeout(() => {
+      if (email && password) {
+        const mockUser = {
+          fullName: 'مهندس جاسر',
+          email: email,
+          cardsRemaining: 500,
+          role: 'admin'
+        }
+        localStorage.setItem('user', JSON.stringify(mockUser))
+        router.push('/dashboard')
       } else {
-        setMessage("Error: " + data.message)
+        setError('الرجاء إدخال البريد الإلكتروني وكلمة المرور')
       }
-    } catch (error) {
-      setMessage("Connection error")
-    }
-    setLoading(false)
+      setLoading(false)
+    }, 1000)
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", fontFamily: "Arial" }}>
-      <div style={{ background: "rgba(10,14,39,0.95)", border: "2px solid rgba(0,255,255,0.3)", borderRadius: "20px", padding: "40px", maxWidth: "500px", width: "100%" }}>
-        <h1 style={{ color: "#00ffff", textAlign: "center", fontSize: "32px", marginBottom: "10px" }}>Jassas Net Card</h1>
-        <p style={{ color: "#94a3b8", textAlign: "center", marginBottom: "30px" }}>نظام إدارة شبكات المايكروتك</p>
-        <h2 style={{ color: "#00ffff", textAlign: "center", marginBottom: "25px" }}>تسجيل الدخول</h2>
-        <input type="text" placeholder="اسم المستخدم أو الإيميل" value={username} onChange={(e) => setUsername(e.target.value)} style={{ width: "100%", padding: "15px", marginBottom: "15px", background: "rgba(0,0,0,0.5)", border: "2px solid rgba(0,255,255,0.3)", borderRadius: "10px", color: "#fff", fontSize: "16px", boxSizing: "border-box" }} />
-        <input type="password" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", padding: "15px", marginBottom: "20px", background: "rgba(0,0,0,0.5)", border: "2px solid rgba(0,255,255,0.3)", borderRadius: "10px", color: "#fff", fontSize: "16px", boxSizing: "border-box" }} />
-        <button onClick={handleLogin} disabled={loading} style={{ width: "100%", padding: "18px", background: loading ? "#666" : "linear-gradient(135deg, #00ffff, #00bfff)", color: "#0a0e27", fontSize: "18px", fontWeight: "bold", borderRadius: "10px", border: "none", cursor: "pointer", marginBottom: "20px" }}>
-          {loading ? "جاري التحميل..." : "دخول آمن"}
-        </button>
-        {message && <div style={{ padding: "15px", background: message.includes("Welcome") ? "rgba(0,255,0,0.2)" : "rgba(255,0,0,0.2)", borderRadius: "10px", color: message.includes("Welcome") ? "#00ff00" : "#ff0000", textAlign: "center", fontWeight: "bold" }}>{message}</div>}
-        <p style={{ color: "#94a3b8", textAlign: "center", marginTop: "20px" }}>
-          ليس لديك حساب؟ <a href="/register" style={{ color: "#00ffff", textDecoration: "none", fontWeight: "bold" }}>إنشاء حساب جديد</a>
-        </p>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e3c72 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif'
+    }}>
+      <div style={{ 
+        background: 'rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: '24px',
+        padding: '40px',
+        width: '100%',
+        maxWidth: '450px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '10px' }}>📶</div>
+          <h1 style={{ color: '#FFD700', fontSize: '28px', margin: '0 0 8px 0', fontWeight: 'bold' }}>Jassas Net Card</h1>
+          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>نظام إدارة شبكات المايكروتك الاحترافي</p>
+        </div>
+
+        {error && (
+          <div style={{ 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            border: '1px solid rgba(239, 68, 68, 0.3)', 
+            color: '#fca5a5', 
+            padding: '12px', 
+            borderRadius: '12px', 
+            marginBottom: '20px',
+            fontSize: '14px',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>البريد الإلكتروني</label>
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@jassas.net"
+              style={{ 
+                width: '100%', 
+                padding: '14px', 
+                background: 'rgba(0, 0, 0, 0.3)', 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                borderRadius: '12px', 
+                color: '#fff', 
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 0.3s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#FFD700'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+            />
+          </div>
+
+          <div style={{ marginBottom: '30px' }}>
+            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>كلمة المرور</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{ 
+                width: '100%', 
+                padding: '14px', 
+                background: 'rgba(0, 0, 0, 0.3)', 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                borderRadius: '12px', 
+                color: '#fff', 
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 0.3s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#FFD700'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+            />
+          </div>
+
+          <button 
+            type="submit"
+            disabled={loading}
+            style={{ 
+              width: '100%', 
+              padding: '16px', 
+              background: loading ? '#666' : 'linear-gradient(135deg, #FFD700 0%, #d4af37 100%)', 
+              color: '#0f172a', 
+              border: 'none', 
+              borderRadius: '12px', 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: '0 10px 25px -5px rgba(255, 215, 0, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)' }}
+            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(0)' }}
+          >
+            {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+          </button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '24px', color: '#64748b', fontSize: '13px' }}>
+          جميع الحقوق محفوظة © 2024 Jassas Soft
+        </div>
       </div>
     </div>
   )
