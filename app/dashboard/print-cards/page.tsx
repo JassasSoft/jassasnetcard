@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PrintCardsPage() {
   const [user, setUser] = useState<any>(null)
@@ -50,9 +51,37 @@ export default function PrintCardsPage() {
   })
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (userData) setUser(JSON.parse(userData))
-    else window.location.href = '/login'
+    let mounted = true
+
+    const loadUser = async () => {
+      const supabase = createClient()
+
+      const { data, error } = await supabase.auth.getUser()
+
+      if (!mounted) return
+
+      if (error || !data.user) {
+        window.location.href = '/login'
+        return
+      }
+
+      const metadata = data.user.user_metadata || {}
+
+      setUser({
+        id: data.user.id,
+        fullName:
+          metadata.full_name ||
+          data.user.email?.split('@')[0] ||
+          'المستخدم',
+        email: data.user.email || '',
+      })
+    }
+
+    loadUser()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const colorSchemes: any = {
@@ -516,7 +545,7 @@ export default function PrintCardsPage() {
           </InputRow>
 
           <InputRow label="بداية اسم المستخدم" icon="🔢" fieldId="prefix">
-            <input type="text" value={formData.usernamePrefix} onChange={(e) => { setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('prefix') }} placeholder="86" maxLength="5" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+            <input type="text" value={formData.usernamePrefix} onChange={(e) => { setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('prefix') }} placeholder="86" maxLength={5} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
           <InputRow label={`عدد الأرقام: ${formData.usernameLength}`} icon="" fieldId="length">
@@ -614,7 +643,7 @@ export default function PrintCardsPage() {
           </InputRow>
 
           <InputRow label="عرض خاص" icon="" fieldId="special">
-            <textarea value={formData.specialOffer} onChange={(e) => { setFormData({...formData, specialOffer: e.target.value}); setActiveField('special') }} rows="2" placeholder="للتواصل: 0123456789" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '14px', resize: 'vertical', textAlign: 'center' }} />
+            <textarea value={formData.specialOffer} onChange={(e) => { setFormData({...formData, specialOffer: e.target.value}); setActiveField('special') }} rows={2} placeholder="للتواصل: 0123456789" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '10px', color: '#fff', fontSize: '14px', resize: 'vertical', textAlign: 'center' }} />
           </InputRow>
 
           {/* أزرار الإنشاء */}
@@ -660,7 +689,7 @@ export default function PrintCardsPage() {
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <button onClick={() => { setShowConfirm(false); exportToPDF() }} style={{ padding: '15px', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', fontSize: '16px', fontWeight: 'bold', borderRadius: '12px', border: 'none', cursor: 'pointer', boxShadow: '0 5px 20px rgba(16,185,129,0.4)' }}>
+                <button onClick={() => { setShowConfirm(false); exportSamplePDF() }} style={{ padding: '15px', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', fontSize: '16px', fontWeight: 'bold', borderRadius: '12px', border: 'none', cursor: 'pointer', boxShadow: '0 5px 20px rgba(16,185,129,0.4)' }}>
                   ✅ تأكيد الطباعة
                 </button>
                 <button onClick={() => setShowConfirm(false)} style={{ padding: '15px', background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: '16px', fontWeight: 'bold', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}>

@@ -1,31 +1,132 @@
 "use client"
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import BrandLogo from '@/components/BrandLogo'
+import { createClient } from '@/lib/supabase/client'
 
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [accountError, setAccountError] = useState('')
   const [activeTab, setActiveTab] = useState('home')
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (userData) setUser(JSON.parse(userData))
-    else router.push('/login')
+    let mounted = true
+
+    const loadUser = async () => {
+      try {
+        const response = await fetch('/api/account/summary', {
+          method: 'GET',
+          cache: 'no-store',
+          credentials: 'same-origin',
+        })
+
+        const result = await response.json()
+
+        if (!mounted) return
+
+        if (response.status === 401) {
+          router.replace('/login')
+          return
+        }
+
+        if (!response.ok || !result.success || !result.subscription) {
+          setAccountError(
+            result.message || 'تعذر تحميل بيانات الحساب. حاول تحديث الصفحة.'
+          )
+          return
+        }
+
+        setUser({
+          id: result.user.id,
+          fullName: result.user.fullName,
+          email: result.user.email,
+          cardsRemaining: Number(result.subscription.cards_remaining ?? 0),
+          totalCardsPrinted: Number(
+            result.subscription.total_cards_printed ?? 0
+          ),
+          planType: result.subscription.plan_type,
+          subscriptionStatus: result.subscription.status,
+          role: 'customer',
+        })
+      } catch {
+        if (mounted) {
+          setAccountError('تعذر الاتصال بالخادم. تحقق من الإنترنت وحاول مجددًا.')
+        }
+      }
+    }
+
+    loadUser()
+
+    return () => {
+      mounted = false
+    }
   }, [router])
 
-  if (!user) return <div style={{ minHeight: '100vh', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><p>جاري التحميل...</p></div>
+  if (!user) {
+    return (
+      <div
+        dir="rtl"
+        style={{
+          minHeight: '100vh',
+          background: '#070b18',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+          fontFamily: 'Segoe UI, Tahoma, Arial',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <BrandLogo compact />
+          <p style={{ marginTop: '20px', color: '#94a3b8' }}>
+            {accountError || 'جاري تحميل حسابك...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
-  const handleLogout = () => { localStorage.removeItem('user'); router.push('/login') }
+  const handleLogout = async () => {
+    const supabase = createClient()
+
+    await supabase.auth.signOut()
+
+    router.replace('/login')
+    router.refresh()
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', fontFamily: 'Segoe UI, Tahoma', paddingBottom: '80px' }}>
       <div style={{ background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', padding: '25px 20px', borderRadius: '0 0 30px 30px', boxShadow: '0 10px 30px rgba(30,64,175,0.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
+          <BrandLogo compact />
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
           <div>
             <p style={{ color: 'rgba(255,255,255,0.8)', margin: '0 0 5px 0', fontSize: '14px' }}>مرحباً،</p>
             <h1 style={{ color: '#fff', margin: 0, fontSize: '26px', fontWeight: 'bold' }}>{user.fullName}</h1>
           </div>
-          <div style={{ width: '55px', height: '55px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: 'bold', color: '#1e40af' }}>{(user.fullName || 'U').charAt(0)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '55px', height: '55px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: 'bold', color: '#1e40af' }}>
+              {(user.fullName || 'U').charAt(0)}
+            </div>
+
+            <button
+              onClick={handleLogout}
+              style={{
+                border: '1px solid rgba(255,255,255,.25)',
+                background: 'rgba(0,0,0,.18)',
+                color: '#fff',
+                borderRadius: '12px',
+                padding: '9px 11px',
+                cursor: 'pointer',
+                fontWeight: 700,
+              }}
+            >
+              خروج
+            </button>
+          </div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', borderRadius: '20px', padding: '25px', border: '1px solid rgba(255,255,255,0.2)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

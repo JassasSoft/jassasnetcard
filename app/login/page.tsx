@@ -1,56 +1,280 @@
 "use client"
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
+import { Suspense, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
+import BrandLogo from "@/components/BrandLogo"
+import { createClient } from "@/lib/supabase/client"
+
+function LoginContent() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const searchParams = useSearchParams()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!email.trim() || !password) {
+      setError("الرجاء إدخال البريد الإلكتروني وكلمة المرور")
+      return
+    }
+
     setLoading(true)
-    setError('')
-    setTimeout(() => {
-      if (email && password) {
-        const mockUser = { fullName: 'محمد حبيب', email: email, cardsRemaining: 487, role: 'admin' }
-        localStorage.setItem('user', JSON.stringify(mockUser))
-        router.push('/dashboard')
-      } else {
-        setError('الرجاء إدخال البريد الإلكتروني وكلمة المرور')
+    setError("")
+
+    try {
+      const supabase = createClient()
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+
+      if (error) {
+        if (
+          error.message.toLowerCase().includes("email not confirmed")
+        ) {
+          setError("يجب تأكيد البريد الإلكتروني أولاً")
+        } else {
+          setError("البريد الإلكتروني أو كلمة المرور غير صحيحة")
+        }
+
+        setLoading(false)
+        return
       }
+
+      const redirectTo = searchParams.get("redirect")
+
+      router.replace(
+        redirectTo && redirectTo.startsWith("/")
+          ? redirectTo
+          : "/dashboard"
+      )
+
+      router.refresh()
+    } catch {
+      setError("حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.")
       setLoading(false)
-    }, 800)
+    }
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3c72 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'Segoe UI, Tahoma' }}>
-      <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '450px', border: '2px solid rgba(0,255,255,0.3)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '10px' }}></div>
-          <h1 style={{ color: '#00ffff', fontSize: '32px', margin: '0 0 8px 0', fontWeight: 'bold' }}>Jassas Net Card</h1>
-          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>نظام إدارة شبكات المايكروتك</p>
+    <main
+      dir="rtl"
+      style={{
+        minHeight: "100vh",
+        background:
+          "radial-gradient(circle at 20% 10%, rgba(124,58,237,.22), transparent 30%), radial-gradient(circle at 80% 90%, rgba(0,217,255,.12), transparent 30%), linear-gradient(135deg,#070b18 0%,#10172a 50%,#080b15 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        fontFamily: "Segoe UI, Tahoma, Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "450px",
+          padding: "36px",
+          borderRadius: "28px",
+          background: "rgba(15,23,42,.76)",
+          backdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,.10)",
+          boxShadow:
+            "0 30px 80px rgba(0,0,0,.55), 0 0 50px rgba(124,58,237,.10)",
+        }}
+      >
+        <BrandLogo />
+
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "30px",
+            marginBottom: "25px",
+          }}
+        >
+          <h1
+            style={{
+              color: "#fff",
+              fontSize: "25px",
+              margin: "0 0 8px",
+              fontWeight: 800,
+            }}
+          >
+            تسجيل الدخول
+          </h1>
+
+          <p
+            style={{
+              color: "#94a3b8",
+              fontSize: "14px",
+              margin: 0,
+            }}
+          >
+            ادخل إلى لوحة إدارة شبكتك بأمان
+          </p>
         </div>
-        {error && <div style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid #ef4444', color: '#fca5a5', padding: '12px', borderRadius: '12px', marginBottom: '20px', textAlign: 'center', fontSize: '14px' }}>{error}</div>}
+
+        {error && (
+          <div
+            style={{
+              background: "rgba(239,68,68,.12)",
+              border: "1px solid rgba(239,68,68,.45)",
+              color: "#fca5a5",
+              padding: "13px",
+              borderRadius: "13px",
+              marginBottom: "18px",
+              textAlign: "center",
+              fontSize: "14px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>البريد الإلكتروني أو اسم المستخدم</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="habib1008@gmail.com" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-          </div>
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ color: '#e2e8f0', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>كلمة المرور</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(0,255,255,0.3)', borderRadius: '12px', color: '#fff', fontSize: '16px', boxSizing: 'border-box' }} />
-          </div>
-          <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px', background: loading ? '#666' : 'linear-gradient(135deg, #00ffff, #00bfff)', color: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '18px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 10px 25px rgba(0,255,255,0.3)' }}>
-            {loading ? 'جاري الدخول...' : 'دخول آمن'}
+          <label
+            style={{
+              display: "block",
+              color: "#e2e8f0",
+              marginBottom: "8px",
+              fontSize: "14px",
+              fontWeight: 700,
+            }}
+          >
+            البريد الإلكتروني
+          </label>
+
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="example@email.com"
+            autoComplete="email"
+            disabled={loading}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "15px",
+              marginBottom: "18px",
+              background: "rgba(2,6,23,.72)",
+              border: "1px solid rgba(0,217,255,.25)",
+              borderRadius: "14px",
+              color: "#fff",
+              fontSize: "16px",
+              outline: "none",
+            }}
+          />
+
+          <label
+            style={{
+              display: "block",
+              color: "#e2e8f0",
+              marginBottom: "8px",
+              fontSize: "14px",
+              fontWeight: 700,
+            }}
+          >
+            كلمة المرور
+          </label>
+
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            disabled={loading}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "15px",
+              marginBottom: "24px",
+              background: "rgba(2,6,23,.72)",
+              border: "1px solid rgba(0,217,255,.25)",
+              borderRadius: "14px",
+              color: "#fff",
+              fontSize: "16px",
+              outline: "none",
+            }}
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "16px",
+              border: "none",
+              borderRadius: "14px",
+              background: loading
+                ? "#475569"
+                : "linear-gradient(135deg,#00d9ff,#7c3aed 65%,#d4af37)",
+              color: "#fff",
+              fontSize: "17px",
+              fontWeight: 800,
+              cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: loading
+                ? "none"
+                : "0 12px 30px rgba(124,58,237,.25)",
+            }}
+          >
+            {loading ? "جاري التحقق..." : "دخول آمن"}
           </button>
         </form>
-        <div style={{ textAlign: 'center', marginTop: '24px', color: '#64748b', fontSize: '14px' }}>
-          ليس لديك حساب؟ <a href="/register" style={{ color: '#00ffff', textDecoration: 'none', fontWeight: 'bold' }}>إنشاء حساب جديد</a>
+
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "24px",
+            color: "#64748b",
+            fontSize: "14px",
+          }}
+        >
+          ليس لديك حساب؟{" "}
+          <Link
+            href="/register"
+            style={{
+              color: "#67e8f9",
+              textDecoration: "none",
+              fontWeight: 800,
+            }}
+          >
+            إنشاء حساب جديد
+          </Link>
         </div>
       </div>
-    </div>
+    </main>
+  )
+}
+
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main
+          dir="rtl"
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#080b15",
+            color: "#e2e8f0",
+            fontFamily: "Segoe UI, Tahoma, Arial, sans-serif",
+          }}
+        >
+          جاري تجهيز صفحة الدخول...
+        </main>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   )
 }
