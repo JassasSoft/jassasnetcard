@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient as createUserClient } from '@/lib/supabase/server'
-import { supabaseServer } from '@/lib/supabase-server'
+import { getSupabaseServer } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +21,8 @@ export async function GET() {
         }
       )
     }
+
+    const supabaseServer = getSupabaseServer()
 
     const { data: subscriptions, error: subscriptionError } =
       await supabaseServer

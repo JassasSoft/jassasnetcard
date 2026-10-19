@@ -17,6 +17,10 @@ export default function RegisterPage() {
   const [message, setMessage] = useState("")
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState("")
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,6 +57,7 @@ export default function RegisterPage() {
         email: formData.email.trim(),
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
           data: {
             full_name: formData.fullName.trim(),
             phone: formData.phone.trim(),
@@ -85,6 +90,37 @@ export default function RegisterPage() {
     } catch {
       setMessage("حدث خطأ في الاتصال. حاول مرة أخرى.")
       setLoading(false)
+    }
+  }
+
+  const handleResendConfirmation = async () => {
+    const email = formData.email.trim()
+    if (!email) {
+      setResendMessage("أدخل بريدك الإلكتروني أولاً.")
+      return
+    }
+
+    setResendLoading(true)
+    setResendMessage("")
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
+      })
+
+      setResendMessage(
+        error
+          ? "تعذر إرسال رسالة التأكيد. حاول لاحقاً."
+          : "راجع بريدك الوارد ومجلد الرسائل غير المرغوب فيها."
+      )
+    } catch {
+      setResendMessage("حدث خطأ في الاتصال. حاول مرة أخرى.")
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -204,30 +240,47 @@ export default function RegisterPage() {
             style={inputStyle}
           />
 
-          <input
-            type="password"
-            placeholder="كلمة المرور"
-            value={formData.password}
-            onChange={(e) => updateField("password", e.target.value)}
-            autoComplete="new-password"
-            disabled={loading}
-            style={inputStyle}
-          />
+          <div style={{ position: "relative", marginBottom: "14px" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="كلمة المرور"
+              value={formData.password}
+              onChange={(e) => updateField("password", e.target.value)}
+              autoComplete="new-password"
+              disabled={loading}
+              style={{ ...inputStyle, paddingRight: "76px", marginBottom: 0 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              disabled={loading}
+              aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+              style={eyeButtonStyle}
+            >
+              {showPassword ? "إخفاء" : "إظهار"}
+            </button>
+          </div>
 
-          <input
-            type="password"
-            placeholder="تأكيد كلمة المرور"
-            value={formData.confirmPassword}
-            onChange={(e) =>
-              updateField("confirmPassword", e.target.value)
-            }
-            autoComplete="new-password"
-            disabled={loading}
-            style={{
-              ...inputStyle,
-              marginBottom: "20px",
-            }}
-          />
+          <div style={{ position: "relative", marginBottom: "20px" }}>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="تأكيد كلمة المرور"
+              value={formData.confirmPassword}
+              onChange={(e) => updateField("confirmPassword", e.target.value)}
+              autoComplete="new-password"
+              disabled={loading}
+              style={{ ...inputStyle, paddingRight: "76px", marginBottom: 0 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((value) => !value)}
+              disabled={loading}
+              aria-label={showConfirmPassword ? "إخفاء تأكيد كلمة المرور" : "إظهار تأكيد كلمة المرور"}
+              style={eyeButtonStyle}
+            >
+              {showConfirmPassword ? "إخفاء" : "إظهار"}
+            </button>
+          </div>
 
           <button
             type="submit"
@@ -252,6 +305,32 @@ export default function RegisterPage() {
             {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
           </button>
         </form>
+
+        {success && (
+          <button
+            type="button"
+            onClick={handleResendConfirmation}
+            disabled={resendLoading}
+            style={{
+              width: "100%",
+              marginTop: "12px",
+              padding: "12px",
+              borderRadius: "12px",
+              border: "1px solid rgba(0,217,255,.35)",
+              background: "rgba(0,217,255,.08)",
+              color: "#67e8f9",
+              fontWeight: 700,
+              cursor: resendLoading ? "wait" : "pointer",
+            }}
+          >
+            {resendLoading ? "جارٍ الإرسال..." : "إعادة إرسال رسالة التأكيد"}
+          </button>
+        )}
+        {resendMessage && (
+          <p role="status" style={{ color: "#67e8f9", fontSize: "13px", textAlign: "center" }}>
+            {resendMessage}
+          </p>
+        )}
 
         {message && (
           <div
@@ -298,6 +377,21 @@ export default function RegisterPage() {
       </div>
     </main>
   )
+}
+
+const eyeButtonStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "50%",
+  right: "10px",
+  transform: "translateY(-50%)",
+  border: "none",
+  background: "transparent",
+  color: "#67e8f9",
+  fontSize: "12px",
+  fontWeight: 800,
+  padding: "8px",
+  cursor: "pointer",
+  zIndex: 2,
 }
 
 const inputStyle: React.CSSProperties = {

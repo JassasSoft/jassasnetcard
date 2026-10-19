@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,7 +23,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
@@ -32,6 +38,10 @@
   ],
   "exclude": [
     "node_modules",
-    "backup-supabase-20261007-232934"
+    "backup-supabase-20261007-232934",
+    "backups",
+    "backup-auth-before-supabase-auth-20261007-234626",
+    "backup-card-design-20261012-103140",
+    "**/*.before-*"
   ]
 }

@@ -1,190 +1,67 @@
-'use client'
-
 type BrandLogoProps = {
   compact?: boolean
 }
 
 export default function BrandLogo({ compact = false }: BrandLogoProps) {
-  const size = compact ? 66 : 94
-
   return (
     <div
+      className={`brand-logo${compact ? " brand-logo-compact" : ""}`}
       dir="rtl"
+      role="img"
       aria-label="جساس نت كرت - Jassas Net Card"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: compact ? 7 : 12,
-        userSelect: 'none',
-        textAlign: 'center',
-      }}
     >
-      <div
-        style={{
-          width: size,
-          height: size,
-          boxSizing: 'border-box',
-          position: 'relative',
-          display: 'grid',
-          placeItems: 'center',
-          overflow: 'hidden',
-          borderRadius: compact ? 19 : 27,
-          background:
-            'radial-gradient(circle at 28% 15%, rgba(0,217,255,.19), transparent 42%), linear-gradient(145deg, #171d35 0%, #171329 58%, #24203a 100%)',
-          border: '1px solid rgba(212,175,55,.72)',
-          boxShadow:
-            'inset 0 1px 0 rgba(255,255,255,.15), 0 9px 28px rgba(0,0,0,.32), 0 0 25px rgba(124,58,237,.16)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            inset: 5,
-            border: '1px solid rgba(148,163,184,.28)',
-            borderRadius: compact ? 14 : 21,
-            pointerEvents: 'none',
-          }}
-        />
-
+      <div className="brand-mark">
+        <span className="brand-mark-halo" />
+        <span className="brand-mark-inner" />
         <svg
-          width={compact ? 51 : 72}
-          height={compact ? 51 : 72}
+          className="brand-svg"
           viewBox="0 0 100 100"
           fill="none"
-          role="img"
-          aria-label="رمز جساس نت كرت للشبكات وكروت الإنترنت"
-          style={{ position: 'relative', zIndex: 1 }}
+          aria-hidden="true"
         >
-          {/* موجات اتصال الشبكة */}
-          <path
-            d="M36 24 Q50 11 64 24"
-            stroke="#00D9FF"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M42 30 Q50 23 58 30"
-            stroke="#9B8AFB"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-          <circle cx="50" cy="35" r="2.7" fill="#E7C76A" />
+          <defs>
+            <linearGradient id="brand-cyan" x1="20" y1="15" x2="78" y2="80" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#70F0FF" />
+              <stop offset="1" stopColor="#00B8E5" />
+            </linearGradient>
+            <linearGradient id="brand-gold" x1="35" y1="35" x2="72" y2="76" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#FFE8A3" />
+              <stop offset="1" stopColor="#C49A35" />
+            </linearGradient>
+          </defs>
 
-          {/* كرت إنترنت بتفاصيل معدنية */}
-          <path
-            d="M22 42 Q22 37 27 37 H73 Q78 37 78 42 V72 Q78 77 73 77 H27 Q22 77 22 72 Z"
-            fill="#171C31"
-            stroke="#C7D2E2"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M27 42 H73"
-            stroke="#00D9FF"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M30 67 H39"
-            stroke="#D4AF37"
-            strokeWidth="2.6"
-            strokeLinecap="round"
-          />
-          <path
-            d="M44 67 H51"
-            stroke="#94A3B8"
-            strokeWidth="2.6"
-            strokeLinecap="round"
-          />
+          <path d="M34 20C43 11 57 11 66 20" stroke="url(#brand-cyan)" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M40 27C46 21 54 21 60 27" stroke="#A99AFF" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M46 33C48.5 31 51.5 31 54 33" stroke="#E9CC75" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="50" cy="38" r="2.4" fill="#F6D887" />
 
-          {/* حرف J كعلامة مميزة */}
           <path
-            d="M61 47 V60 Q61 68 53 68 Q48 68 45 64"
-            stroke="#D9B85F"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            d="M19 45C19 41.7 21.7 39 25 39H75C78.3 39 81 41.7 81 45V72C81 75.3 78.3 78 75 78H25C21.7 78 19 75.3 19 72V45Z"
+            fill="#10172C"
+            stroke="#B9C8DD"
+            strokeWidth="1.6"
           />
-          <path
-            d="M61 47 H69"
-            stroke="#00D9FF"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
+          <path d="M22 46H78" stroke="url(#brand-cyan)" strokeWidth="2.8" strokeLinecap="round" />
+          <path d="M27 51H39" stroke="#8B9CB6" strokeWidth="2" strokeLinecap="round" />
+          <path d="M27 57H35" stroke="#8B9CB6" strokeWidth="2" strokeLinecap="round" />
+          <path d="M28 69H38" stroke="#E4BD60" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M43 69H50" stroke="#8B9CB6" strokeWidth="2.5" strokeLinecap="round" />
 
-          {/* لمسات بنفسجية وذهبية */}
-          <circle cx="28" cy="49" r="2" fill="#A78BFA" />
-          <circle cx="72" cy="71" r="2" fill="#D4AF37" />
+          <path d="M67 50V63C67 68 64 71 59 71C55.5 71 53 69.4 51 66" stroke="url(#brand-gold)" strokeWidth="5.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M67 50H74" stroke="url(#brand-cyan)" strokeWidth="4.8" strokeLinecap="round" />
+          <circle cx="74" cy="69" r="2" fill="#A99AFF" />
+          <circle cx="25" cy="62" r="1.8" fill="#00D9FF" />
         </svg>
-
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '18%',
-            right: '18%',
-            height: 2,
-            borderRadius: 99,
-            background:
-              'linear-gradient(90deg, #00D9FF, #8B5CF6, #D4AF37)',
-            opacity: 0.95,
-          }}
-        />
+        <span className="brand-mark-base" />
       </div>
 
-      <div style={{ minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: compact ? 18 : 27,
-            fontWeight: 900,
-            lineHeight: 1.35,
-            letterSpacing: '.15px',
-            background:
-              'linear-gradient(100deg, #55DDF7 0%, #B5A2FF 48%, #F1D486 90%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 2px 10px rgba(124,58,237,.14))',
-          }}
-        >
-          جساس نت كرت
-        </div>
-
-        <div
-          dir="ltr"
-          style={{
-            marginTop: 3,
-            color: '#D4DCEB',
-            fontSize: compact ? 10 : 13,
-            fontWeight: 800,
-            letterSpacing: compact ? 1 : 1.5,
-            lineHeight: 1.5,
-          }}
-        >
-          JASSAS NET CARD
-        </div>
-
+      <div className="brand-copy">
+        <div className="brand-name">جساس نت كرت</div>
+        <div className="brand-name-en" dir="ltr">JASSAS NET CARD</div>
         {!compact && (
           <>
-            <div
-              style={{
-                width: 54,
-                height: 1,
-                margin: '9px auto 8px',
-                background:
-                  'linear-gradient(90deg, transparent, #D4AF37, transparent)',
-              }}
-            />
-            <div
-              style={{
-                color: '#AAB5CA',
-                fontSize: 12,
-                fontWeight: 600,
-                lineHeight: 1.9,
-              }}
-            >
-              إدارة كروت المايكروتك باحتراف وأمان
-            </div>
+            <div className="brand-divider" />
+            <div className="brand-tagline">إدارة كروت المايكروتك باحتراف وأمان</div>
           </>
         )}
       </div>
