@@ -69,7 +69,19 @@ export default function RegisterPage() {
         if (error.message.toLowerCase().includes("already registered")) {
           setMessage("هذا البريد الإلكتروني مستخدم بالفعل")
         } else {
-          setMessage("تعذر إنشاء الحساب: " + error.message)
+          const errorText = error.message.toLowerCase()
+
+          if (errorText.includes("password") &&
+              (errorText.includes("weak") || errorText.includes("short"))) {
+            setMessage("كلمة المرور ضعيفة. اختر كلمة مرور أقوى.")
+          } else if (
+            errorText.includes("rate limit") ||
+            errorText.includes("too many requests")
+          ) {
+            setMessage("حاولت إنشاء الحساب مرات كثيرة. انتظر قليلًا ثم حاول مجددًا.")
+          } else {
+            setMessage("تعذر إنشاء الحساب الآن. تحقق من البيانات وحاول مرة أخرى.")
+          }
         }
 
         setLoading(false)

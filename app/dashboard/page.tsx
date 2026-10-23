@@ -224,7 +224,11 @@ export default function DashboardPage() {
     )
   }
 
-  const initial = (user.fullName || user.email || "ج").trim().charAt(0)
+  const customerName =
+    user.fullName?.trim() ||
+    user.email?.split("@")[0]?.trim() ||
+    "عميلنا العزيز"
+  const initial = customerName.charAt(0) || "ج"
   const subscriptionActive = ["active", "trialing"].includes(
     user.subscriptionStatus.toLowerCase()
   )
@@ -264,7 +268,7 @@ export default function DashboardPage() {
               لوحة إدارة الشبكة
             </span>
             <h1>
-              أهلاً بك، <span>{user.fullName}</span>
+              أهلاً بك، <span>{customerName}</span>
             </h1>
             <p>
               كل أدوات إدارة كروتك في مساحة واحدة، واضحة وسهلة الاستخدام.

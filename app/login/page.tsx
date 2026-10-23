@@ -1,7 +1,7 @@
 "use client"
 
-import { Suspense, useState, type FormEvent } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import BrandLogo from "@/components/BrandLogo"
 import { createClient } from "@/lib/supabase/client"
@@ -41,7 +41,6 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
 
 function LoginContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -77,7 +76,7 @@ function LoginContent() {
         return
       }
 
-      const redirectTo = searchParams.get("redirect")
+      const redirectTo = new URLSearchParams(window.location.search).get("redirect")
       const safeRedirect =
         redirectTo?.startsWith("/") && !redirectTo.startsWith("//")
           ? redirectTo
@@ -253,16 +252,5 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="auth-loading" dir="rtl">
-          <span className="auth-spinner" aria-hidden="true" />
-          <span>جارٍ تجهيز صفحة الدخول...</span>
-        </main>
-      }
-    >
-      <LoginContent />
-    </Suspense>
-  )
+  return <LoginContent />
 }

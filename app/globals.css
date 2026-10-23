@@ -2106,3 +2106,147 @@ button.dashboard-action-card:hover {
     transition-duration: .01ms !important;
   }
 }
+
+/* =========================================================
+   JASSAS NET CARD — Login Interaction Polish
+   Lightweight motion • Premium icons • Mobile friendly
+   ========================================================= */
+
+.auth-shell .auth-card {
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.auth-shell .auth-heading-icon {
+  position: relative;
+  isolation: isolate;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease,
+    background 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.auth-shell .auth-heading-icon svg,
+.auth-shell .auth-input-icon svg,
+.auth-shell .auth-secure-note svg,
+.auth-shell .auth-feature-icon svg,
+.auth-shell .auth-submit-icon svg {
+  display: block;
+  flex-shrink: 0;
+  transition:
+    color 180ms ease,
+    filter 180ms ease,
+    transform 180ms ease;
+}
+
+.auth-shell .auth-status-dot {
+  animation: jnc-status-pulse 2.8s ease-in-out infinite;
+}
+
+.auth-shell .auth-input-wrap {
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.auth-shell .auth-input-wrap:focus-within {
+  border-color: rgba(80, 230, 250, .78);
+  box-shadow:
+    0 0 0 3px rgba(80, 230, 250, .09),
+    0 5px 22px rgba(80, 230, 250, .055);
+}
+
+.auth-shell .auth-input-wrap:focus-within .auth-input-icon svg {
+  filter: drop-shadow(0 0 5px rgba(80, 230, 250, .22));
+}
+
+.auth-shell .auth-password-toggle:active:not(:disabled) {
+  transform: scale(.94);
+}
+
+.auth-shell .auth-submit {
+  isolation: isolate;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.auth-shell .auth-submit-icon {
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.auth-shell .auth-submit:hover:not(:disabled) .auth-submit-icon {
+  transform: translateX(-2px);
+}
+
+.auth-shell .auth-register a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.auth-shell .auth-feature {
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    transform 200ms ease;
+}
+
+.auth-shell .auth-feature-icon {
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.auth-shell .auth-feature-icon svg {
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.auth-shell .auth-error {
+  border-inline-start: 3px solid rgba(255, 105, 125, .8);
+}
+
+@keyframes jnc-status-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 9px rgba(88, 231, 177, .38);
+  }
+  50% {
+    opacity: .72;
+    box-shadow: 0 0 15px rgba(88, 231, 177, .68);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .auth-shell .auth-card:hover {
+    border-color: rgba(169, 148, 255, .24);
+    box-shadow:
+      0 34px 94px rgba(0, 0, 0, .38),
+      0 0 0 1px rgba(255, 255, 255, .02) inset,
+      0 0 42px rgba(113, 81, 216, .09);
+  }
+
+  .auth-shell .auth-heading-icon:hover {
+    transform: translateY(-2px);
+    border-color: rgba(80, 230, 250, .4);
+    box-shadow: 0 0 22px rgba(80, 230, 250, .1);
+  }
+
+  .auth-shell .auth-feature:hover {
+    transform: translateX(-3px);
+  }
+
+  .auth-shell .auth-feature:hover .auth-feature-icon {
+    transform: scale(1.045);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell .auth-status-dot {
+    animation: none !important;
+  }
+}

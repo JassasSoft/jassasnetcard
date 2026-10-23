@@ -4,6 +4,18 @@ import { QRCodeSVG } from 'qrcode.react'
 import QRCodeGenerator from 'qrcode'
 import { createClient } from '@/lib/supabase/client'
 
+const escapeHtml = (value: unknown): string =>
+  String(value ?? '').replace(/[&<>"']/g, (char) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }
+    return entities[char]
+  })
+
 export default function PrintCardsPage() {
   const [user, setUser] = useState<any>(null)
   const [printedCards, setPrintedCards] = useState<any[]>([])
@@ -419,7 +431,7 @@ export default function PrintCardsPage() {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
           <div style="flex: 1; text-align: center; padding: 12px; background: ${c.panelAlt}; border-radius: 12px; border: 2px solid ${c.accent};">
             <div style="font-size: 11px; color: ${c.text}; opacity: 0.9; margin-bottom: 5px;">🌐 الشبكة</div>
-            <div style="font-size: ${card.networkFontSize}px; color: ${card.networkColor}; font-weight: bold;">${card.network}</div>
+            <div style="font-size: ${card.networkFontSize}px; color: ${card.networkColor}; font-weight: bold;">${escapeHtml(card.network)}</div>
           </div>
           ${card.qrEnabled ? `<div style="background: #fff; padding: 4px; border-radius: 8px; margin-left: 10px; border: 2px solid ${c.accent};">
             <img src="${qrDataUrl}" width="${card.qrSize}" height="${card.qrSize}" alt="QR Code" style="display:block; width:${card.qrSize}px; height:${card.qrSize}px;" />
@@ -427,36 +439,36 @@ export default function PrintCardsPage() {
         </div>
         <div style="background: ${c.panel}; border-radius: 12px; padding: 15px; margin: 15px 0; border: 2px dashed ${c.accent}; text-align: center;">
           <div style="font-size: 11px; color: ${card.labelColor}; margin-bottom: 8px;">🔢 رقم الكرت / بيانات الدخول</div>
-          <div style="font-size: ${card.cardNumberFontSize}px; color: ${card.usernameColor}; font-weight: bold; font-family: monospace; letter-spacing: 3px; background: ${c.panel}; padding: 10px; border-radius: 8px;">${card.username}</div>
+          <div style="font-size: ${card.cardNumberFontSize}px; color: ${card.usernameColor}; font-weight: bold; font-family: monospace; letter-spacing: 3px; background: ${c.panel}; padding: 10px; border-radius: 8px;">${escapeHtml(card.username)}</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: ${card.infoFontSize}px;">
           <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
             <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">⏱️ الصلاحية</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${card.validity}</div>
+            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.validity)}</div>
           </div>
           <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
             <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">⏰ الوقت</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${card.cardTime}</div>
+            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.cardTime)}</div>
           </div>
           <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
             <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">💾 البيانات</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${card.dataPackage}</div>
+            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.dataPackage)}</div>
           </div>
           <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
             <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">💰 السعر</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${card.price}</div>
+            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.price)}</div>
           </div>
         </div>
-        ${card.distributor ? `<div style="text-align: center; margin-top: 10px; font-size: 11px; color: ${card.labelColor}; background: ${c.panelAlt}; padding: 6px; border-radius: 8px;">الموزع: ${card.distributor}</div>` : ''}
-        ${card.rechargeText ? `<div style="background: ${c.rechargeBg}; color: #fff; padding: 8px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; font-weight: bold; border: 1px solid ${c.accent};">⚡ ${card.rechargeText}</div>` : ''}
-        ${card.specialOffer ? `<div style="background: ${c.offerBg}; color: ${c.offerText}; padding: 8px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; border: 1px solid ${c.accent};">🎁 ${card.specialOffer}</div>` : ''}
+        ${card.distributor ? `<div style="text-align: center; margin-top: 10px; font-size: 11px; color: ${card.labelColor}; background: ${c.panelAlt}; padding: 6px; border-radius: 8px;">الموزع: ${escapeHtml(card.distributor)}</div>` : ''}
+        ${card.rechargeText ? `<div style="background: ${c.rechargeBg}; color: #fff; padding: 8px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; font-weight: bold; border: 1px solid ${c.accent};">⚡ ${escapeHtml(card.rechargeText)}</div>` : ''}
+        ${card.specialOffer ? `<div style="background: ${c.offerBg}; color: ${c.offerText}; padding: 8px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; border: 1px solid ${c.accent};">🎁 ${escapeHtml(card.specialOffer)}</div>` : ''}
         <div style="position:relative; z-index:1; margin-top:10px; padding:8px; text-align:center; font-size:10px; line-height:1.8; font-weight:600; color:${c.text}; background:${c.panelAlt}; border:1px solid ${c.accent}; border-radius:8px;">احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>
             <div style="position:relative; z-index:1; text-align:center; margin-top:10px; padding-top:8px; border-top:1px solid ${c.accent}; font-size:10px; opacity:0.8; color:${c.text};">جساس نت كرت – JASSAS NET CARD</div>
       </div>
     `
     cardsHTML.push(cardHTML)
     }
-    printWindow.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>عينة كرت - ${formData.networkName}</title><style>@page { size: A4; margin: 20mm; } body { font-family: Arial, Tahoma, sans-serif; background: #f5f5f5; padding: 20px; } .no-print { background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 12px; } .no-print button { padding: 12px 25px; margin: 5px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; } @media print { body { padding: 0; background: #fff; } .no-print { display: none !important; } }</style></head><body><div class="no-print"><h2>🖨️ عينة الكرت - طباعة PDF</h2><p>اضغط Ctrl+P ثم اختر "حفظ كـ PDF"</p><button onclick="window.print()" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #0f172a;">️ طباعة / حفظ PDF</button><button onclick="window.close()" style="background: #ef4444; color: #fff;">إغلاق</button></div><div class="cards-grid" style="display:grid;grid-template-columns:repeat(${batch ? Math.max(1, Math.min(6, Number(formData.colsCount) || 3)) : 1},minmax(0,1fr));gap:12px;align-items:start;">${cardsHTML.join('')}</div></body></html>`)
+    printWindow.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>عينة كرت - ${escapeHtml(formData.networkName)}</title><style>@page { size: A4; margin: 20mm; } body { font-family: Arial, Tahoma, sans-serif; background: #f5f5f5; padding: 20px; } .no-print { background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 12px; } .no-print button { padding: 12px 25px; margin: 5px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; } @media print { body { padding: 0; background: #fff; } .no-print { display: none !important; } }</style></head><body><div class="no-print"><h2>🖨️ عينة الكرت - طباعة PDF</h2><p>اضغط Ctrl+P ثم اختر "حفظ كـ PDF"</p><button onclick="window.print()" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #0f172a;">️ طباعة / حفظ PDF</button><button onclick="window.close()" style="background: #ef4444; color: #fff;">إغلاق</button></div><div class="cards-grid" style="display:grid;grid-template-columns:repeat(${batch ? Math.max(1, Math.min(6, Number(formData.colsCount) || 3)) : 1},minmax(0,1fr));gap:12px;align-items:start;">${cardsHTML.join('')}</div></body></html>`)
     printWindow.document.close()
     return true
   }
