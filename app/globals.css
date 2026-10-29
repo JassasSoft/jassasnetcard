@@ -79,10 +79,10 @@ body {
    ========================================================= */
 
 .auth-shell {
-  --auth-cyan: #50e6fa;
-  --auth-purple: #a994ff;
-  --auth-gold: #e5c36b;
-  --auth-muted: #a5b2ca;
+  --auth-cyan: #168de2;
+  --auth-purple: #8060dc;
+  --auth-gold: #c99a28;
+  --auth-muted: #526783;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -92,11 +92,11 @@ body {
   min-height: 100svh;
   padding: 32px 20px;
   overflow: hidden;
-  color: #f6f8ff;
+  color: #172b49;
   background:
-    radial-gradient(ellipse at 76% 16%, rgba(99, 64, 190, .19), transparent 32%),
-    radial-gradient(ellipse at 12% 82%, rgba(0, 190, 224, .11), transparent 34%),
-    linear-gradient(140deg, #070b16 0%, #0c1224 48%, #090c18 100%);
+    radial-gradient(ellipse at 78% 12%, rgba(151, 119, 255, .24), transparent 34%),
+    radial-gradient(ellipse at 12% 82%, rgba(41, 190, 255, .25), transparent 36%),
+    linear-gradient(140deg, #eaf8ff 0%, #d9efff 45%, #f6f3ff 100%);
   font-family: "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
@@ -152,14 +152,14 @@ body {
   min-width: 0;
   padding: clamp(24px, 3.5vw, 42px);
   overflow: hidden;
-  border: 1px solid rgba(190, 204, 235, .15);
+  border: 1px solid rgba(255, 255, 255, .88);
   border-radius: 28px;
   background:
-    linear-gradient(145deg, rgba(24, 32, 56, .94), rgba(13, 18, 34, .96));
+    linear-gradient(145deg, rgba(255, 255, 255, .97), rgba(247, 250, 255, .94));
   box-shadow:
-    0 32px 90px rgba(0, 0, 0, .36),
-    0 0 0 1px rgba(255, 255, 255, .018) inset,
-    0 0 48px rgba(113, 81, 216, .07);
+    0 28px 70px rgba(47, 91, 150, .16),
+    0 0 0 1px rgba(255, 255, 255, .8) inset,
+    0 12px 34px rgba(91, 104, 190, .09);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   animation: auth-rise .7s cubic-bezier(.2, .75, .25, 1) both;
@@ -279,7 +279,7 @@ body {
 }
 
 .brand-name {
-  color: #e7efff;
+  color: #243b60;
   font-size: 27px;
   font-weight: 900;
   line-height: 1.5;
@@ -293,7 +293,7 @@ body {
 
 .brand-name-en {
   margin-top: 2px;
-  color: #d0d9eb;
+  color: #506783;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 2px;
@@ -308,7 +308,7 @@ body {
 }
 
 .brand-tagline {
-  color: #aab7ce;
+  color: #607591;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.9;
@@ -364,7 +364,7 @@ body {
 
 .auth-heading h1 {
   margin: 0;
-  color: #f6f8ff;
+  color: #172b49;
   font-size: clamp(23px, 3vw, 28px);
   font-weight: 850;
   letter-spacing: -.5px;
@@ -372,7 +372,7 @@ body {
 
 .auth-heading p {
   margin: 9px 0 0;
-  color: #9caac3;
+  color: #5c708d;
   font-size: 13px;
   line-height: 1.9;
 }
@@ -391,7 +391,7 @@ body {
 }
 
 .auth-field label {
-  color: #e0e8f8;
+  color: #304866;
   font-size: 13px;
   font-weight: 750;
 }
@@ -404,7 +404,7 @@ body {
 }
 
 .auth-label-hint {
-  color: #7f8ca8;
+  color: #6a7f9b;
   font-size: 10px;
 }
 
@@ -415,16 +415,21 @@ body {
   min-width: 0;
   min-height: 55px;
   padding: 0 14px;
-  border: 1px solid rgba(151, 170, 208, .19);
+  border: 1px solid rgba(120, 157, 205, .30);
   border-radius: 15px;
-  background: rgba(5, 10, 23, .55);
+  background: linear-gradient(145deg, #ffffff, #f3f8ff);
+  box-shadow:
+    0 5px 14px rgba(50, 88, 140, .07),
+    inset 0 1px 0 rgba(255, 255, 255, .95);
   transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
 
 .auth-input-wrap:focus-within {
-  border-color: rgba(80, 230, 250, .68);
-  background: rgba(5, 13, 27, .86);
-  box-shadow: 0 0 0 3px rgba(80, 230, 250, .075), 0 0 24px rgba(80, 230, 250, .045);
+  border-color: rgba(22, 141, 226, .78);
+  background: #ffffff;
+  box-shadow:
+    0 0 0 3px rgba(22, 141, 226, .12),
+    0 8px 22px rgba(22, 141, 226, .10);
 }
 
 .auth-input-icon {
@@ -445,7 +450,7 @@ body {
   padding: 0;
   border: 0;
   outline: 0;
-  color: #f6f8ff;
+  color: #203754;
   background: transparent;
   font: inherit;
   font-size: 14px;
@@ -453,7 +458,7 @@ body {
 }
 
 .auth-input-wrap input::placeholder {
-  color: #687793;
+  color: #8798af;
   opacity: 1;
 }
 
@@ -471,7 +476,7 @@ body {
   height: 38px;
   flex: 0 0 38px;
   place-items: center;
-  color: #8b9ab5;
+  color: #617896;
   border: 0;
   border-radius: 11px;
   background: transparent;
@@ -480,8 +485,8 @@ body {
 }
 
 .auth-password-toggle:hover:not(:disabled) {
-  color: var(--auth-cyan);
-  background: rgba(80, 230, 250, .08);
+  color: #176fc0;
+  background: rgba(22, 141, 226, .09);
 }
 
 .auth-password-toggle:disabled {
@@ -2223,11 +2228,11 @@ button.dashboard-action-card:hover {
 
 @media (hover: hover) and (pointer: fine) {
   .auth-shell .auth-card:hover {
-    border-color: rgba(169, 148, 255, .24);
+    border-color: rgba(126, 105, 220, .32);
     box-shadow:
-      0 34px 94px rgba(0, 0, 0, .38),
-      0 0 0 1px rgba(255, 255, 255, .02) inset,
-      0 0 42px rgba(113, 81, 216, .09);
+      0 32px 76px rgba(47, 91, 150, .20),
+      0 0 0 1px rgba(255, 255, 255, .8) inset,
+      0 0 38px rgba(113, 81, 216, .12);
   }
 
   .auth-shell .auth-heading-icon:hover {

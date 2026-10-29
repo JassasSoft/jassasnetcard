@@ -152,7 +152,7 @@ export default function RegisterPage() {
       style={{
         minHeight: "100vh",
         background:
-          "radial-gradient(circle at 20% 10%, rgba(124,58,237,.22), transparent 30%), radial-gradient(circle at 80% 90%, rgba(0,217,255,.12), transparent 30%), linear-gradient(135deg,#070b18 0%,#10172a 50%,#080b15 100%)",
+          "radial-gradient(circle at 15% 12%, rgba(124,58,237,.15), transparent 32%), radial-gradient(circle at 88% 85%, rgba(0,153,255,.20), transparent 34%), linear-gradient(135deg,#e8f7ff 0%,#d7edff 48%,#f5f1ff 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -166,11 +166,11 @@ export default function RegisterPage() {
           maxWidth: "500px",
           padding: "36px",
           borderRadius: "28px",
-          background: "rgba(15,23,42,.78)",
+          background: "linear-gradient(145deg,rgba(255,255,255,.97),rgba(247,250,255,.95))",
           backdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,.10)",
+          border: "1px solid rgba(255,255,255,.92)",
           boxShadow:
-            "0 30px 80px rgba(0,0,0,.55), 0 0 50px rgba(124,58,237,.10)",
+            "0 28px 70px rgba(47,91,150,.17), 0 10px 30px rgba(124,58,237,.08)",
         }}
       >
         <BrandLogo />
@@ -184,7 +184,7 @@ export default function RegisterPage() {
         >
           <h1
             style={{
-              color: "#fff",
+              color: "#172b49",
               fontSize: "25px",
               margin: "0 0 8px",
               fontWeight: 800,
@@ -195,7 +195,7 @@ export default function RegisterPage() {
 
           <p
             style={{
-              color: "#94a3b8",
+              color: "#5c708d",
               margin: 0,
               fontSize: "14px",
             }}
@@ -207,13 +207,13 @@ export default function RegisterPage() {
         <div
           style={{
             background:
-              "linear-gradient(135deg,rgba(212,175,55,.10),rgba(124,58,237,.12))",
-            border: "1px solid rgba(212,175,55,.25)",
-            borderRadius: "14px",
-            padding: "13px",
+              "linear-gradient(110deg,rgba(255,248,220,.98),rgba(241,235,255,.98) 52%,rgba(224,245,255,.98))",
+            border: "1px solid rgba(201,154,40,.38)",
+            borderRadius: "16px",
+            padding: "14px",
             marginBottom: "20px",
             textAlign: "center",
-            color: "#f5d76e",
+            color: "#674b12",
             fontWeight: 800,
             fontSize: "14px",
           }}
@@ -300,11 +300,11 @@ export default function RegisterPage() {
             style={{
               width: "100%",
               padding: "16px",
-              border: "none",
+              border: "1px solid rgba(255,255,255,.75)",
               borderRadius: "14px",
               background: loading
-                ? "#475569"
-                : "linear-gradient(135deg,#00d9ff,#7c3aed 65%,#d4af37)",
+                ? "#8293aa"
+                : "linear-gradient(110deg,#168de2 0%,#8060dc 68%,#c99a28 125%)",
               color: "#fff",
               fontSize: "17px",
               fontWeight: 800,
@@ -328,9 +328,9 @@ export default function RegisterPage() {
               marginTop: "12px",
               padding: "12px",
               borderRadius: "12px",
-              border: "1px solid rgba(0,217,255,.35)",
-              background: "rgba(0,217,255,.08)",
-              color: "#67e8f9",
+              border: "1px solid rgba(22,141,226,.28)",
+              background: "linear-gradient(110deg,#edf8ff,#f4f0ff)",
+              color: "#176fc0",
               fontWeight: 700,
               cursor: resendLoading ? "wait" : "pointer",
             }}
@@ -339,7 +339,7 @@ export default function RegisterPage() {
           </button>
         )}
         {resendMessage && (
-          <p role="status" style={{ color: "#67e8f9", fontSize: "13px", textAlign: "center" }}>
+          <p role="status" style={{ color: "#176fc0", fontSize: "13px", textAlign: "center" }}>
             {resendMessage}
           </p>
         )}
@@ -359,7 +359,7 @@ export default function RegisterPage() {
               border: success
                 ? "1px solid rgba(16,185,129,.35)"
                 : "1px solid rgba(239,68,68,.35)",
-              color: success ? "#6ee7b7" : "#fca5a5",
+              color: success ? "#087c60" : "#b42335",
             }}
           >
             {message}
@@ -370,7 +370,7 @@ export default function RegisterPage() {
           style={{
             textAlign: "center",
             marginTop: "22px",
-            color: "#64748b",
+            color: "#536985",
             fontSize: "14px",
           }}
         >
@@ -378,7 +378,7 @@ export default function RegisterPage() {
           <Link
             href="/login"
             style={{
-              color: "#67e8f9",
+              color: "#176fc0",
               textDecoration: "none",
               fontWeight: 800,
             }}
@@ -398,7 +398,7 @@ const eyeButtonStyle: React.CSSProperties = {
   transform: "translateY(-50%)",
   border: "none",
   background: "transparent",
-  color: "#67e8f9",
+  color: "#176fc0",
   fontSize: "12px",
   fontWeight: 800,
   padding: "8px",
@@ -411,10 +411,11 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
   padding: "15px",
   marginBottom: "14px",
-  background: "rgba(2,6,23,.72)",
-  border: "1px solid rgba(0,217,255,.25)",
+  background: "linear-gradient(145deg,#ffffff,#f3f8ff)",
+  border: "1px solid rgba(120,157,205,.32)",
   borderRadius: "14px",
-  color: "#fff",
+  color: "#203754",
+  boxShadow: "0 5px 14px rgba(50,88,140,.07), inset 0 1px 0 rgba(255,255,255,.95)",
   fontSize: "16px",
   outline: "none",
 }
