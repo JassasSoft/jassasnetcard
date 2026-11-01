@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#00ffff",
+  themeColor: "#eaf8ff",
 }
 
 export default function RootLayout({
@@ -33,9 +33,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.svg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="theme-color" content="#00ffff" />
+        <meta name="theme-color" content="#eaf8ff" />
       </head>
-      <body style={{ margin: 0, padding: 0, background: "#0a0e27" }}>
+      <body style={{ margin: 0, padding: 0, background: "#f5f7fc" }}>
         {children}
         <script dangerouslySetInnerHTML={{
           __html: `

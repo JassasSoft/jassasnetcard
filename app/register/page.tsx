@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import BrandLogo from "@/components/BrandLogo"
+import AuthThemeToggle from "@/components/AuthThemeToggle"
 import { createClient } from "@/lib/supabase/client"
 
 export default function RegisterPage() {
@@ -22,9 +23,12 @@ export default function RegisterPage() {
   const [resendLoading, setResendLoading] = useState(false)
   const [resendMessage, setResendMessage] = useState("")
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const updateField = (field: keyof typeof formData, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }))
+  }
 
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setMessage("")
     setSuccess(false)
 
@@ -71,8 +75,10 @@ export default function RegisterPage() {
         } else {
           const errorText = error.message.toLowerCase()
 
-          if (errorText.includes("password") &&
-              (errorText.includes("weak") || errorText.includes("short"))) {
+          if (
+            errorText.includes("password") &&
+            (errorText.includes("weak") || errorText.includes("short"))
+          ) {
             setMessage("كلمة المرور ضعيفة. اختر كلمة مرور أقوى.")
           } else if (
             errorText.includes("rate limit") ||
@@ -97,7 +103,6 @@ export default function RegisterPage() {
       setMessage(
         "تم إنشاء الحساب بنجاح. تحقق من بريدك الإلكتروني لتفعيل الحساب ثم سجل الدخول."
       )
-
       setLoading(false)
     } catch {
       setMessage("حدث خطأ في الاتصال. حاول مرة أخرى.")
@@ -107,6 +112,7 @@ export default function RegisterPage() {
 
   const handleResendConfirmation = async () => {
     const email = formData.email.trim()
+
     if (!email) {
       setResendMessage("أدخل بريدك الإلكتروني أولاً.")
       return
@@ -114,6 +120,7 @@ export default function RegisterPage() {
 
     setResendLoading(true)
     setResendMessage("")
+
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.resend({
@@ -136,286 +143,200 @@ export default function RegisterPage() {
     }
   }
 
-  const updateField = (
-    field: keyof typeof formData,
-    value: string
-  ) => {
-    setFormData((current) => ({
-      ...current,
-      [field]: value,
-    }))
-  }
-
   return (
-    <main
-      dir="rtl"
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at 15% 12%, rgba(124,58,237,.15), transparent 32%), radial-gradient(circle at 88% 85%, rgba(0,153,255,.20), transparent 34%), linear-gradient(135deg,#e8f7ff 0%,#d7edff 48%,#f5f1ff 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-        fontFamily: "Segoe UI, Tahoma, Arial, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "500px",
-          padding: "36px",
-          borderRadius: "28px",
-          background: "linear-gradient(145deg,rgba(255,255,255,.97),rgba(247,250,255,.95))",
-          backdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,.92)",
-          boxShadow:
-            "0 28px 70px rgba(47,91,150,.17), 0 10px 30px rgba(124,58,237,.08)",
-        }}
-      >
-        <BrandLogo />
+    <main className="auth-shell auth-register-page" dir="rtl">
+      <div className="auth-orb auth-orb-one" aria-hidden="true" />
+      <div className="auth-orb auth-orb-two" aria-hidden="true" />
+      <div className="auth-grid" aria-hidden="true" />
 
-        <div
-          style={{
-            textAlign: "center",
-            marginTop: "28px",
-            marginBottom: "22px",
-          }}
-        >
-          <h1
-            style={{
-              color: "#172b49",
-              fontSize: "25px",
-              margin: "0 0 8px",
-              fontWeight: 800,
-            }}
-          >
-            إنشاء حساب جديد
-          </h1>
+      <div className="auth-register-layout">
+        <section className="auth-card auth-register-card" aria-labelledby="register-heading">
+          <div className="auth-card-top">
+            <span className="auth-status">
+              <span className="auth-status-dot" />
+              انضم إلى جساس نت كرت
+            </span>
+            <AuthThemeToggle />
+          </div>
 
-          <p
-            style={{
-              color: "#5c708d",
-              margin: 0,
-              fontSize: "14px",
-            }}
-          >
-            ابدأ إدارة كروتك وشبكتك باحتراف
-          </p>
-        </div>
+          <BrandLogo />
 
-        <div
-          style={{
-            background:
-              "linear-gradient(110deg,rgba(255,248,220,.98),rgba(241,235,255,.98) 52%,rgba(224,245,255,.98))",
-            border: "1px solid rgba(201,154,40,.38)",
-            borderRadius: "16px",
-            padding: "14px",
-            marginBottom: "20px",
-            textAlign: "center",
-            color: "#674b12",
-            fontWeight: 800,
-            fontSize: "14px",
-          }}
-        >
-          🎁 هدية التسجيل: 500 كرت مجاني
-        </div>
+          <div className="auth-heading">
+            <div className="auth-heading-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M19 8v6m-3-3h6" />
+              </svg>
+            </div>
+            <h1 id="register-heading">إنشاء حساب جديد</h1>
+            <p>ابدأ إدارة كروتك وشبكتك باحتراف.</p>
+          </div>
 
-        <form onSubmit={handleRegister}>
-          <input
-            type="text"
-            placeholder="الاسم الكامل"
-            value={formData.fullName}
-            onChange={(e) => updateField("fullName", e.target.value)}
-            autoComplete="name"
-            disabled={loading}
-            style={inputStyle}
-          />
+          <div className="auth-gift">
+            <span className="auth-gift-icon" aria-hidden="true">🎁</span>
+            <span>هدية التسجيل</span>
+            <strong>500 كرت مجاني</strong>
+          </div>
 
-          <input
-            type="email"
-            placeholder="البريد الإلكتروني"
-            value={formData.email}
-            onChange={(e) => updateField("email", e.target.value)}
-            autoComplete="email"
-            disabled={loading}
-            style={inputStyle}
-          />
+          <form className="auth-form auth-register-form" onSubmit={handleRegister}>
+            <div className="auth-field">
+              <label htmlFor="register-name">الاسم الكامل</label>
+              <div className="auth-input-wrap">
+                <input
+                  id="register-name"
+                  type="text"
+                  placeholder="أدخل اسمك الكامل"
+                  value={formData.fullName}
+                  onChange={(e) => updateField("fullName", e.target.value)}
+                  autoComplete="name"
+                  disabled={loading}
+                  required
+                />
+              </div>
+            </div>
 
-          <input
-            type="tel"
-            placeholder="رقم الهاتف"
-            value={formData.phone}
-            onChange={(e) => updateField("phone", e.target.value)}
-            autoComplete="tel"
-            disabled={loading}
-            style={inputStyle}
-          />
+            <div className="auth-field">
+              <label htmlFor="register-email">البريد الإلكتروني</label>
+              <div className="auth-input-wrap" dir="ltr">
+                <input
+                  id="register-email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={(e) => updateField("email", e.target.value)}
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  disabled={loading}
+                  required
+                />
+              </div>
+            </div>
 
-          <div style={{ position: "relative", marginBottom: "14px" }}>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="كلمة المرور"
-              value={formData.password}
-              onChange={(e) => updateField("password", e.target.value)}
-              autoComplete="new-password"
-              disabled={loading}
-              style={{ ...inputStyle, paddingRight: "76px", marginBottom: 0 }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((value) => !value)}
-              disabled={loading}
-              aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
-              style={eyeButtonStyle}
-            >
-              {showPassword ? "إخفاء" : "إظهار"}
+            <div className="auth-field">
+              <label htmlFor="register-phone">رقم الهاتف <span className="auth-optional">(اختياري)</span></label>
+              <div className="auth-input-wrap" dir="ltr">
+                <input
+                  id="register-phone"
+                  type="tel"
+                  placeholder="رقم الهاتف"
+                  value={formData.phone}
+                  onChange={(e) => updateField("phone", e.target.value)}
+                  autoComplete="tel"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="register-password">كلمة المرور</label>
+              <div className="auth-input-wrap" dir="ltr">
+                <input
+                  id="register-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="6 أحرف على الأقل"
+                  value={formData.password}
+                  onChange={(e) => updateField("password", e.target.value)}
+                  autoComplete="new-password"
+                  disabled={loading}
+                  required
+                  minLength={6}
+                />
+                <button
+                  className="auth-password-toggle"
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  disabled={loading}
+                  aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? "إخفاء" : "إظهار"}
+                </button>
+              </div>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="register-confirm-password">تأكيد كلمة المرور</label>
+              <div className="auth-input-wrap" dir="ltr">
+                <input
+                  id="register-confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="أعد إدخال كلمة المرور"
+                  value={formData.confirmPassword}
+                  onChange={(e) => updateField("confirmPassword", e.target.value)}
+                  autoComplete="new-password"
+                  disabled={loading}
+                  required
+                />
+                <button
+                  className="auth-password-toggle"
+                  type="button"
+                  onClick={() => setShowConfirmPassword((value) => !value)}
+                  disabled={loading}
+                  aria-label={showConfirmPassword ? "إخفاء تأكيد كلمة المرور" : "إظهار تأكيد كلمة المرور"}
+                  aria-pressed={showConfirmPassword}
+                >
+                  {showConfirmPassword ? "إخفاء" : "إظهار"}
+                </button>
+              </div>
+            </div>
+
+            <button className="auth-submit" type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="auth-spinner" aria-hidden="true" />
+                  جارٍ إنشاء الحساب...
+                </>
+              ) : (
+                <>
+                  <span>إنشاء الحساب</span>
+                  <span className="auth-submit-icon" aria-hidden="true">✦</span>
+                </>
+              )}
             </button>
-          </div>
+          </form>
 
-          <div style={{ position: "relative", marginBottom: "20px" }}>
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="تأكيد كلمة المرور"
-              value={formData.confirmPassword}
-              onChange={(e) => updateField("confirmPassword", e.target.value)}
-              autoComplete="new-password"
-              disabled={loading}
-              style={{ ...inputStyle, paddingRight: "76px", marginBottom: 0 }}
-            />
+          {success && (
             <button
+              className="auth-resend-button"
               type="button"
-              onClick={() => setShowConfirmPassword((value) => !value)}
-              disabled={loading}
-              aria-label={showConfirmPassword ? "إخفاء تأكيد كلمة المرور" : "إظهار تأكيد كلمة المرور"}
-              style={eyeButtonStyle}
+              onClick={handleResendConfirmation}
+              disabled={resendLoading}
             >
-              {showConfirmPassword ? "إخفاء" : "إظهار"}
+              {resendLoading ? "جارٍ الإرسال..." : "إعادة إرسال رسالة التأكيد"}
             </button>
+          )}
+
+          {resendMessage && (
+            <p className="auth-resend-message" role="status">{resendMessage}</p>
+          )}
+
+          {message && (
+            <div
+              className={`auth-register-message ${success ? "is-success" : "is-error"}`}
+              role={success ? "status" : "alert"}
+              aria-live="polite"
+            >
+              {message}
+            </div>
+          )}
+
+          <div className="auth-register">
+            <span>لديك حساب بالفعل؟</span>
+            <Link href="/login">
+              تسجيل الدخول
+              <span aria-hidden="true">←</span>
+            </Link>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "16px",
-              border: "1px solid rgba(255,255,255,.75)",
-              borderRadius: "14px",
-              background: loading
-                ? "#8293aa"
-                : "linear-gradient(110deg,#168de2 0%,#8060dc 68%,#c99a28 125%)",
-              color: "#fff",
-              fontSize: "17px",
-              fontWeight: 800,
-              cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: loading
-                ? "none"
-                : "0 12px 30px rgba(124,58,237,.25)",
-            }}
-          >
-            {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
-          </button>
-        </form>
-
-        {success && (
-          <button
-            type="button"
-            onClick={handleResendConfirmation}
-            disabled={resendLoading}
-            style={{
-              width: "100%",
-              marginTop: "12px",
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid rgba(22,141,226,.28)",
-              background: "linear-gradient(110deg,#edf8ff,#f4f0ff)",
-              color: "#176fc0",
-              fontWeight: 700,
-              cursor: resendLoading ? "wait" : "pointer",
-            }}
-          >
-            {resendLoading ? "جارٍ الإرسال..." : "إعادة إرسال رسالة التأكيد"}
-          </button>
-        )}
-        {resendMessage && (
-          <p role="status" style={{ color: "#176fc0", fontSize: "13px", textAlign: "center" }}>
-            {resendMessage}
-          </p>
-        )}
-
-        {message && (
-          <div
-            style={{
-              marginTop: "18px",
-              padding: "14px",
-              borderRadius: "13px",
-              textAlign: "center",
-              fontSize: "14px",
-              fontWeight: 700,
-              background: success
-                ? "rgba(16,185,129,.12)"
-                : "rgba(239,68,68,.12)",
-              border: success
-                ? "1px solid rgba(16,185,129,.35)"
-                : "1px solid rgba(239,68,68,.35)",
-              color: success ? "#087c60" : "#b42335",
-            }}
-          >
-            {message}
-          </div>
-        )}
-
-        <div
-          style={{
-            textAlign: "center",
-            marginTop: "22px",
-            color: "#536985",
-            fontSize: "14px",
-          }}
-        >
-          لديك حساب بالفعل؟{" "}
-          <Link
-            href="/login"
-            style={{
-              color: "#176fc0",
-              textDecoration: "none",
-              fontWeight: 800,
-            }}
-          >
-            تسجيل الدخول
-          </Link>
-        </div>
+          <footer className="auth-footer">
+            <span>JASSAS SOFT PRO</span>
+            <span className="auth-footer-separator">•</span>
+            <span>تقنية تُسهّل إدارة شبكتك</span>
+          </footer>
+        </section>
       </div>
     </main>
   )
-}
-
-const eyeButtonStyle: React.CSSProperties = {
-  position: "absolute",
-  top: "50%",
-  right: "10px",
-  transform: "translateY(-50%)",
-  border: "none",
-  background: "transparent",
-  color: "#176fc0",
-  fontSize: "12px",
-  fontWeight: 800,
-  padding: "8px",
-  cursor: "pointer",
-  zIndex: 2,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  padding: "15px",
-  marginBottom: "14px",
-  background: "linear-gradient(145deg,#ffffff,#f3f8ff)",
-  border: "1px solid rgba(120,157,205,.32)",
-  borderRadius: "14px",
-  color: "#203754",
-  boxShadow: "0 5px 14px rgba(50,88,140,.07), inset 0 1px 0 rgba(255,255,255,.95)",
-  fontSize: "16px",
-  outline: "none",
 }

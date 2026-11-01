@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import BrandLogo from "@/components/BrandLogo"
+import AuthThemeToggle from "@/components/AuthThemeToggle"
 import { createClient } from "@/lib/supabase/client"
 
 type IconName = "mail" | "lock" | "eye" | "eye-off" | "shield" | "arrow" | "wifi"
@@ -104,6 +105,7 @@ function LoginContent() {
               بوابتك لإدارة الشبكة
             </span>
             <span className="auth-version">JNC · SECURE ACCESS</span>
+            <AuthThemeToggle />
           </div>
 
           <BrandLogo />
