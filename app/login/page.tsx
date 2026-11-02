@@ -102,9 +102,9 @@ function LoginContent() {
           <div className="auth-card-top">
             <span className="auth-status">
               <span className="auth-status-dot" />
-              بوابتك لإدارة الشبكة
+              إدارة شبكتك تبدأ من هنا
             </span>
-            <span className="auth-version">JNC · SECURE ACCESS</span>
+            <span className="auth-version">JASSAS NET CARD</span>
             <AuthThemeToggle />
           </div>
 
@@ -114,8 +114,8 @@ function LoginContent() {
             <div className="auth-heading-icon">
               <Icon name="wifi" size={22} />
             </div>
-            <h1 id="login-heading">مرحباً بعودتك</h1>
-            <p>سجّل دخولك وتابع إدارة كروت الإنترنت بكل سهولة.</p>
+            <h1 id="login-heading">مرحباً بك في جساس نت كرت</h1>
+            <p>تحكّم في كروت الإنترنت وشبكتك من مكان واحد.</p>
           </div>
 
           {error && (
@@ -198,7 +198,7 @@ function LoginContent() {
           </div>
 
           <div className="auth-register">
-            <span>جديد في جساس نت كرت؟</span>
+            <span>انضم إلى عائلة جساس نت كرت</span>
             <Link href="/register">
               إنشاء حساب جديد
               <Icon name="arrow" size={15} />
