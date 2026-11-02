@@ -110,6 +110,13 @@ function LoginContent() {
 
           <BrandLogo />
 
+          <div className="auth-gift" role="note">
+            <span className="auth-gift-icon" aria-hidden="true">🎁</span>
+            <span>هدية التسجيل</span>
+            <strong>500 كرت مجاني</strong>
+            <span>ابدأ رحلتك مع جساس نت كرت</span>
+          </div>
+
           <div className="auth-heading">
             <div className="auth-heading-icon">
               <Icon name="wifi" size={22} />
@@ -225,6 +232,50 @@ function LoginContent() {
             تجربة أكثر تنظيماً لإدارة كروت الإنترنت، مع واجهة صُممت لتمنحك
             وضوحاً وسرعة وراحة في الاستخدام.
           </p>
+
+          <div className="auth-visual-stage" aria-hidden="true">
+            <div className="auth-visual-glow" />
+            <div className="auth-visual-orbit auth-visual-orbit-one" />
+            <div className="auth-visual-orbit auth-visual-orbit-two" />
+
+            <div className="auth-visual-phone">
+              <div className="auth-phone-camera" />
+              <div className="auth-phone-top">
+                <span>JASSAS</span>
+                <span className="auth-phone-signal">● ● ●</span>
+              </div>
+              <div className="auth-phone-brand">
+                <span className="auth-phone-wifi">⌁</span>
+                <strong>جساس نت كرت</strong>
+                <small>إدارة شبكتك بسهولة</small>
+              </div>
+              <div className="auth-phone-stat">
+                <span>كروتك المتاحة</span>
+                <strong>500</strong>
+                <small>هدية التسجيل</small>
+              </div>
+              <div className="auth-phone-bars">
+                <i /><i /><i /><i />
+              </div>
+              <div className="auth-phone-bottom">
+                <span>إدارة الكروت</span>
+                <span>⌘</span>
+              </div>
+            </div>
+
+            <div className="auth-visual-ticket auth-ticket-main">
+              <span className="auth-ticket-brand">JASSAS NET CARD</span>
+              <strong>86 245 810</strong>
+              <span className="auth-ticket-details">ساعة واحدة · إنترنت</span>
+              <span className="auth-ticket-price">كرت إنترنت</span>
+            </div>
+
+            <div className="auth-visual-ticket auth-ticket-small">
+              <span>✦ هدية البداية</span>
+              <strong>500</strong>
+              <small>كرت مجاني</small>
+            </div>
+          </div>
 
           <div className="auth-feature-list">
             <div className="auth-feature">
