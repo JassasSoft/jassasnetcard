@@ -156,7 +156,9 @@ function LoginContent() {
             <div className="auth-field">
               <div className="auth-label-row">
                 <label htmlFor="login-password">كلمة المرور</label>
-                <span className="auth-label-hint">محميّة بتشفير آمن</span>
+                <Link className="auth-forgot-link" href="/forgot-password">
+                  نسيت كلمة المرور؟
+                </Link>
               </div>
               <div className="auth-input-wrap" dir="ltr">
                 <span className="auth-input-icon"><Icon name="lock" /></span>

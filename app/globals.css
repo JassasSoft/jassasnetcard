@@ -3565,3 +3565,167 @@ html[data-auth-theme="dark"] .auth-visual-orbit-two {
     animation: none;
   }
 }
+
+/* JASSAS — Password recovery pages */
+.auth-recovery-layout {
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-recovery-card {
+  width: min(100%, 540px);
+  margin-inline: auto;
+}
+
+.auth-recovery-card .auth-heading {
+  margin-block: 26px 22px;
+}
+
+.auth-recovery-card .auth-heading h1 {
+  font-size: clamp(23px, 5vw, 30px);
+  line-height: 1.5;
+}
+
+.auth-recovery-card .auth-heading p {
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.auth-recovery-card .auth-field label {
+  font-size: 15px;
+}
+
+.auth-recovery-card .auth-input-wrap input {
+  min-height: 54px;
+  font-size: 16px;
+}
+
+.auth-forgot-link {
+  color: #2468d8;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: color .2s ease, opacity .2s ease;
+}
+
+.auth-forgot-link:hover {
+  color: #bd8b24;
+  text-decoration: underline;
+}
+
+.auth-recovery-back {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.auth-recovery-back a {
+  color: #2868c9;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.auth-recovery-back a:hover {
+  text-decoration: underline;
+}
+
+.auth-recovery-success,
+.auth-recovery-message {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid rgba(42, 139, 113, .25);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(230, 250, 243, .96), rgba(239, 248, 255, .96));
+  color: #174e43;
+  text-align: center;
+  line-height: 1.9;
+}
+
+.auth-recovery-success-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #d4f6e6, #ffffff);
+  color: #13845f;
+  font-size: 25px;
+  font-weight: 900;
+  box-shadow: 0 7px 20px rgba(19, 132, 95, .13);
+}
+
+.auth-recovery-success strong,
+.auth-recovery-message strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.auth-recovery-success p,
+.auth-recovery-message p {
+  margin: 9px 0;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.auth-recovery-email {
+  display: block;
+  margin-top: 12px;
+  color: #2868c9;
+  font-size: 14px;
+  font-weight: 800;
+  direction: ltr;
+  overflow-wrap: anywhere;
+}
+
+.auth-recovery-login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 16px;
+  text-decoration: none;
+}
+
+.auth-recovery-page .auth-submit:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+html[data-auth-theme="dark"] .auth-forgot-link,
+html[data-auth-theme="dark"] .auth-recovery-back a {
+  color: #8dcaff;
+}
+
+html[data-auth-theme="dark"] .auth-recovery-success,
+html[data-auth-theme="dark"] .auth-recovery-message {
+  border-color: rgba(105, 210, 177, .28);
+  background: linear-gradient(145deg, rgba(17, 65, 66, .96), rgba(22, 45, 77, .96));
+  color: #e0fff2;
+}
+
+html[data-auth-theme="dark"] .auth-recovery-success-icon {
+  background: linear-gradient(145deg, #164f4b, #203e60);
+  color: #8af0c9;
+}
+
+html[data-auth-theme="dark"] .auth-recovery-email {
+  color: #9bd3ff;
+}
+
+@media (max-width: 520px) {
+  .auth-recovery-card {
+    padding-inline: 20px;
+  }
+
+  .auth-recovery-card .auth-heading p {
+    font-size: 14px;
+  }
+
+  .auth-recovery-success,
+  .auth-recovery-message {
+    padding: 17px;
+  }
+}
