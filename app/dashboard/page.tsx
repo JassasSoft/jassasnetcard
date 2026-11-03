@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import BrandLogo from "@/components/BrandLogo"
+import AuthThemeToggle from "@/components/AuthThemeToggle"
 import { createClient } from "@/lib/supabase/client"
 
 type AccountData = {
@@ -244,6 +245,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="dashboard-topbar-actions">
+          <AuthThemeToggle />
           <div className="dashboard-session-label">
             <span className="dashboard-session-dot" />
             مساحة العميل

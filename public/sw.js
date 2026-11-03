@@ -1,37 +1,19 @@
-const CACHE_NAME = 'jassas-net-card-v1'
-const urlsToCache = [
-  '/',
-  '/login',
-  '/register',
-  '/dashboard'
-]
+const CACHE_PREFIX = 'jassas-net-card-';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache)
-    })
-  )
-})
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request)
-    })
-  )
-})
+  event.waitUntil(self.skipWaiting());
+});
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName)
-          }
-        })
-      )
-    })
-  )
-})
+  event.waitUntil((async () => {
+    const cacheNames = await caches.keys();
+
+    await Promise.all(
+      cacheNames
+        .filter((name) => name.startsWith(CACHE_PREFIX))
+        .map((name) => caches.delete(name))
+    );
+
+    await self.clients.claim();
+  })());
+});

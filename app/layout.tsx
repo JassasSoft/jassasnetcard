@@ -37,19 +37,33 @@ export default function RootLayout({
       </head>
       <body style={{ margin: 0, padding: 0, background: "#f5f7fc" }}>
         {children}
-        <script dangerouslySetInnerHTML={{
+        <script
+        dangerouslySetInnerHTML={{
           __html: `
             if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then((reg) => {
-                  console.log('SW registered:', reg)
-                }).catch((err) => {
-                  console.log('SW registration failed:', err)
-                })
-              })
+              let refreshing = false;
+
+              navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                  refreshing = true;
+                  window.location.reload();
+                }
+              });
+
+              window.addEventListener('load', async () => {
+                try {
+                  const registration = await navigator.serviceWorker.register('/sw.js', {
+                    updateViaCache: 'none',
+                  });
+                  await registration.update();
+                } catch (error) {
+                  console.warn('Service worker update failed:', error);
+                }
+              }, { once: true });
             }
-          `
-        }} />
+          `,
+        }}
+      />
       </body>
     </html>
   )

@@ -3729,3 +3729,271 @@ html[data-auth-theme="dark"] .auth-recovery-email {
     padding: 17px;
   }
 }
+
+/* Login password recovery link placement */
+.auth-forgot-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+  padding-inline: 2px;
+}
+
+.auth-forgot-row .auth-forgot-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #2468d8;
+}
+
+html[data-auth-theme="dark"] .auth-forgot-row .auth-forgot-link {
+  color: #8dcaff;
+}
+
+
+
+/* =========================================================
+   JASSAS — DASHBOARD ROYAL BLUE DARK THEME
+   Shared preference: jassas-auth-theme
+   ========================================================= */
+
+html[data-auth-theme="dark"] .dashboard-shell {
+  --dash-bg: #123f70;
+  --dash-surface: rgba(25, 67, 111, .88);
+  --dash-surface-strong: #194b7e;
+  --dash-text: #f0f6ff;
+  --dash-muted: #c0d2e9;
+  --dash-border: rgba(184, 216, 255, .2);
+  --dash-blue: #83caff;
+  --dash-purple: #c0aaff;
+  --dash-gold: #f0d18a;
+
+  color: var(--dash-text);
+  background:
+    radial-gradient(ellipse at 8% 5%, rgba(80, 190, 255, .25), transparent 36%),
+    radial-gradient(ellipse at 92% 20%, rgba(157, 132, 255, .22), transparent 34%),
+    radial-gradient(ellipse at 50% 90%, rgba(29, 137, 221, .2), transparent 44%),
+    linear-gradient(145deg, #174b80 0%, #15518d 48%, #283f83 100%);
+}
+
+html[data-auth-theme="dark"] .dashboard-topbar {
+  border-bottom-color: rgba(195, 220, 255, .2);
+}
+
+html[data-auth-theme="dark"] .dashboard-session-label {
+  color: #d4e5fa;
+}
+
+html[data-auth-theme="dark"] .dashboard-logout {
+  color: #eff6ff;
+  border-color: rgba(190, 218, 255, .3);
+  background: linear-gradient(145deg, rgba(44, 91, 143, .9), rgba(28, 68, 116, .92));
+  box-shadow: 0 5px 17px rgba(4, 25, 58, .16), inset 0 1px rgba(255,255,255,.08);
+}
+
+html[data-auth-theme="dark"] .dashboard-logout:hover {
+  border-color: rgba(208, 230, 255, .5);
+  background: #32699f;
+}
+
+html[data-auth-theme="dark"] .dashboard-welcome h1,
+html[data-auth-theme="dark"] .dashboard-section-heading h2 {
+  color: #f2f7ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-welcome h1 span {
+  background: linear-gradient(100deg, #9cddff, #d0baff 55%, #f1d58d);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-auth-theme="dark"] .dashboard-welcome p,
+html[data-auth-theme="dark"] .dashboard-live-label {
+  color: #c0d5ed;
+}
+
+html[data-auth-theme="dark"] .dashboard-avatar {
+  border-color: rgba(239, 210, 139, .6);
+  background: linear-gradient(145deg, #278bd0, #655ac2 72%, #b28a42);
+}
+
+html[data-auth-theme="dark"] .dashboard-balance-card {
+  border-color: rgba(190, 222, 255, .38);
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(255,255,255,.2), transparent 42%),
+    radial-gradient(ellipse at 92% 100%, rgba(159,143,255,.3), transparent 45%),
+    linear-gradient(118deg, #1769ad 0%, #245db0 48%, #554baf 100%);
+  box-shadow: 0 22px 48px rgba(3, 24, 58, .28), inset 0 1px rgba(255,255,255,.24);
+}
+
+html[data-auth-theme="dark"] .dashboard-section-kicker {
+  color: #f0d18a;
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-card,
+html[data-auth-theme="dark"] .dashboard-action-card {
+  color: #edf5ff;
+  border-color: rgba(185, 215, 255, .22);
+  background: linear-gradient(145deg, rgba(31, 77, 125, .96), rgba(23, 60, 103, .96));
+  box-shadow: 0 10px 26px rgba(4, 26, 59, .17), inset 0 1px rgba(255,255,255,.07);
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-card:hover,
+html[data-auth-theme="dark"] button.dashboard-action-card:hover {
+  border-color: rgba(175, 220, 255, .46);
+  background: linear-gradient(145deg, #285f96, #214e82);
+  box-shadow: 0 14px 30px rgba(4, 24, 57, .23);
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-caption,
+html[data-auth-theme="dark"] .dashboard-stat-foot,
+html[data-auth-theme="dark"] .dashboard-action-copy > small {
+  color: #b9cce3;
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-card > strong,
+html[data-auth-theme="dark"] .dashboard-action-copy > strong {
+  color: #f3f7ff;
+}
+
+html[data-auth-theme="dark"] .stat-icon-blue,
+html[data-auth-theme="dark"] .dashboard-action-icon {
+  color: #9bd7ff;
+  border-color: rgba(133, 202, 255, .27);
+  background: linear-gradient(145deg, rgba(65, 139, 199, .4), rgba(39, 104, 166, .35));
+}
+
+html[data-auth-theme="dark"] .stat-icon-purple,
+html[data-auth-theme="dark"] .router-action-icon {
+  color: #d0bdff;
+  border-color: rgba(188, 164, 255, .27);
+  background: linear-gradient(145deg, rgba(119, 91, 190, .4), rgba(83, 68, 151, .35));
+}
+
+html[data-auth-theme="dark"] .stat-icon-gold,
+html[data-auth-theme="dark"] .dashboard-account-icon {
+  color: #f4d58d;
+  border-color: rgba(239, 205, 126, .28);
+  background: linear-gradient(145deg, rgba(166, 127, 54, .35), rgba(117, 87, 37, .3));
+}
+
+html[data-auth-theme="dark"] .stat-icon-status {
+  color: #83e6cb;
+  border-color: rgba(104, 225, 192, .24);
+  background: rgba(57, 166, 139, .18);
+}
+
+html[data-auth-theme="dark"] .dashboard-action-arrow {
+  color: #c5dcf5;
+  border-color: rgba(185, 215, 255, .22);
+  background: rgba(255,255,255,.07);
+}
+
+html[data-auth-theme="dark"] .dashboard-integration-status {
+  color: #f0d18a;
+}
+
+html[data-auth-theme="dark"] .dashboard-account-strip {
+  border-color: rgba(185, 215, 255, .22);
+  background: linear-gradient(145deg, rgba(31, 77, 125, .94), rgba(23, 60, 103, .92));
+  box-shadow: 0 8px 22px rgba(4, 26, 59, .16);
+}
+
+html[data-auth-theme="dark"] .dashboard-account-copy strong {
+  color: #f1f6ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-account-copy span,
+html[data-auth-theme="dark"] .dashboard-footer p,
+html[data-auth-theme="dark"] .dashboard-footer > span {
+  color: #b9cce3;
+}
+
+html[data-auth-theme="dark"] .dashboard-account-role {
+  color: #b8e2ff;
+  border-color: rgba(142, 203, 255, .28);
+  background: rgba(74, 143, 199, .2);
+}
+
+html[data-auth-theme="dark"] .dashboard-bottom-nav {
+  border-top-color: rgba(190, 218, 255, .2);
+  background: rgba(19, 57, 99, .94);
+  box-shadow: 0 -8px 30px rgba(3, 24, 58, .24);
+}
+
+html[data-auth-theme="dark"] .dashboard-nav-item {
+  color: #b8cce4;
+}
+
+html[data-auth-theme="dark"] .dashboard-nav-item.is-active {
+  color: #b5e3ff;
+  border-color: rgba(145, 207, 255, .24);
+  background: linear-gradient(145deg, rgba(62, 128, 185, .38), rgba(80, 91, 166, .3));
+}
+
+html[data-auth-theme="dark"] .dashboard-nav-item:hover {
+  color: #ffffff;
+}
+
+html[data-auth-theme="dark"] .dashboard-state {
+  color: #f0f6ff;
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(77, 190, 255, .25), transparent 40%),
+    linear-gradient(145deg, #174b80, #15518d 55%, #283f83);
+}
+
+html[data-auth-theme="dark"] .dashboard-state-card {
+  color: #f0f6ff;
+  border-color: rgba(190, 218, 255, .28);
+  background: linear-gradient(145deg, rgba(31, 77, 125, .97), rgba(23, 60, 103, .97));
+  box-shadow: 0 22px 65px rgba(3, 24, 58, .28), inset 0 1px rgba(255,255,255,.1);
+}
+
+html[data-auth-theme="dark"] .dashboard-state-card h1 {
+  color: #f2f7ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-state-card p {
+  color: #c0d5ed;
+}
+
+html[data-auth-theme="dark"] .dashboard-loader {
+  border-color: rgba(151, 208, 255, .2);
+  border-top-color: #9cddff;
+}
+
+html[data-auth-theme="dark"] .dashboard-primary-button {
+  color: #49350e;
+  background: linear-gradient(110deg, #fff0bd, #e8c56e 58%, #d8ad4d);
+}
+
+html[data-auth-theme="dark"] .dashboard-text-button {
+  color: #a9ddff;
+}
+
+html[data-auth-theme="dark"] .dashboard-shell button:focus-visible,
+html[data-auth-theme="dark"] .dashboard-shell a:focus-visible {
+  outline-color: #a8e2ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-topbar .auth-theme-toggle {
+  color: #edf6ff;
+  border-color: rgba(190, 220, 255, .36);
+  background: linear-gradient(145deg, #2866a5, #1c4a80);
+  box-shadow: 0 4px 13px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.1);
+}
+
+@media (max-width: 640px) {
+  .dashboard-topbar-actions {
+    gap: 7px;
+  }
+
+  .dashboard-topbar .auth-theme-toggle {
+    min-height: 36px;
+    gap: 5px;
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+}

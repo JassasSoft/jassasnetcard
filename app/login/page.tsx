@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import BrandLogo from "@/components/BrandLogo"
 import AuthThemeToggle from "@/components/AuthThemeToggle"
@@ -41,8 +40,6 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
 }
 
 function LoginContent() {
-  const router = useRouter()
-
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -51,6 +48,9 @@ function LoginContent() {
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (loading) return
+
     setError("")
 
     if (!email.trim() || !password) {
@@ -60,12 +60,26 @@ function LoginContent() {
 
     setLoading(true)
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+
     try {
       const supabase = createClient()
-      const { error: authError } = await supabase.auth.signInWithPassword({
+
+      const authRequest = supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       })
+
+      const timeoutRequest = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error("LOGIN_TIMEOUT"))
+        }, 20000)
+      })
+
+      const { error: authError } = await Promise.race([
+        authRequest,
+        timeoutRequest,
+      ])
 
       if (authError) {
         if (authError.message.toLowerCase().includes("email not confirmed")) {
@@ -73,7 +87,6 @@ function LoginContent() {
         } else {
           setError("تعذّر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.")
         }
-        setLoading(false)
         return
       }
 
@@ -83,10 +96,15 @@ function LoginContent() {
           ? redirectTo
           : "/dashboard"
 
-      router.replace(safeRedirect)
-      router.refresh()
-    } catch {
-      setError("تعذر الاتصال بالخدمة الآن. تحقق من الإنترنت وحاول مجدداً.")
+      window.location.assign(safeRedirect)
+    } catch (error) {
+      if (error instanceof Error && error.message === "LOGIN_TIMEOUT") {
+        setError("تأخر الاتصال بخدمة تسجيل الدخول. تحقق من الإنترنت وحاول مجدداً.")
+      } else {
+        setError("تعذر الاتصال بالخدمة الآن. تحقق من الإنترنت وحاول مجدداً.")
+      }
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId)
       setLoading(false)
     }
   }
@@ -156,9 +174,6 @@ function LoginContent() {
             <div className="auth-field">
               <div className="auth-label-row">
                 <label htmlFor="login-password">كلمة المرور</label>
-                <Link className="auth-forgot-link" href="/forgot-password">
-                  نسيت كلمة المرور؟
-                </Link>
               </div>
               <div className="auth-input-wrap" dir="ltr">
                 <span className="auth-input-icon"><Icon name="lock" /></span>
@@ -183,6 +198,11 @@ function LoginContent() {
                 >
                   <Icon name={showPassword ? "eye-off" : "eye"} size={19} />
                 </button>
+              </div>
+              <div className="auth-forgot-row">
+                <Link className="auth-forgot-link" href="/forgot-password">
+                  هل نسيت كلمة المرور؟
+                </Link>
               </div>
             </div>
 
