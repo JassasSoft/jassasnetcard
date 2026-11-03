@@ -28,22 +28,8 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data } = await supabase.auth.getClaims()
-  const claims = data?.claims
+  const isAuthenticated = Boolean(data?.claims)
   const pathname = request.nextUrl.pathname
-
-  const allowedEmail = (
-    process.env.DEVELOPMENT_ALLOWED_EMAIL || ''
-  ).trim().toLowerCase()
-
-  const signedInEmail = String(claims?.email ?? '')
-    .trim()
-    .toLowerCase()
-
-  const isAuthenticated = Boolean(claims)
-  const isAllowedUser =
-    isAuthenticated &&
-    allowedEmail.length > 0 &&
-    signedInEmail === allowedEmail
 
   const isDashboard =
     pathname === '/dashboard' ||
@@ -81,31 +67,9 @@ export async function updateSession(request: NextRequest) {
 
       return NextResponse.redirect(url)
     }
-
-    if (!isAllowedUser) {
-      if (isProtectedApi) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'هذا الحساب غير مسموح له بالدخول أثناء التطوير.',
-          },
-          {
-            status: 403,
-            headers: { 'Cache-Control': 'private, no-store' },
-          }
-        )
-      }
-
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      url.search = ''
-      url.searchParams.set('error', 'not-allowed')
-
-      return NextResponse.redirect(url)
-    }
   }
 
-  if ((isLogin || isRegister) && isAllowedUser) {
+  if ((isLogin || isRegister) && isAuthenticated) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     url.search = ''

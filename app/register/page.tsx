@@ -94,6 +94,19 @@ export default function RegisterPage() {
         return
       }
 
+      // Supabase may return an empty identities array for an existing email.
+      if (
+        data.user &&
+        Array.isArray(data.user.identities) &&
+        data.user.identities.length === 0
+      ) {
+        setMessage(
+          "هذا البريد الإلكتروني مسجل بالفعل. يمكنك تسجيل الدخول أو استعادة كلمة المرور."
+        )
+        setLoading(false)
+        return
+      }
+
       if (data.session) {
         window.location.href = "/dashboard"
         return
