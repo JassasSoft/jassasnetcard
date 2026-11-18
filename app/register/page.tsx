@@ -42,8 +42,13 @@ export default function RegisterPage() {
       return
     }
 
-    if (formData.password.length < 6) {
-      setMessage("كلمة المرور يجب أن تكون 6 أحرف على الأقل")
+    if (formData.password.length < 12) {
+      setMessage("كلمة المرور يجب أن تكون 12 حرفاً على الأقل")
+      return
+    }
+
+    if (!/[A-Za-z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+      setMessage("يجب أن تحتوي كلمة المرور على حرف إنجليزي واحد ورقم واحد على الأقل")
       return
     }
 
@@ -254,7 +259,7 @@ export default function RegisterPage() {
                   autoComplete="new-password"
                   disabled={loading}
                   required
-                  minLength={6}
+                  minLength={12}
                 />
                 <button
                   className="auth-password-toggle"
@@ -281,6 +286,7 @@ export default function RegisterPage() {
                   autoComplete="new-password"
                   disabled={loading}
                   required
+                  minLength={12}
                 />
                 <button
                   className="auth-password-toggle"

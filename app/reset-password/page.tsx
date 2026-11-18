@@ -49,8 +49,13 @@ export default function ResetPasswordPage() {
     event.preventDefault()
     setError("")
 
-    if (password.length < 6) {
-      setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل.")
+    if (password.length < 12) {
+      setError("كلمة المرور يجب أن تكون 12 حرفاً على الأقل.")
+      return
+    }
+
+    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError("يجب أن تحتوي كلمة المرور على حرف إنجليزي واحد ورقم واحد على الأقل.")
       return
     }
 
@@ -148,9 +153,9 @@ export default function ResetPasswordPage() {
                       type="password"
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
-                      placeholder="6 أحرف على الأقل"
+                      placeholder="12 حرفاً على الأقل"
                       autoComplete="new-password"
-                      minLength={6}
+                      minLength={12}
                       required
                       disabled={loading}
                     />
@@ -167,7 +172,7 @@ export default function ResetPasswordPage() {
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       placeholder="أعد كتابة كلمة المرور"
                       autoComplete="new-password"
-                      minLength={6}
+                      minLength={12}
                       required
                       disabled={loading}
                     />

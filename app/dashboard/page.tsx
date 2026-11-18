@@ -406,6 +406,23 @@ export default function DashboardPage() {
               </span>
             </button>
 
+            <button
+              type="button"
+              className="dashboard-action-card"
+              onClick={() => router.push("/dashboard/card-vault")}
+            >
+              <span className="dashboard-action-icon stat-icon-gold">
+                <DashboardIcon name="package" size={25} />
+              </span>
+              <span className="dashboard-action-copy">
+                <strong>خزنة الكروت</strong>
+                <small>اعرض الكروت المحفوظة وابحث عنها وانسخ أرقامها</small>
+              </span>
+              <span className="dashboard-action-arrow">
+                <DashboardIcon name="arrow" size={19} />
+              </span>
+            </button>
+
             <article className="dashboard-action-card dashboard-router-card">
               <span className="dashboard-action-icon router-action-icon">
                 <DashboardIcon name="router" size={25} />
@@ -457,6 +474,14 @@ export default function DashboardPage() {
         >
           <DashboardIcon name="cards" size={21} />
           <span>الكروت والطباعة</span>
+        </button>
+        <button
+          type="button"
+          className="dashboard-nav-item"
+          onClick={() => router.push("/dashboard/card-vault")}
+        >
+          <DashboardIcon name="package" size={21} />
+          <span>الخزنة</span>
         </button>
         <button
           type="button"

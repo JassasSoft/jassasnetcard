@@ -1,8 +1,11 @@
 "use client"
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import QRCodeGenerator from 'qrcode'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import BrandLogo from '@/components/BrandLogo'
+import AuthThemeToggle from '@/components/AuthThemeToggle'
 
 const escapeHtml = (value: unknown): string =>
   String(value ?? '').replace(/[&<>"']/g, (char) => {
@@ -16,17 +19,145 @@ const escapeHtml = (value: unknown): string =>
     return entities[char]
   })
 
+const createBatchIdempotencyKey = (): string => {
+  if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
+    throw new Error('Secure random generator is unavailable')
+  }
+
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+
+  // UUID v4
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+
+  const hex = Array.from(bytes, (byte) =>
+    byte.toString(16).padStart(2, '0')
+  ).join('')
+
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    hex.slice(12, 16),
+    hex.slice(16, 20),
+    hex.slice(20),
+  ].join('-')
+}
+
+
+const DEFAULT_TEXT_STYLES = {
+  network: { show: true, fontSize: 20, color: '#ffffff', fontFamily: 'default', position: 'top', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  username: { show: true, fontSize: 22, color: '#FFD700', fontFamily: 'default', position: 'center', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  validity: { show: true, fontSize: 11, color: '#ffffff', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  time: { show: true, fontSize: 11, color: '#ffffff', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  data: { show: true, fontSize: 11, color: '#ffffff', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  price: { show: true, fontSize: 11, color: '#ffffff', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  distributor: { show: true, fontSize: 10, color: '#e0e0e0', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  offer: { show: true, fontSize: 11, color: '#ffffff', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  recharge: { show: true, fontSize: 10, color: '#ffffff', fontFamily: 'default', position: 'right', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  customMessage: { show: false, fontSize: 12, color: '#FFD700', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 1, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+  warning: { show: true, fontSize: 10, color: '#e0e0e0', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
+};
+
+const sanitizeTextStyles = (value: unknown) => {
+  const input = value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, any>
+    : {};
+
+  const positions = ['top', 'bottom', 'left', 'right', 'center'];
+  const aligns = ['right', 'center', 'left'];
+  const borders = ['solid', 'dashed', 'dotted'];
+  const fonts = ['default', 'arabic', 'mono', 'serif', 'sans'];
+
+  const safeColor = (v: unknown, fallback: string) =>
+    typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : fallback;
+
+  const safeSize = (v: unknown, fallback: number) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.min(40, Math.max(8, n)) : fallback;
+  };
+
+  return Object.fromEntries(
+    Object.entries(DEFAULT_TEXT_STYLES).map(([key, defaults]) => {
+      const item = input[key] && typeof input[key] === 'object' && !Array.isArray(input[key])
+        ? input[key]
+        : {};
+
+      return [key, {
+        show: typeof item.show === 'boolean' ? item.show : defaults.show,
+        fontSize: safeSize(item.fontSize, defaults.fontSize),
+        color: safeColor(item.color, defaults.color),
+        fontFamily: fonts.includes(item.fontFamily) ? item.fontFamily : defaults.fontFamily,
+        position: positions.includes(item.position) ? item.position : defaults.position,
+        align: aligns.includes(item.align) ? item.align : defaults.align,
+        borderWidth: Number.isFinite(Number(item.borderWidth))
+          ? Math.min(6, Math.max(0, Number(item.borderWidth)))
+          : defaults.borderWidth,
+        borderColor: safeColor(item.borderColor, defaults.borderColor),
+        borderStyle: borders.includes(item.borderStyle) ? item.borderStyle : defaults.borderStyle,
+        background: item.background === 'transparent'
+          ? 'transparent'
+          : safeColor(item.background, defaults.background),
+      }];
+    })
+  ) as typeof DEFAULT_TEXT_STYLES;
+};
+
+type InputRowProps = { label: string; children: ReactNode; icon?: string; fieldId?: string; activeField: string }
+
+function InputRow({ label, children, icon = '', fieldId = '', activeField }: InputRowProps) {
+  return (
+    <div
+      id={fieldId ? `studio-field-${fieldId}` : undefined}
+      className="print-cards-row"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '12px',
+        padding: '12px 15px',
+        background: activeField === fieldId ? 'rgba(0,255,255,0.15)' : 'rgba(0,0,0,0.3)',
+        borderRadius: '12px',
+        border: activeField === fieldId ? '2px solid #FFD700' : '1px solid rgba(124,58,237,0.30)',
+        transition: 'all 0.3s ease',
+        boxShadow: activeField === fieldId ? '0 0 20px rgba(124,58,237,0.45)' : 'none'
+      }}
+    >
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {children}
+      </div>
+      <div style={{ color: activeField === fieldId ? '#FFD700' : '#e2e8f0', fontWeight: 'bold', fontSize: '14px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px', minWidth: '120px', justifyContent: 'flex-end' }}>
+        {icon && <span style={{ fontSize: '16px' }}>{icon}</span>}
+        {label}
+      </div>
+    </div>
+  )
+}
 export default function PrintCardsPage() {
+  const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [printedCards, setPrintedCards] = useState<any[]>([])
+  const [batchPrintSnapshot, setBatchPrintSnapshot] = useState<any>(null)
   const [showConfirm, setShowConfirm] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [printRetryAvailable, setPrintRetryAvailable] = useState(false)
+  const [batchIdempotencyKey, setBatchIdempotencyKey] = useState<string | null>(null)
+  const [batchHistory, setBatchHistory] = useState<any[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState('')
+  const [restoringBatchId, setRestoringBatchId] = useState<string | null>(null)
+  const [restoredBatchId, setRestoredBatchId] = useState<string | null>(null)
   const [activeField, setActiveField] = useState('')
+  const [selectedTextStyleKey, setSelectedTextStyleKey] = useState('network')
+  const [activeStudioSection, setActiveStudioSection] = useState('identity')
+  const [cardsCountDraft, setCardsCountDraft] = useState('100')
+  const [colsCountDraft, setColsCountDraft] = useState('3')
   const previewRef = useRef<HTMLDivElement>(null)
 
   const [formData, setFormData] = useState({
     profile: 'DEFAULT',
+    customMessage: '',
+    textStyles: DEFAULT_TEXT_STYLES,
     validity: '1',
     validityType: 'no-expiry',
     userDuration: '1',
@@ -66,6 +197,11 @@ export default function PrintCardsPage() {
     fontFamily: 'default'
   })
 
+  const selectedTextStyle =
+    (formData.textStyles as any)?.[selectedTextStyleKey] ||
+    (DEFAULT_TEXT_STYLES as any)[selectedTextStyleKey]
+
+
   useEffect(() => {
     let mounted = true
 
@@ -100,6 +236,47 @@ export default function PrintCardsPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!user) return
+
+    let mounted = true
+
+    const loadHistory = async () => {
+      setHistoryLoading(true)
+      setHistoryError('')
+
+      try {
+        const response = await fetch('/api/print-cards', {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        const result = await response.json().catch(() => null)
+
+        if (!response.ok || result?.success !== true) {
+          throw new Error(result?.message || 'تعذر تحميل سجل الدفعات.')
+        }
+
+        if (mounted) {
+          setBatchHistory(Array.isArray(result.batches) ? result.batches : [])
+        }
+      } catch (error) {
+        if (mounted) {
+          setHistoryError(
+            error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل السجل.'
+          )
+        }
+      } finally {
+        if (mounted) setHistoryLoading(false)
+      }
+    }
+
+    void loadHistory()
+
+    return () => {
+      mounted = false
+    }
+  }, [user])
+
   const colorSchemes: any = {
     'blue-gold': { bg: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #d4af37 100%)', accent: '#FFD700', text: '#ffffff', border: '#FFD700' },
     'purple-silver': { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #c0c0c0 100%)', accent: '#c0c0c0', text: '#ffffff', border: '#c0c0c0' },
@@ -115,43 +292,251 @@ export default function PrintCardsPage() {
   }
 
   const getCardColors = (style: string, scheme: string) => {
-    const base =
-      style === "plain"
-        ? { bg: "#ffffff", accent: "#374151", text: "#111827", border: "#9ca3af" }
-        : style === "three-color"
-          ? {
-              bg: "linear-gradient(135deg, #ffffff 0%, #eef2ff 58%, #dbeafe 78%, #7c3aed 100%)",
-              accent: "#2563eb",
-              text: "#172033",
-              border: "#7c3aed"
-            }
-          : (colorSchemes[scheme] || colorSchemes["blue-gold"])
+  const base =
+    style === "plain"
+      ? { bg: "#ffffff", accent: "#374151", text: "#111827", border: "#9ca3af" }
+      : style === "luxury"
+      ? {
+          bg: "linear-gradient(135deg, #071b3a 0%, #123f78 48%, #172b4d 75%, #8b6a28 100%)",
+          accent: "#f7d77a",
+          text: "#fffaf0",
+          border: "#d6ad55",
+        }
+      : style === "three-color"
+      ? {
+          bg: "linear-gradient(135deg, #ffffff 0%, #eef2ff 58%, #dbeafe 78%, #7c3aed 100%)",
+          accent: "#2563eb",
+          text: "#172033",
+          border: "#7c3aed",
+        }
+      : (colorSchemes[scheme] || colorSchemes["blue-gold"]);
 
-    const light = style === "plain" || style === "three-color"
+  const light = style === "plain" || style === "three-color";
 
-    return {
-      ...base,
-      panel: light ? "#f3f4f6" : "rgba(0,0,0,0.3)",
-      panelStrong: light ? "#ffffff" : "rgba(0,0,0,0.3)",
-      panelAlt: light ? "#f8fafc" : "rgba(255,255,255,0.1)",
-      labelText: light ? "#4b5563" : "#e5e7eb",
-      infoText: light ? "#111827" : base.text,
-      numberText: light ? "#111827" : base.accent,
-      offerBg: light ? "#ede9fe" : "rgba(255,215,0,0.2)",
-      offerText: light ? "#5b21b6" : "#FFD700",
-      rechargeBg: light
-        ? "linear-gradient(135deg, #2563eb, #7c3aed)"
-        : "linear-gradient(135deg, #2563eb, #7c3aed)",
-      rechargeText: "#ffffff"
-    }
-  }
+  return {
+    ...base,
+    panel: light ? "#f3f4f6" : "rgba(0,0,0,0.3)",
+    panelStrong: light ? "#ffffff" : "rgba(0,0,0,0.3)",
+    panelAlt: light ? "#f8fafc" : "rgba(255,255,255,0.1)",
+    labelText: light ? "#4b5563" : "#e5e7eb",
+    infoText: light ? "#111827" : base.text,
+    numberText: light ? "#111827" : base.accent,
+    offerBg: light ? "#ede9fe" : "rgba(215,175,80,0.2)",
+    offerText: light ? "#5b21b6" : "#f7d77a",
+    rechargeBg: "linear-gradient(135deg, #2563eb, #7c3aed)",
+    rechargeText: "#ffffff",
+  };
+};
 
-  const fontFamilies: any = {
+const fontFamilies: any = {
     'default': 'Segoe UI, Tahoma, Arial, sans-serif',
     'arabic': 'Arial, Tahoma, sans-serif',
     'mono': 'Courier New, monospace',
     'serif': 'Georgia, serif',
     'sans': 'Helvetica, Arial, sans-serif'
+  }
+
+  // محرك موحد لتنسيق النصوص في المعاينة وPDF
+  const getCardTextStyle = (card: any, key: string) => {
+    const defaults = DEFAULT_TEXT_STYLES[key as keyof typeof DEFAULT_TEXT_STYLES];
+    const safeDefaults = defaults || DEFAULT_TEXT_STYLES.customMessage;
+    const config = card.textStyles?.[key] || safeDefaults;
+
+    return {
+      display: config.show === false ? 'none' : 'block',
+      fontSize: Math.min(40, Math.max(8, Number(config.fontSize) || safeDefaults.fontSize)),
+      color: config.color || safeDefaults.color,
+      fontFamily: fontFamilies[config.fontFamily] || fontFamilies.default,
+      textAlign: config.align || safeDefaults.align,
+      border: Math.min(6, Math.max(0, Number(config.borderWidth) || 0)) + 'px ' +
+        (config.borderStyle || 'solid') + ' ' + (config.borderColor || safeDefaults.borderColor),
+      background: config.background || 'transparent',
+      borderRadius: '8px',
+      padding: Number(config.borderWidth) > 0 || config.background !== 'transparent'
+        ? '5px 7px'
+        : '0px',
+      boxSizing: 'border-box' as const,
+    };
+  };
+
+  const getCardTextCss = (card: any, key: string) => {
+    const s = getCardTextStyle(card, key);
+    return `display:${s.display};font-size:${s.fontSize}px;color:${s.color};font-family:${s.fontFamily};text-align:${s.textAlign};border:${s.border};background:${s.background};border-radius:${s.borderRadius};padding:${s.padding};box-sizing:border-box;`;
+  };
+
+  const restoreBatch = async (batchId: string) => {
+    if (restoringBatchId) return
+
+    setRestoringBatchId(batchId)
+    try {
+      const response = await fetch(
+        '/api/print-cards?batch_id=' + encodeURIComponent(batchId),
+        { method: 'GET', cache: 'no-store' }
+      )
+      const result = await response.json().catch(() => null)
+
+      if (!response.ok || result?.success !== true || !result.batch) {
+        throw new Error(result?.message || 'تعذر استرجاع الدفعة.')
+      }
+
+      const snapshot = result.batch.print_snapshot
+      if (
+        !snapshot ||
+        snapshot.version !== 1 ||
+        !snapshot.template ||
+        typeof snapshot.template !== 'object' ||
+        Array.isArray(snapshot.template) ||
+        !snapshot.settings ||
+        typeof snapshot.settings !== 'object' ||
+        Array.isArray(snapshot.settings) ||
+        !Array.isArray(snapshot.usernames) ||
+        snapshot.usernames.length !== Number(result.batch.card_count) ||
+        snapshot.usernames.length < 1 ||
+        snapshot.usernames.length > 10000
+      ) {
+        throw new Error('بيانات تصميم هذه الدفعة غير مكتملة أو غير مدعومة.')
+      }
+
+      const rawSettings = snapshot.settings
+      const allowedStyles = ['colored', 'plain', 'three-color', 'luxury']
+      const allowedShapes = ['rectangle', 'square', 'rounded', 'triangle']
+      const allowedBorders = ['solid', 'dashed', 'dotted']
+      const allowedProfiles = ['DEFAULT', 'PREMIUM', 'BASIC']
+      const safeHex = (value: unknown, fallback: string) =>
+        typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
+          ? value
+          : fallback
+      const clamp = (value: unknown, fallback: number, min: number, max: number) => {
+        const parsed = Number(value)
+        return Number.isFinite(parsed)
+          ? Math.min(max, Math.max(min, parsed))
+          : fallback
+      }
+
+      const safeSettings = {
+        ...formData,
+        ...rawSettings,
+        profile: allowedProfiles.includes(rawSettings.profile) ? rawSettings.profile : 'DEFAULT',
+        cardStyle: allowedStyles.includes(rawSettings.cardStyle) ? rawSettings.cardStyle : 'colored',
+        colorScheme: Object.prototype.hasOwnProperty.call(colorSchemes, rawSettings.colorScheme)
+          ? rawSettings.colorScheme
+          : 'blue-gold',
+        cardShape: allowedShapes.includes(rawSettings.cardShape) ? rawSettings.cardShape : 'rectangle',
+        borderStyle: allowedBorders.includes(rawSettings.borderStyle) ? rawSettings.borderStyle : 'solid',
+        fontFamily: Object.prototype.hasOwnProperty.call(fontFamilies, rawSettings.fontFamily)
+          ? rawSettings.fontFamily
+          : 'default',
+        networkName: String(rawSettings.networkName ?? 'Jassas Net').slice(0, 100),
+        colsCount: clamp(rawSettings.colsCount, 3, 1, 6),
+        qrSize: clamp(rawSettings.qrSize, 55, 40, 80),
+        borderWidth: clamp(rawSettings.borderWidth, 2, 1, 8),
+        networkFontSize: clamp(rawSettings.networkFontSize, 20, 8, 40),
+        cardNumberFontSize: clamp(rawSettings.cardNumberFontSize, 22, 8, 40),
+        infoFontSize: clamp(rawSettings.infoFontSize, 12, 8, 30),
+        labelFontSize: clamp(rawSettings.labelFontSize, 10, 8, 24),
+        usernameColor: safeHex(rawSettings.usernameColor, '#FFD700'),
+        networkColor: safeHex(rawSettings.networkColor, '#ffffff'),
+        cardNumberColor: safeHex(rawSettings.cardNumberColor, '#FFD700'),
+        infoColor: safeHex(rawSettings.infoColor, '#ffffff'),
+        labelColor: safeHex(rawSettings.labelColor, '#e0e0e0'),
+        borderColor: safeHex(rawSettings.borderColor, '#FFD700'),
+        customMessage: String(rawSettings.customMessage ?? '').slice(0, 240),
+        textStyles: sanitizeTextStyles(rawSettings.textStyles),
+      }
+
+      const template = snapshot.template
+      const fallbackColors = getCardColors(safeSettings.cardStyle, safeSettings.colorScheme)
+
+      // Preserve the exact palette saved with the original print batch.
+      // Only allow safe CSS color values; fall back per property if invalid.
+      const savedColors =
+        template.colors &&
+        typeof template.colors === 'object' &&
+        !Array.isArray(template.colors)
+          ? template.colors
+          : {}
+
+      const safeCssColor = (value: unknown, fallback: string) =>
+        typeof value === 'string' &&
+        /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|linear-gradient\([\d\s.,%#a-z-]+\))$/i.test(value.trim())
+          ? value.trim()
+          : fallback
+
+      const colors = {
+        bg: safeCssColor(savedColors.bg, fallbackColors.bg),
+        accent: safeCssColor(savedColors.accent, fallbackColors.accent),
+        text: safeCssColor(savedColors.text, fallbackColors.text),
+        border: safeCssColor(savedColors.border, fallbackColors.border),
+        panel: safeCssColor(savedColors.panel, fallbackColors.panel),
+        panelStrong: safeCssColor(savedColors.panelStrong, fallbackColors.panelStrong),
+        panelAlt: safeCssColor(savedColors.panelAlt, fallbackColors.panelAlt),
+        labelText: safeCssColor(savedColors.labelText, fallbackColors.labelText),
+        infoText: safeCssColor(savedColors.infoText, fallbackColors.infoText),
+        numberText: safeCssColor(savedColors.numberText, fallbackColors.numberText),
+        offerBg: safeCssColor(savedColors.offerBg, fallbackColors.offerBg),
+        offerText: safeCssColor(savedColors.offerText, fallbackColors.offerText),
+        rechargeBg: safeCssColor(savedColors.rechargeBg, fallbackColors.rechargeBg),
+        rechargeText: safeCssColor(savedColors.rechargeText, fallbackColors.rechargeText),
+      }
+      const restoredCards = snapshot.usernames.map((rawUsername: unknown, index: number) => {
+        const username = String(rawUsername)
+        if (!/^\d{1,32}$/.test(username)) {
+          throw new Error('يوجد رقم كرت غير صالح داخل الدفعة المحفوظة.')
+        }
+
+        return {
+          ...template,
+          textStyles: safeSettings.textStyles,
+          customMessage: String(template.customMessage ?? safeSettings.customMessage ?? '').slice(0, 240),
+          id: 'restored-' + index + '-' + username,
+          username,
+          network: String(template.network ?? safeSettings.networkName).slice(0, 100),
+          validity: String(template.validity ?? safeSettings.validity).slice(0, 80),
+          cardTime: String(template.cardTime ?? safeSettings.cardTime).slice(0, 80),
+          dataPackage: String(template.dataPackage ?? safeSettings.dataPackage).slice(0, 80),
+          price: String(template.price ?? safeSettings.cardPrice).slice(0, 40),
+          distributor: String(template.distributor ?? '').slice(0, 100),
+          rechargeText: String(template.rechargeText ?? '').slice(0, 160),
+          specialOffer: String(template.specialOffer ?? '').slice(0, 160),
+          colors,
+          fontFamily: fontFamilies[safeSettings.fontFamily],
+          cardShape: safeSettings.cardShape,
+          borderStyle: safeSettings.borderStyle,
+          borderWidth: safeSettings.borderWidth,
+          borderColor: safeSettings.borderColor,
+          qrEnabled: template.qrEnabled === true,
+          qrSize: safeSettings.qrSize,
+          networkFontSize: safeSettings.networkFontSize,
+          cardNumberFontSize: safeSettings.cardNumberFontSize,
+          infoFontSize: safeSettings.infoFontSize,
+          labelFontSize: safeSettings.labelFontSize,
+          usernameColor: safeSettings.usernameColor,
+          networkColor: safeSettings.networkColor,
+          cardNumberColor: safeSettings.cardNumberColor,
+          infoColor: safeSettings.infoColor,
+          labelColor: safeSettings.labelColor,
+        }
+      })
+
+      setFormData(safeSettings)
+      setCardsCountDraft(String(safeSettings.cardsCount ?? 100))
+      setColsCountDraft(String(safeSettings.colsCount ?? 3))
+      setPrintedCards(restoredCards)
+      setBatchPrintSnapshot({
+        ...snapshot,
+        settings: safeSettings,
+      })
+      setBatchIdempotencyKey(null)
+      setPrintRetryAvailable(false)
+      setRestoredBatchId(batchId)
+      setShowConfirm(false)
+
+      alert('تم استرجاع الدفعة وتصميمها. يمكنك إعادة طباعتها دون خصم الرصيد.')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'تعذر استرجاع الدفعة.')
+    } finally {
+      setRestoringBatchId(null)
+    }
   }
 
   const timeLabels: any = { hour: 'ساعة', day: 'يوم', week: 'أسبوع', month: 'شهر' }
@@ -202,6 +587,8 @@ export default function PrintCardsPage() {
 
   const previewCard = {
     username: previewNumber,
+    customMessage: formData.customMessage,
+    textStyles: formData.textStyles,
     validity: formData.validity + ' ' + validityLabels[formData.validityType],
     userDuration: formData.userDuration + ' ' + validityLabels[formData.userDurationType],
     dataPackage: formData.dataPackage === 'unlimited' ? 'بدون حد' : formData.dataAmount + ' ' + formData.dataUnit,
@@ -256,6 +643,9 @@ export default function PrintCardsPage() {
     }
     return {
       background: bg,
+      backgroundImage: card.cardShape === 'triangle'
+        ? 'linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)'
+        : undefined,
       boxShadow: shadow,
       borderRadius: radius,
       border: border,
@@ -271,10 +661,24 @@ export default function PrintCardsPage() {
 
   const generateCards = () => {
     const cards = []
-    const qty = Math.floor(Number(formData.cardsCount)) || 100
+    const qty = Number(cardsCountDraft)
+    const columns = Number(colsCountDraft)
 
-    if (!Number.isFinite(qty) || qty < 1 || qty > 10000) {
-      alert('حدد كمية بين 1 و10000 كرت.')
+    if (!cardsCountDraft || !Number.isInteger(qty) || qty < 1 || qty > 10000) {
+      alert('حدد كمية صحيحة بين 1 و10000 كرت.')
+      return
+    }
+    if (!colsCountDraft || !Number.isInteger(columns) || columns < 1 || columns > 6) {
+      alert('حدد عدد أعمدة صحيحاً بين 1 و6.')
+      return
+    }
+
+    let nextIdempotencyKey: string
+
+    try {
+      nextIdempotencyKey = createBatchIdempotencyKey()
+    } catch {
+      alert('تعذر إنشاء مفتاح آمن للدفعة. حدّث الصفحة وحاول مرة أخرى.')
       return
     }
 
@@ -309,6 +713,8 @@ export default function PrintCardsPage() {
         qrSize: formData.qrSize,
         rechargeText: formData.rechargeText,
         specialOffer: formData.specialOffer,
+        customMessage: formData.customMessage,
+        textStyles: formData.textStyles,
         cardStyle: formData.cardStyle,
         cardEffect: formData.cardEffect,
         cardShape: formData.cardShape,
@@ -329,11 +735,30 @@ export default function PrintCardsPage() {
       })
     }
     setPrintedCards(cards)
+    setRestoredBatchId(null)
+    setBatchPrintSnapshot({
+      version: 1,
+      template: cards[0],
+      usernames: cards.map((card) => String(card.username)),
+      settings: { ...formData, cardsCount: qty, colsCount: columns },
+    })
+    setBatchIdempotencyKey(nextIdempotencyKey)
+    setPrintRetryAvailable(false)
     setShowConfirm(true)
   }
 
   const confirmAndPrint = async () => {
     if (isSaving || printedCards.length === 0) return
+
+    if (!batchPrintSnapshot) {
+      alert('نسخة تصميم الدفعة غير جاهزة. أنشئ الدفعة مرة أخرى.')
+      return
+    }
+
+    if (!batchIdempotencyKey) {
+      alert('مفتاح الدفعة غير متوفر. أنشئ الدفعة مرة أخرى قبل الحفظ.')
+      return
+    }
 
     const printWindow = window.open('', '_blank')
     if (!printWindow) {
@@ -347,6 +772,8 @@ export default function PrintCardsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          idempotency_key: batchIdempotencyKey,
+          print_snapshot: batchPrintSnapshot,
           cards: printedCards.map((card) => ({
             card_code: String(card.username),
             card_value: `${String(card.price ?? '').trim()} جنيه | ${String(card.dataPackage ?? '').trim()} | ${String(card.network ?? '').trim()}`,
@@ -363,7 +790,7 @@ export default function PrintCardsPage() {
       }
 
       setShowConfirm(false)
-      const printPrepared = await exportSamplePDF(printedCards, true, printWindow)
+      const printPrepared = await exportSamplePDF(printedCards, true, printWindow, batchPrintSnapshot.settings)
       if (printPrepared) {
         setPrintRetryAvailable(false)
         alert(`تم حفظ ${result.saved_count} كرت وتجهيز صفحة الطباعة. الرصيد المتبقي: ${result.cards_remaining ?? 'غير متاح'}.`)
@@ -373,8 +800,8 @@ export default function PrintCardsPage() {
       }
     } catch (error) {
       printWindow.close()
-      console.error('Card save failed:', error)
-      alert('تعذّر تأكيد نتيجة الطلب بسبب مشكلة اتصال. قد يكون الحفظ قد اكتمل؛ تحقّق من سجل الكروت والرصيد قبل أي محاولة جديدة.')
+      console.error('Card save request failed:', error)
+      alert('انقطع الاتصال قبل تأكيد النتيجة. الدفعة ومفتاحها محفوظان في الصفحة؛ اضغط تأكيد الطباعة مرة أخرى، وسيمنع النظام خصم الرصيد مرتين.')
     } finally {
       setIsSaving(false)
     }
@@ -383,7 +810,8 @@ export default function PrintCardsPage() {
   const exportSamplePDF = async (
     cardsToPrint: any[] = [previewCard],
     batch = false,
-    preopenedWindow?: Window | null
+    preopenedWindow?: Window | null,
+    printSettings: any = formData
   ): Promise<boolean> => {
     if (!Array.isArray(cardsToPrint) || cardsToPrint.length === 0) {
       alert('لا توجد كروت جاهزة للطباعة.')
@@ -423,52 +851,77 @@ export default function PrintCardsPage() {
     const c = card.colors
     let bg = c.bg
     let radius = '15px'
+
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
+
+    let shadow = '0 10px 30px rgba(0,0,0,0.3)'
+    let border = card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
+
+    if (card.cardEffect === '3d') {
+      shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
+      border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
+    } else if (card.cardEffect === 'shadow') {
+      shadow = '0 25px 60px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.4)'
+    } else if (card.cardEffect === 'glow') {
+      shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
+      border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
+    }
+
+    const allowedFontFamilies = Object.values(fontFamilies)
+    const fontFamily = allowedFontFamilies.includes(card.fontFamily)
+      ? card.fontFamily
+      : fontFamilies.default
+
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; background: ${bg}; border-radius: ${radius}; border: ${card.borderWidth}px ${card.borderStyle} ${c.border}; padding: 20px; width: 100%; box-sizing: border-box; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${card.cardShape === 'triangle' ? 'background-image: linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%);' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
             <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-          <div style="flex: 1; text-align: center; padding: 12px; background: ${c.panelAlt}; border-radius: 12px; border: 2px solid ${c.accent};">
-            <div style="font-size: 11px; color: ${c.text}; opacity: 0.9; margin-bottom: 5px;">🌐 الشبكة</div>
-            <div style="font-size: ${card.networkFontSize}px; color: ${card.networkColor}; font-weight: bold;">${escapeHtml(card.network)}</div>
+        <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
+          <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.borderWidth}px ${card.borderStyle} ${card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:inset 0 2px 10px rgba(0,0,0,0.2);">
+            <div style="font-size:${card.labelFontSize}px; color:${card.labelColor}; opacity:0.9; margin-bottom:4px;">🌐 الشبكة</div>
+            ${card.textStyles?.network?.show !== false ? `<div style="${getCardTextCss(card, 'network')}font-weight:bold;line-height:1.2;text-shadow:0 3px 10px rgba(0,0,0,0.4);">${escapeHtml(card.network)}</div>` : ''}
           </div>
-          ${card.qrEnabled ? `<div style="background: #fff; padding: 4px; border-radius: 8px; margin-left: 10px; border: 2px solid ${c.accent};">
-            <img src="${qrDataUrl}" width="${card.qrSize}" height="${card.qrSize}" alt="QR Code" style="display:block; width:${card.qrSize}px; height:${card.qrSize}px;" />
+          ${(card.qrEnabled || card.rechargeText) ? `<div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
+            ${card.qrEnabled ? `<div style="background:#fff; border-radius:10px; padding:4px; box-shadow:0 4px 15px rgba(0,0,0,0.3); border:2px solid ${c.accent};">
+              <img src="${qrDataUrl}" width="${card.qrSize}" height="${card.qrSize}" alt="QR Code" style="display:block; width:${card.qrSize}px; height:${card.qrSize}px;" />
+            </div>` : ''}
+            ${card.rechargeText && card.textStyles?.recharge?.show !== false ? `<div style="background:${c.rechargeBg}; border-radius:10px; padding:6px 10px; box-shadow:0 4px 15px rgba(37,99,235,0.35); border:1px solid ${c.accent};">
+              <div style="${getCardTextCss(card, 'recharge')}font-weight:bold;white-space:nowrap;text-shadow:0 2px 5px rgba(0,0,0,0.3);">⚡ ${escapeHtml(card.rechargeText)}</div>
+            </div>` : ''}
           </div>` : ''}
         </div>
-        <div style="background: ${c.panel}; border-radius: 12px; padding: 15px; margin: 15px 0; border: 2px dashed ${c.accent}; text-align: center;">
-          <div style="font-size: 11px; color: ${card.labelColor}; margin-bottom: 8px;">🔢 رقم الكرت / بيانات الدخول</div>
-          <div style="font-size: ${card.cardNumberFontSize}px; color: ${card.usernameColor}; font-weight: bold; font-family: monospace; letter-spacing: 3px; background: ${c.panel}; padding: 10px; border-radius: 8px;">${escapeHtml(card.username)}</div>
+        <div style="grid-area:username; min-width:0; align-self:stretch; background: ${c.panel}; border-radius: 12px; padding: 10px 8px; margin:0; border: 2px dashed ${c.accent}; text-align: center;">
+          <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 5px;">🔢 رقم الكرت / بيانات الدخول</div>
+          ${card.textStyles?.username?.show !== false ? `<div style="${getCardTextCss(card, 'username')}font-weight:bold;letter-spacing:3px;text-shadow:0 3px 10px rgba(0,0,0,0.5);">${escapeHtml(card.username)}</div>` : ''}
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: ${card.infoFontSize}px;">
-          <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
-            <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">⏱️ الصلاحية</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.validity)}</div>
+        <div style="grid-area:info; min-width:0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: ${card.infoFontSize}px;">
+          <div style="background: ${c.panel}; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
+            <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 3px;">⏱️ الصلاحية</div>
+            ${card.textStyles?.validity?.show !== false ? `<div style="${getCardTextCss(card, 'validity')}font-weight:bold;">${escapeHtml(card.validity)}</div>` : ''}
           </div>
-          <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
-            <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">⏰ الوقت</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.cardTime)}</div>
+          <div style="background: ${c.panel}; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
+            <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 3px;">⏰ الوقت</div>
+            ${card.textStyles?.time?.show !== false ? `<div style="${getCardTextCss(card, 'time')}font-weight:bold;">${escapeHtml(card.cardTime)}</div>` : ''}
           </div>
-          <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
-            <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">💾 البيانات</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.dataPackage)}</div>
+          <div style="background: ${c.panel}; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
+            <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 3px;">💾 البيانات</div>
+            ${card.textStyles?.data?.show !== false ? `<div style="${getCardTextCss(card, 'data')}font-weight:bold;">${escapeHtml(card.dataPackage)}</div>` : ''}
           </div>
-          <div style="background: ${c.panel}; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
-            <div style="font-size: 10px; color: ${card.labelColor}; margin-bottom: 4px;">💰 السعر</div>
-            <div style="font-weight: bold; color: ${card.infoColor};">${escapeHtml(card.price)}</div>
+          <div style="background: ${c.panel}; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid ${c.accent};">
+            <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 3px;">💰 السعر</div>
+            ${card.textStyles?.price?.show !== false ? `<div style="${getCardTextCss(card, 'price')}font-weight:bold;">${escapeHtml(card.price)}</div>` : ''}
           </div>
         </div>
-        ${card.distributor ? `<div style="text-align: center; margin-top: 10px; font-size: 11px; color: ${card.labelColor}; background: ${c.panelAlt}; padding: 6px; border-radius: 8px;">الموزع: ${escapeHtml(card.distributor)}</div>` : ''}
-        ${card.rechargeText ? `<div style="background: ${c.rechargeBg}; color: #fff; padding: 8px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; font-weight: bold; border: 1px solid ${c.accent};">⚡ ${escapeHtml(card.rechargeText)}</div>` : ''}
-        ${card.specialOffer ? `<div style="background: ${c.offerBg}; color: ${c.offerText}; padding: 8px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; border: 1px solid ${c.accent};">🎁 ${escapeHtml(card.specialOffer)}</div>` : ''}
-        <div style="position:relative; z-index:1; margin-top:10px; padding:8px; text-align:center; font-size:10px; line-height:1.8; font-weight:600; color:${c.text}; background:${c.panelAlt}; border:1px solid ${c.accent}; border-radius:8px;">احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>
-            <div style="position:relative; z-index:1; text-align:center; margin-top:10px; padding-top:8px; border-top:1px solid ${c.accent}; font-size:10px; opacity:0.8; color:${c.text};">جساس نت كرت – JASSAS NET CARD</div>
+        ${card.distributor && card.textStyles?.distributor?.show !== false ? `<div style="grid-column:1 / -1; margin-top:0;${getCardTextCss(card, 'distributor')}">الموزع: ${escapeHtml(card.distributor)}</div>` : ''}
+        ${card.specialOffer && card.textStyles?.offer?.show !== false ? `<div style="grid-column:1 / -1; margin-top:0;position:relative;z-index:1;${getCardTextCss(card, 'offer')}">🎁 ${escapeHtml(card.specialOffer)}</div>` : ''}
+        ${card.customMessage && card.textStyles?.customMessage?.show !== false ? `<div style="grid-column:1 / -1; margin-top:0;position:relative;z-index:1;${getCardTextCss(card, 'customMessage')}">${escapeHtml(card.customMessage)}</div>` : ''}
+        ${card.textStyles?.warning?.show !== false ? `<div style="grid-column:1 / -1; position:relative;z-index:1;margin-top:0;${getCardTextCss(card, 'warning')}line-height:1.6;font-weight:600;">احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>` : ''}
+            <div style="grid-column:1 / -1; position:relative; z-index:1; text-align:center; margin-top:0; padding-top:6px; border-top:1px solid ${c.accent}; font-size:10px; opacity:0.8; color:${c.text};">جساس نت كرت – JASSAS NET CARD</div>
       </div>
     `
     cardsHTML.push(cardHTML)
     }
-    printWindow.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>عينة كرت - ${escapeHtml(formData.networkName)}</title><style>@page { size: A4; margin: 20mm; } body { font-family: Arial, Tahoma, sans-serif; background: #f5f5f5; padding: 20px; } .no-print { background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 12px; } .no-print button { padding: 12px 25px; margin: 5px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; } @media print { body { padding: 0; background: #fff; } .no-print { display: none !important; } }</style></head><body><div class="no-print"><h2>🖨️ عينة الكرت - طباعة PDF</h2><p>اضغط Ctrl+P ثم اختر "حفظ كـ PDF"</p><button onclick="window.print()" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #0f172a;">️ طباعة / حفظ PDF</button><button onclick="window.close()" style="background: #ef4444; color: #fff;">إغلاق</button></div><div class="cards-grid" style="display:grid;grid-template-columns:repeat(${batch ? Math.max(1, Math.min(6, Number(formData.colsCount) || 3)) : 1},minmax(0,1fr));gap:12px;align-items:start;">${cardsHTML.join('')}</div></body></html>`)
+    printWindow.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>عينة كرت - ${escapeHtml(printSettings.networkName)}</title><style>@page { size: A4; margin: 20mm; } body { font-family: Arial, Tahoma, sans-serif; background: #f5f5f5; padding: 20px; } .no-print { background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 12px; } .no-print button { padding: 12px 25px; margin: 5px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; } @media print { body { padding: 0; background: #fff; } .no-print { display: none !important; } }</style></head><body><div class="no-print"><h2>🖨️ عينة الكرت - طباعة PDF</h2><p>اضغط Ctrl+P ثم اختر "حفظ كـ PDF"</p><button onclick="window.print()" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #0f172a;">️ طباعة / حفظ PDF</button><button onclick="window.close()" style="background: #ef4444; color: #fff;">إغلاق</button></div><div class="cards-grid" style="display:grid;grid-template-columns:repeat(${batch ? Math.max(1, Math.min(6, Number(printSettings.colsCount) || 3)) : 1},minmax(0,1fr));gap:12px;align-items:start;">${cardsHTML.join('')}</div></body></html>`)
     printWindow.document.close()
     return true
   }
@@ -477,48 +930,31 @@ export default function PrintCardsPage() {
     return <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #1e293b)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><p>جاري التحميل...</p></div>
   }
 
-  const InputRow = ({ label, children, icon = '', fieldId = '' }: { label: string, children: any, icon?: string, fieldId?: string }) => (
-    <div 
-      style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '12px', 
-        marginBottom: '12px', 
-        padding: '12px 15px', 
-        background: activeField === fieldId ? 'rgba(0,255,255,0.15)' : 'rgba(0,0,0,0.3)', 
-        borderRadius: '12px', 
-        border: activeField === fieldId ? '2px solid #FFD700' : '1px solid rgba(124,58,237,0.30)',
-        transition: 'all 0.3s ease',
-        boxShadow: activeField === fieldId ? '0 0 20px rgba(124,58,237,0.45)' : 'none'
-      }}
-    >
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {children}
-      </div>
-      <div style={{ color: activeField === fieldId ? '#FFD700' : '#e2e8f0', fontWeight: 'bold', fontSize: '14px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px', minWidth: '120px', justifyContent: 'flex-end' }}>
-        {icon && <span style={{ fontSize: '16px' }}>{icon}</span>}
-        {label}
-      </div>
-    </div>
-  )
+
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2d3748 100%)', padding: '15px', fontFamily: 'Segoe UI, Tahoma' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className="print-cards-shell" style={{ minHeight: '100vh', padding: '15px', fontFamily: 'Segoe UI, Tahoma' }}>
+      <div style={{ maxWidth: '1120px', width: '100%', margin: '0 auto' }}>
         
-        {/* الشعار */}
-        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: 'linear-gradient(135deg, #1d4ed8 0%, #7c3aed 65%, #4338ca 100%)', borderRadius: '20px', boxShadow: '0 10px 40px rgba(102,126,234,0.4)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-            <div style={{ fontSize: '40px' }}>📶</div>
-            <div>
-              <h1 style={{ color: '#FFD700', fontSize: '32px', margin: '0 0 3px 0', fontWeight: 'bold', textShadow: '0 3px 10px rgba(0,0,0,0.5)' }}>Jassas Net Card</h1>
-              <p style={{ color: '#fff', fontSize: '13px', margin: 0, opacity: 0.9 }}>نظام إدارة شبكات المايكروتك الاحترافي</p>
+        <header className="print-cards-header">
+          <div className="print-cards-brand">
+            <BrandLogo compact />
+            <div className="print-cards-brand-copy">
+              <h1>إدارة وطباعة كروت الإنترنت</h1>
+              <p>Jassas Net Card · JASSAS SOFT PRO</p>
             </div>
           </div>
-        </div>
+          <div className="print-cards-header-actions">
+            <AuthThemeToggle />
+            <button type="button" className="print-cards-back" onClick={() => router.push("/dashboard")}>
+              <span aria-hidden="true">→</span>
+              العودة للوحة التحكم
+            </button>
+          </div>
+        </header>
 
         {/* المعاينة الديناميكية - ثابتة في الأعلى */}
-        <div ref={previewRef} style={{ 
+        <div ref={previewRef} className="print-cards-preview studio-preview-dock" style={{
           position: 'sticky', 
           top: '10px', 
           zIndex: 100, 
@@ -541,12 +977,12 @@ export default function PrintCardsPage() {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '380px', width: '100%', position: 'relative', overflow: 'hidden' }}>
+            <div className="print-cards-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '560px', width: '100%', position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '8px', padding: '12px' }}>
               <div aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-25deg)', width: '95%', textAlign: 'center', fontSize: '16px', opacity: 0.12, fontWeight: 900, whiteSpace: 'normal', lineHeight: 1.8, pointerEvents: 'none', zIndex: 0, color: previewCard.colors.accent }}>جساس نت كرت<br />JASSAS NET CARD</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: '12px' }}>
+              <div style={{ gridArea: 'header', minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 0 }}>
                 <div style={{ flex: 1, background: previewCard.colors.panelAlt, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, marginBottom: '4px' }}>🌐 الشبكة</div>
-                  <h3 style={{ margin: 0, fontSize: previewCard.networkFontSize + 'px', color: previewCard.networkColor, fontWeight: 'bold', lineHeight: 1.2, textShadow: '0 3px 10px rgba(0,0,0,0.4)' }}>{previewCard.network}</h3>
+                  {previewCard.textStyles?.network?.show !== false && <h3 style={{ margin: 0, fontWeight: 'bold', lineHeight: 1.2, textShadow: '0 3px 10px rgba(0,0,0,0.4)', ...getCardTextStyle(previewCard, 'network') }}>{previewCard.network}</h3>}
                 </div>
                 {(previewCard.qrEnabled || previewCard.rechargeText) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
@@ -555,42 +991,157 @@ export default function PrintCardsPage() {
                         <QRCode cardNumber={previewCard.username} size={previewCard.qrSize} />
                       </div>
                     )}
-                    {previewCard.rechargeText && (
+                    {previewCard.rechargeText && previewCard.textStyles?.recharge?.show !== false && (
                       <div style={{ background: previewCard.colors.rechargeBg, borderRadius: '10px', padding: '6px 10px', boxShadow: '0 4px 15px rgba(37,99,235,0.35)', border: '1px solid ' + previewCard.colors.accent }}>
-                        <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold', whiteSpace: 'nowrap', textShadow: '0 2px 5px rgba(0,0,0,0.3)' }}> {previewCard.rechargeText}</div>
+                        <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textShadow: '0 2px 5px rgba(0,0,0,0.3)', ...getCardTextStyle(previewCard, 'recharge') }}>⚡ {previewCard.rechargeText}</div>
                       </div>
                     )}
                   </div>
                 )}
               </div>
-              <div style={{ background: previewCard.colors.panel, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '12px', position: 'relative', zIndex: 1, border: '2px dashed ' + previewCard.colors.accent, marginBottom: '10px', boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.3)' }}>
+              <div style={{ gridArea: 'username', minWidth: 0, alignSelf: 'stretch', background: previewCard.colors.panel, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 8px', position: 'relative', zIndex: 1, border: '2px dashed ' + previewCard.colors.accent, marginBottom: 0, boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.3)' }}>
                 <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px' }}>🔢 رقم الكرت / اسم المستخدم</div>
-                <div style={{ fontSize: previewCard.cardNumberFontSize + 'px', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center', letterSpacing: '3px', color: previewCard.usernameColor, textShadow: '0 3px 10px rgba(0,0,0,0.5)', background: previewCard.colors.panel, padding: '8px', borderRadius: '8px' }}>{previewCard.username}</div>
+                {previewCard.textStyles?.username?.show !== false && <div style={{ ...getCardTextStyle(previewCard, 'username'), fontWeight: 'bold', letterSpacing: '3px', textShadow: '0 3px 10px rgba(0,0,0,0.5)' }}>{previewCard.username}</div>}
               </div>
-              <div style={{ fontSize: previewCard.infoFontSize + 'px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+              <div style={{ gridArea: 'info', minWidth: 0, fontSize: previewCard.infoFontSize + 'px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                 <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏱️ الصلاحية</div>
-                  <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.validity}</div>
+                  {previewCard.textStyles?.validity?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'validity') }}>{previewCard.validity}</div>}
                 </div>
                 <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏰ الوقت</div>
-                  <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.cardTime}</div>
+                  {previewCard.textStyles?.time?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'time') }}>{previewCard.cardTime}</div>}
                 </div>
                 <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💾 البيانات</div>
-                  <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.dataPackage}</div>
+                  {previewCard.textStyles?.data?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'data') }}>{previewCard.dataPackage}</div>}
                 </div>
                 <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💰 السعر</div>
-                  <div style={{ fontWeight: 'bold', color: previewCard.infoColor, fontSize: (previewCard.infoFontSize - 1) + 'px' }}>{previewCard.price}</div>
+                  {previewCard.textStyles?.price?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'price') }}>{previewCard.price}</div>}
                 </div>
               </div>
-              {previewCard.distributor && <div style={{ textAlign: 'center', marginTop: '8px', fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, position: 'relative', zIndex: 1, background: previewCard.colors.panelAlt, padding: '5px', borderRadius: '8px' }}>الموزع: {previewCard.distributor}</div>}
-              {previewCard.specialOffer && <div style={{ marginTop: '8px', padding: '6px', background: previewCard.colors.offerBg, borderRadius: '8px', fontSize: previewCard.labelFontSize + 'px', textAlign: 'center', position: 'relative', zIndex: 1, color: previewCard.colors.offerText, border: '1px solid ' + previewCard.colors.accent }}>🎁 {previewCard.specialOffer}</div>}
-                            <div style={{ marginTop: '9px', padding: '7px 8px', textAlign: 'center', position: 'relative', zIndex: 1, background: previewCard.colors.panelAlt, color: previewCard.colors.infoText, border: '1px solid ' + previewCard.colors.accent, borderRadius: '8px', fontSize: '10px', lineHeight: 1.7, fontWeight: 600 }}>احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>
+              {previewCard.distributor && previewCard.textStyles?.distributor?.show !== false && <div style={{ gridColumn: '1 / -1', marginTop: 0, position: 'relative', zIndex: 1, ...getCardTextStyle(previewCard, 'distributor') }}>الموزع: {previewCard.distributor}</div>}
+              {previewCard.specialOffer && previewCard.textStyles?.offer?.show !== false && <div style={Object.assign(
+                  {
+                    gridColumn: '1 / -1',
+                    marginTop: 0,
+                    padding: '6px',
+                    background: previewCard.colors.offerBg,
+                    borderRadius: '8px',
+                    textAlign: 'center' as const,
+                    position: 'relative' as const,
+                    zIndex: 1,
+                    border: '1px solid ' + previewCard.colors.accent,
+                  },
+                  getCardTextStyle(previewCard, 'offer'),
+                  {
+                    background: previewCard.textStyles?.offer?.background && previewCard.textStyles.offer.background !== 'transparent'
+                      ? previewCard.textStyles.offer.background
+                      : previewCard.colors.offerBg,
+                    border: Number(previewCard.textStyles?.offer?.borderWidth) > 0
+                      ? getCardTextStyle(previewCard, 'offer').border
+                      : '1px solid ' + previewCard.colors.accent,
+                  }
+                )}>🎁 {previewCard.specialOffer}</div>}
+              {previewCard.customMessage && previewCard.textStyles?.customMessage?.show !== false && (
+                <div style={{ gridColumn: '1 / -1', ...getCardTextStyle(previewCard, 'customMessage'), marginTop: 0, position: 'relative', zIndex: 1 }}>
+                  {previewCard.customMessage}
+                </div>
+              )}
+                            {previewCard.textStyles?.warning?.show !== false && <div style={{ gridColumn: '1 / -1', marginTop: 0, position: 'relative', zIndex: 1, lineHeight: 1.6, fontWeight: 600, ...getCardTextStyle(previewCard, 'warning') }}>احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>}
             </div>
           </div>
         </div>
+
+        <nav className="studio-section-nav" aria-label="أقسام استوديو تصميم الكروت">
+          {[
+            { id: 'identity', label: 'الشبكة والبروفايل', icon: '🌐', target: 'studio-field-profile' },
+            { id: 'numbers', label: 'أرقام الكروت', icon: '🔢', target: 'studio-field-prefix' },
+            { id: 'duration', label: 'الصلاحية والسعة', icon: '⏱️', target: 'studio-field-validity' },
+            { id: 'time', label: 'الوقت والسعر', icon: '💳', target: 'studio-field-cardTime' },
+            { id: 'content', label: 'النصوص والعروض', icon: '✍️', target: 'studio-field-customMessage' },
+            { id: 'design', label: 'شكل وألوان الكرت', icon: '🎨', target: 'studio-section-design' },
+            { id: 'typography', label: 'الخطوط والتنسيق', icon: '🔤', target: 'studio-section-typography' },
+            { id: 'print', label: 'الكمية والطباعة', icon: '🖨️', target: 'studio-field-count' },
+            { id: 'history', label: 'سجل الدفعات', icon: '🗂️', target: 'batch-history-heading' },
+          ].map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              className={`studio-section-tab${activeStudioSection === section.id ? ' is-active' : ''}`}
+              aria-current={activeStudioSection === section.id ? 'location' : undefined}
+              onClick={() => {
+                setActiveStudioSection(section.id)
+                document.getElementById(section.target)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }}
+            >
+              <span aria-hidden="true">{section.icon}</span>
+              <span>{section.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <section aria-labelledby="batch-history-heading" style={{ marginBottom: '20px', padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(214,173,85,0.45)', boxShadow: '0 8px 28px rgba(0,0,0,0.18)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <div>
+              <h2 id="batch-history-heading" style={{ color: '#f3d58a', margin: 0, fontSize: '19px' }}>🗂️ سجل دفعات الطباعة</h2>
+              <p style={{ color: '#cbd5e1', margin: '6px 0 0', fontSize: '13px' }}>استرجع أي دفعة سابقة واطبعها بنفس تصميمها دون خصم جديد.</p>
+            </div>
+            <button type="button" onClick={() => {
+              setHistoryLoading(true)
+              setHistoryError('')
+              void fetch('/api/print-cards', { cache: 'no-store' })
+                .then(async (response) => {
+                  const result = await response.json().catch(() => null)
+                  if (!response.ok || result?.success !== true) throw new Error(result?.message || 'تعذر تحديث السجل.')
+                  setBatchHistory(Array.isArray(result.batches) ? result.batches : [])
+                })
+                .catch((error) => setHistoryError(error instanceof Error ? error.message : 'تعذر تحديث السجل.'))
+                .finally(() => setHistoryLoading(false))
+            }} disabled={historyLoading} style={{ minHeight: '42px', padding: '9px 14px', borderRadius: '10px', border: '1px solid rgba(214,173,85,0.5)', background: 'rgba(30,64,175,0.35)', color: '#fff', fontWeight: 700, cursor: historyLoading ? 'wait' : 'pointer' }}>
+              {historyLoading ? 'جارٍ التحديث...' : '↻ تحديث السجل'}
+            </button>
+          </div>
+
+          {historyError && <p role="alert" style={{ color: '#fca5a5', fontSize: '13px' }}>{historyError}</p>}
+          {historyLoading && batchHistory.length === 0 && <p role="status" style={{ color: '#cbd5e1' }}>جارٍ تحميل الدفعات...</p>}
+          {!historyLoading && !historyError && batchHistory.length === 0 && <p style={{ color: '#cbd5e1', fontSize: '14px' }}>لا توجد دفعات محفوظة حتى الآن.</p>}
+
+          {batchHistory.length > 0 && (
+            <div style={{ display: 'grid', gap: '10px' }}>
+              {batchHistory.map((batch) => (
+                <div key={batch.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', padding: '13px', borderRadius: '12px', background: 'rgba(15,23,42,0.55)', border: '1px solid rgba(148,163,184,0.2)' }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ color: '#f8fafc', fontWeight: 800, fontSize: '14px' }}>{Number(batch.card_count) || 0} كرت</div>
+                    <div style={{ color: '#cbd5e1', fontSize: '12px', marginTop: '5px' }}>
+                      {batch.created_at ? new Date(batch.created_at).toLocaleString('ar') : 'تاريخ غير متاح'}
+                    </div>
+                    <div style={{ color: '#f3d58a', fontSize: '12px', marginTop: '4px' }}>
+                      الرصيد بعد الحفظ: {batch.cards_remaining ?? 'غير متاح'}
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => void restoreBatch(String(batch.id))} disabled={restoringBatchId !== null} style={{ minHeight: '44px', padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(96,165,250,0.65)', background: 'linear-gradient(135deg,#1d4ed8,#4338ca)', color: '#fff', fontWeight: 800, cursor: restoringBatchId !== null ? 'wait' : 'pointer', opacity: restoringBatchId !== null && restoringBatchId !== batch.id ? 0.55 : 1 }}>
+                    {restoringBatchId === batch.id ? 'جارٍ الاسترجاع...' : 'استرجاع وإعادة طباعة'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {restoredBatchId && printedCards.length > 0 && (
+          <div role="status" style={{ marginBottom: '18px', padding: '18px', borderRadius: '16px', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(96,165,250,0.55)', color: '#e2e8f0' }}>
+            <div style={{ fontWeight: 800, marginBottom: '8px', color: '#bfdbfe' }}>تم استرجاع الدفعة المحفوظة</div>
+            <p style={{ fontSize: '14px', lineHeight: 1.8, marginBottom: '12px' }}>هذه إعادة طباعة فقط. لن يتم إرسال طلب حفظ ولن يُخصم أي رصيد.</p>
+            <button type="button" onClick={async () => {
+              const prepared = await exportSamplePDF(printedCards, true, undefined, batchPrintSnapshot?.settings || formData)
+              if (prepared) alert('تم تجهيز صفحة الطباعة للدفعة المسترجعة.')
+            }} style={{ width: '100%', minHeight: '48px', padding: '13px 16px', border: '1px solid rgba(147,197,253,0.7)', borderRadius: '12px', background: 'linear-gradient(135deg, #1d4ed8, #4338ca)', color: '#fff', fontWeight: 800, cursor: 'pointer' }}>
+              🖨️ إعادة طباعة الدفعة المسترجعة
+            </button>
+          </div>
+        )}
 
         {printRetryAvailable && printedCards.length > 0 && (
           <div role="status" style={{ marginBottom: '18px', padding: '18px', borderRadius: '16px', background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.55)', color: '#e2e8f0' }}>
@@ -598,7 +1149,7 @@ export default function PrintCardsPage() {
             <p style={{ fontSize: '14px', lineHeight: 1.8, marginBottom: '12px' }}>أعد تجهيز صفحة الطباعة للدفعة نفسها. لن يُرسل طلب حفظ جديد ولن يُخصم الرصيد مرة أخرى.</p>
             <button
               onClick={async () => {
-                const prepared = await exportSamplePDF(printedCards, true)
+                const prepared = await exportSamplePDF(printedCards, true, undefined, batchPrintSnapshot?.settings || formData)
                 if (prepared) {
                   setPrintRetryAvailable(false)
                   alert('تم تجهيز صفحة الطباعة للدفعة المحفوظة.')
@@ -612,12 +1163,12 @@ export default function PrintCardsPage() {
         )}
 
         {/* إعدادات الكرت */}
-        <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(124,58,237,0.30)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
+        <div className="print-cards-settings" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(124,58,237,0.30)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
           <h2 style={{ color: '#FFD700', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '28px' }}>⚙️</span> إعدادات الكرت
           </h2>
 
-          <InputRow label="البروفايل" icon="👤" fieldId="profile">
+          <InputRow activeField={activeField} label="البروفايل" icon="👤" fieldId="profile">
             <select value={formData.profile} onChange={(e) => { setFormData({...formData, profile: e.target.value}); setActiveField('profile') }} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }}>
               <option value="DEFAULT">DEFAULT</option>
               <option value="PREMIUM">PREMIUM</option>
@@ -625,7 +1176,7 @@ export default function PrintCardsPage() {
             </select>
           </InputRow>
 
-          <InputRow label="الصلاحية" icon="✓" fieldId="validity">
+          <InputRow activeField={activeField} label="الصلاحية" icon="✓" fieldId="validity">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
               <input type="number" value={formData.validity} onChange={(e) => { setFormData({...formData, validity: e.target.value}); setActiveField('validity') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
               <select value={formData.validityType} onChange={(e) => { setFormData({...formData, validityType: e.target.value}); setActiveField('validity') }} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
@@ -638,7 +1189,7 @@ export default function PrintCardsPage() {
             </div>
           </InputRow>
 
-          <InputRow label="مدة المستخدم" icon="⏱️" fieldId="userDuration">
+          <InputRow activeField={activeField} label="مدة المستخدم" icon="⏱️" fieldId="userDuration">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
               <input type="number" value={formData.userDuration} onChange={(e) => { setFormData({...formData, userDuration: e.target.value}); setActiveField('userDuration') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
               <select value={formData.userDurationType} onChange={(e) => { setFormData({...formData, userDurationType: e.target.value}); setActiveField('userDuration') }} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
@@ -651,7 +1202,7 @@ export default function PrintCardsPage() {
             </div>
           </InputRow>
 
-          <InputRow label="باقة البيانات" icon="💾" fieldId="dataPackage">
+          <InputRow activeField={activeField} label="باقة البيانات" icon="💾" fieldId="dataPackage">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
               <select value={formData.dataPackage} onChange={(e) => { setFormData({...formData, dataPackage: e.target.value}); setActiveField('dataPackage') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                 <option value="unlimited">بدون حد</option>
@@ -669,11 +1220,11 @@ export default function PrintCardsPage() {
             </div>
           </InputRow>
 
-          <InputRow label="اسم الشبكة" icon="🌐" fieldId="network">
+          <InputRow activeField={activeField} label="اسم الشبكة" icon="🌐" fieldId="network">
             <input type="text" value={formData.networkName} onChange={(e) => { setFormData({...formData, networkName: e.target.value}); setActiveField('network') }} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
-          <InputRow label="وقت الكرت" icon="" fieldId="cardTime">
+          <InputRow activeField={activeField} label="وقت الكرت" icon="" fieldId="cardTime">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
               <input type="number" value={formData.cardTime} onChange={(e) => { setFormData({...formData, cardTime: e.target.value}); setActiveField('cardTime') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
               <select value={formData.cardTimeType} onChange={(e) => { setFormData({...formData, cardTimeType: e.target.value}); setActiveField('cardTime') }} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
@@ -685,47 +1236,68 @@ export default function PrintCardsPage() {
             </div>
           </InputRow>
 
-          <InputRow label="سعر الكرت" icon="💰" fieldId="price">
+          <InputRow activeField={activeField} label="سعر الكرت" icon="💰" fieldId="price">
             <input type="number" value={formData.cardPrice} onChange={(e) => { setFormData({...formData, cardPrice: e.target.value}); setActiveField('price') }} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(183,243,74,0.65)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
-          <InputRow label="الموزع" icon="" fieldId="distributor">
+          <InputRow activeField={activeField} label="الموزع" icon="" fieldId="distributor">
             <input type="text" value={formData.distributor} onChange={(e) => { setFormData({...formData, distributor: e.target.value}); setActiveField('distributor') }} placeholder="عبدالرحمن" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
-          <InputRow label="بداية اسم المستخدم" icon="🔢" fieldId="prefix">
+          <InputRow activeField={activeField} label="بداية اسم المستخدم" icon="🔢" fieldId="prefix">
             <input type="text" value={formData.usernamePrefix} onChange={(e) => { setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('prefix') }} placeholder="86" maxLength={5} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
-          <InputRow label={`عدد الأرقام: ${formData.usernameLength}`} icon="" fieldId="length">
+          <InputRow activeField={activeField} label={`عدد الأرقام: ${formData.usernameLength}`} icon="" fieldId="length">
             <input type="range" min="6" max="20" value={formData.usernameLength} onChange={(e) => { setFormData({...formData, usernameLength: parseInt(e.target.value)}); setActiveField('length') }} style={{ flex: 1 }} />
           </InputRow>
 
-          <InputRow label="لون اسم المستخدم" icon="🎨" fieldId="usernameColor">
+          <InputRow activeField={activeField} label="لون اسم المستخدم" icon="🎨" fieldId="usernameColor">
             <input type="color" value={formData.usernameColor} onChange={(e) => { setFormData({...formData, usernameColor: e.target.value}); setActiveField('usernameColor') }} style={{ flex: 1, height: '45px', border: 'none', borderRadius: '8px', cursor: 'pointer' }} />
           </InputRow>
 
-          <InputRow label="عدد الكروت" icon="📦" fieldId="count">
-            <input type="number" value={formData.cardsCount} onChange={(e) => { setFormData({...formData, cardsCount: parseInt(e.target.value) || 100}); setActiveField('count') }} min="1" max="10000" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+          <InputRow activeField={activeField} label="عدد الكروت" icon="📦" fieldId="count">
+            <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={cardsCountDraft} onChange={(e) => {
+              const next = e.target.value.replace(/[^0-9]/g, '').slice(0, 5)
+              setCardsCountDraft(next)
+              if (next !== '' && Number(next) >= 1 && Number(next) <= 10000) setFormData((current) => ({ ...current, cardsCount: Number(next) }))
+              setActiveField('count')
+            }} onBlur={() => {
+              const parsed = Number(cardsCountDraft)
+              if (!cardsCountDraft || !Number.isInteger(parsed) || parsed < 1 || parsed > 10000) {
+                setCardsCountDraft(String(formData.cardsCount))
+              }
+            }} aria-label="عدد الكروت من 1 إلى 10000" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
-          <InputRow label="عدد الأعمدة" icon="" fieldId="cols">
-            <input type="number" value={formData.colsCount} onChange={(e) => { setFormData({...formData, colsCount: parseInt(e.target.value) || 3}); setActiveField('cols') }} min="1" max="10" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+          <InputRow activeField={activeField} label="عدد الأعمدة" icon="" fieldId="cols">
+            <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={colsCountDraft} onChange={(e) => {
+              const next = e.target.value.replace(/[^0-9]/g, '').slice(0, 2)
+              setColsCountDraft(next)
+              if (next !== '' && Number(next) >= 1 && Number(next) <= 6) setFormData((current) => ({ ...current, colsCount: Number(next) }))
+              setActiveField('cols')
+            }} onBlur={() => {
+              const parsed = Number(colsCountDraft)
+              if (!colsCountDraft || !Number.isInteger(parsed) || parsed < 1 || parsed > 6) {
+                setColsCountDraft(String(formData.colsCount))
+              }
+            }} aria-label="عدد الأعمدة من 1 إلى 6" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
           {/* تصميم الكرت */}
-          <h3 style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 تصميم الكرت</h3>
+          <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 تصميم الكرت</h3>
 
-          <InputRow label="نوع التصميم" icon="🎭" fieldId="cardStyle">
-            <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+          <InputRow activeField={activeField} label="نوع التصميم" icon="🎭" fieldId="cardStyle">
+            <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
               <button onClick={() => { setFormData({...formData, cardStyle: 'plain'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'plain' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'plain' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>عادي</button>
               <button onClick={() => { setFormData({...formData, cardStyle: 'colored'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'colored' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'colored' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ملون</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'three-color'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'three-color' ? 'linear-gradient(135deg, #2563eb, #a855f7)' : 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ثلاثي الألوان</button>
+              <button onClick={() => { setFormData({...formData, cardStyle: 'three-color'}); setActiveField('cardStyle') }} style={{ flex: 1, minWidth: '92px', padding: '12px', background: formData.cardStyle === 'three-color' ? 'linear-gradient(135deg, #2563eb, #a855f7)' : 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ثلاثي الألوان</button>
+              <button onClick={() => { setFormData({...formData, cardStyle: 'luxury'}); setActiveField('cardStyle') }} style={{ flex: 1, minWidth: '92px', padding: '12px', background: formData.cardStyle === 'luxury' ? 'linear-gradient(135deg, #d6ad55, #8b6a28)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'luxury' ? '#101827' : '#fff', border: '1px solid rgba(214,173,85,.55)', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>فاخر</button>
             </div>
           </InputRow>
 
           {formData.cardStyle === 'colored' && (
-            <InputRow label="نظام الألوان" icon="🌈" fieldId="colorScheme">
+            <InputRow activeField={activeField} label="نظام الألوان" icon="🌈" fieldId="colorScheme">
               <select value={formData.colorScheme} onChange={(e) => { setFormData({...formData, colorScheme: e.target.value}); setActiveField('colorScheme') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                 {Object.keys(colorSchemes).map((key: string) => (
                   <option key={key} value={key}>
@@ -746,7 +1318,7 @@ export default function PrintCardsPage() {
             </InputRow>
           )}
 
-          <InputRow label="التأثير" icon="✨" fieldId="cardEffect">
+          <InputRow activeField={activeField} label="التأثير" icon="✨" fieldId="cardEffect">
             <select value={formData.cardEffect} onChange={(e) => { setFormData({...formData, cardEffect: e.target.value}); setActiveField('cardEffect') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
               <option value="plain">عادي</option>
               <option value="gradient">مدرج</option>
@@ -756,15 +1328,16 @@ export default function PrintCardsPage() {
             </select>
           </InputRow>
 
-          <InputRow label="شكل الكرت" icon="📱" fieldId="cardShape">
-            <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+          <InputRow activeField={activeField} label="شكل الكرت" icon="📱" fieldId="cardShape">
+            <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
               <button onClick={() => { setFormData({...formData, cardShape: 'rectangle'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rectangle' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rectangle' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مستطيل</button>
               <button onClick={() => { setFormData({...formData, cardShape: 'square'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'square' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'square' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مربع</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'rounded'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rounded' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rounded' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مدور</button>
+              <button onClick={() => { setFormData({...formData, cardShape: 'rounded'}); setActiveField('cardShape') }} style={{ flex: 1, minWidth: '75px', padding: '10px', background: formData.cardShape === 'rounded' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rounded' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مدور</button>
+              <button onClick={() => { setFormData({...formData, cardShape: 'triangle'}); setActiveField('cardShape') }} style={{ flex: 1, minWidth: '100px', padding: '10px', background: formData.cardShape === 'triangle' ? 'linear-gradient(135deg, #d6ad55, #8b6a28)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'triangle' ? '#101827' : '#fff', border: '1px solid rgba(214,173,85,.55)', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>زخرفة مثلثية</button>
             </div>
           </InputRow>
 
-          <InputRow label="نوع الإطار" icon="框" fieldId="borderStyle">
+          <InputRow activeField={activeField} label="نوع الإطار" icon="框" fieldId="borderStyle">
             <select value={formData.borderStyle} onChange={(e) => { setFormData({...formData, borderStyle: e.target.value}); setActiveField('borderStyle') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
               <option value="solid">متصل ━</option>
               <option value="dashed">متقطع ┄</option>
@@ -772,11 +1345,11 @@ export default function PrintCardsPage() {
             </select>
           </InputRow>
 
-          <InputRow label={`سمك الإطار: ${formData.borderWidth}px`} icon="" fieldId="borderWidth">
+          <InputRow activeField={activeField} label={`سمك الإطار: ${formData.borderWidth}px`} icon="" fieldId="borderWidth">
             <input type="range" min="1" max="8" value={formData.borderWidth} onChange={(e) => { setFormData({...formData, borderWidth: parseInt(e.target.value)}); setActiveField('borderWidth') }} style={{ flex: 1 }} />
           </InputRow>
 
-          <InputRow label="QR Code" icon="📱" fieldId="qr">
+          <InputRow activeField={activeField} label="QR Code" icon="📱" fieldId="qr">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
               <input type="checkbox" checked={formData.enableQR} onChange={(e) => { setFormData({...formData, enableQR: e.target.checked}); setActiveField('qr') }} style={{ width: '22px', height: '22px', cursor: 'pointer' }} />
               <span style={{ color: '#e2e8f0', fontSize: '14px' }}>تفعيل</span>
@@ -784,18 +1357,399 @@ export default function PrintCardsPage() {
           </InputRow>
 
           {formData.enableQR && (
-            <InputRow label={`حجم QR: ${formData.qrSize}px`} icon="📐" fieldId="qrSize">
+            <InputRow activeField={activeField} label={`حجم QR: ${formData.qrSize}px`} icon="📐" fieldId="qrSize">
               <input type="range" min="40" max="80" value={formData.qrSize} onChange={(e) => { setFormData({...formData, qrSize: parseInt(e.target.value)}); setActiveField('qrSize') }} style={{ flex: 1 }} />
             </InputRow>
           )}
 
-          <InputRow label="نص الشحن" icon="⚡" fieldId="recharge">
+          <InputRow activeField={activeField} label="نص الشحن" icon="⚡" fieldId="recharge">
             <input type="text" value={formData.rechargeText} onChange={(e) => { setFormData({...formData, rechargeText: e.target.value}); setActiveField('recharge') }} placeholder="بنكك، تحويل، يوجد شحن..." style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
-          <InputRow label="عرض خاص" icon="" fieldId="special">
+          <InputRow activeField={activeField} label="عرض خاص" icon="" fieldId="special">
             <textarea value={formData.specialOffer} onChange={(e) => { setFormData({...formData, specialOffer: e.target.value}); setActiveField('special') }} rows={2} placeholder="للتواصل: 0123456789" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '14px', resize: 'vertical', textAlign: 'center' }} />
           </InputRow>
+
+          <InputRow activeField={activeField} label="عبارة حرة على الكرت" icon="✨" fieldId="customMessage">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+              <textarea
+                value={formData.customMessage}
+                maxLength={240}
+                onChange={(e) => setFormData({ ...formData, customMessage: e.target.value })}
+                rows={2}
+                placeholder="مثال: رمضان كريم، عيد سعيد، كل عام وأنتم بخير..."
+                style={{ width: '100%', boxSizing: 'border-box', padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(214,173,85,0.55)', borderRadius: '10px', color: '#fff', fontSize: '14px', resize: 'vertical', textAlign: 'center' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0' }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.textStyles.customMessage.show}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      textStyles: {
+                        ...formData.textStyles,
+                        customMessage: {
+                          ...formData.textStyles.customMessage,
+                          show: e.target.checked
+                        }
+                      }
+                    })}
+                  />
+                  إظهار العبارة على الكرت
+                </label>
+                <span style={{ color: '#cbd5e1', fontSize: '12px' }}>
+                  {formData.customMessage.length}/240
+                </span>
+              </div>
+            </div>
+          </InputRow>
+
+
+          {/* محرر تنسيق النصوص */}
+          <section
+            id="studio-section-typography"
+            aria-label="محرر تنسيق النصوص"
+            style={{
+              marginTop: '24px',
+              padding: '18px',
+              borderRadius: '16px',
+              background: 'rgba(15,23,42,0.48)',
+              border: '1px solid rgba(214,173,85,0.55)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.16)'
+            }}
+          >
+            <h3 style={{
+              color: '#f3d58a',
+              fontSize: '18px',
+              fontWeight: 800,
+              margin: '0 0 8px'
+            }}>
+              ✨ محرر تنسيق النصوص
+            </h3>
+            <p style={{
+              color: '#cbd5e1',
+              fontSize: '13px',
+              lineHeight: 1.7,
+              margin: '0 0 15px'
+            }}>
+              اختر أي خانة وعدّل مظهرها. التغييرات تظهر مباشرة في المعاينة.
+            </p>
+
+            <label style={{
+              display: 'block',
+              color: '#e2e8f0',
+              fontSize: '13px',
+              fontWeight: 700,
+              marginBottom: '7px'
+            }}>
+              الخانة المراد تنسيقها
+            </label>
+
+            <select
+              value={selectedTextStyleKey}
+              onChange={(e) => setSelectedTextStyleKey(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                marginBottom: '16px',
+                background: '#172554',
+                color: '#fff',
+                border: '1px solid rgba(214,173,85,0.55)',
+                borderRadius: '10px',
+                fontSize: '15px'
+              }}
+            >
+              <option value="network">اسم الشبكة</option>
+              <option value="username">رقم الكرت / اسم المستخدم</option>
+              <option value="validity">الصلاحية</option>
+              <option value="time">الوقت</option>
+              <option value="data">حجم البيانات</option>
+              <option value="price">السعر</option>
+              <option value="distributor">اسم الموزع</option>
+              <option value="offer">العرض الخاص</option>
+              <option value="recharge">نص الشحن</option>
+              <option value="customMessage">العبارة الحرة</option>
+              <option value="warning">التنبيه</option>
+            </select>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              padding: '12px',
+              marginBottom: '15px',
+              borderRadius: '10px',
+              background: 'rgba(255,255,255,0.06)'
+            }}>
+              <span style={{ color: '#f8fafc', fontSize: '14px', fontWeight: 700 }}>
+                إظهار هذه الخانة على الكرت
+              </span>
+              <input
+                type="checkbox"
+                checked={selectedTextStyle.show !== false}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  textStyles: {
+                    ...formData.textStyles,
+                    [selectedTextStyleKey]: {
+                      ...selectedTextStyle,
+                      show: e.target.checked
+                    }
+                  }
+                })}
+                style={{ width: '22px', height: '22px' }}
+              />
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '12px'
+            }}>
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                حجم الخط: {selectedTextStyle.fontSize}px
+                <input
+                  type="range"
+                  min="8"
+                  max="40"
+                  value={selectedTextStyle.fontSize}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        fontSize: Number(e.target.value)
+                      }
+                    }
+                  })}
+                  style={{ width: '100%', marginTop: '9px' }}
+                />
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                لون الكتابة
+                <input
+                  type="color"
+                  value={selectedTextStyle.color}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        color: e.target.value
+                      }
+                    }
+                  })}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '38px',
+                    marginTop: '5px',
+                    border: 0,
+                    borderRadius: '8px',
+                    background: 'transparent'
+                  }}
+                />
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                نوع الخط
+                <select
+                  value={selectedTextStyle.fontFamily}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        fontFamily: e.target.value
+                      }
+                    }
+                  })}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    marginTop: '5px',
+                    background: '#172554',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <option value="default">افتراضي</option>
+                  <option value="arabic">عربي</option>
+                  <option value="sans">حديث</option>
+                  <option value="serif">كلاسيكي</option>
+                  <option value="mono">رقمي</option>
+                </select>
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                محاذاة الكتابة
+                <select
+                  value={selectedTextStyle.align}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        align: e.target.value
+                      }
+                    }
+                  })}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    marginTop: '5px',
+                    background: '#172554',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <option value="right">يمين</option>
+                  <option value="center">وسط</option>
+                  <option value="left">يسار</option>
+                </select>
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                سمك الإطار: {selectedTextStyle.borderWidth}px
+                <input
+                  type="range"
+                  min="0"
+                  max="6"
+                  value={selectedTextStyle.borderWidth}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        borderWidth: Number(e.target.value)
+                      }
+                    }
+                  })}
+                  style={{ width: '100%', marginTop: '9px' }}
+                />
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                لون الإطار
+                <input
+                  type="color"
+                  value={selectedTextStyle.borderColor}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        borderColor: e.target.value
+                      }
+                    }
+                  })}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '38px',
+                    marginTop: '5px',
+                    border: 0,
+                    borderRadius: '8px',
+                    background: 'transparent'
+                  }}
+                />
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                شكل الإطار
+                <select
+                  value={selectedTextStyle.borderStyle}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        borderStyle: e.target.value
+                      }
+                    }
+                  })}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    marginTop: '5px',
+                    background: '#172554',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <option value="solid">متصل</option>
+                  <option value="dashed">متقطع</option>
+                  <option value="dotted">منقط</option>
+                </select>
+              </label>
+
+              <label style={{ color: '#e2e8f0', fontSize: '13px' }}>
+                خلفية النص
+                <input
+                  type="color"
+                  value={selectedTextStyle.background !== 'transparent'
+                    ? selectedTextStyle.background
+                    : '#172554'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        background: e.target.value
+                      }
+                    }
+                  })}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '38px',
+                    marginTop: '5px',
+                    border: 0,
+                    borderRadius: '8px',
+                    background: 'transparent'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormData({
+                    ...formData,
+                    textStyles: {
+                      ...formData.textStyles,
+                      [selectedTextStyleKey]: {
+                        ...selectedTextStyle,
+                        background: 'transparent'
+                      }
+                    }
+                  })}
+                  style={{
+                    marginTop: '7px',
+                    padding: '6px 9px',
+                    color: '#e2e8f0',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '7px'
+                  }}
+                >
+                  بدون خلفية
+                </button>
+              </label>
+            </div>
+          </section>
+
 
           {/* أزرار الإنشاء */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '25px' }}>
@@ -810,8 +1764,8 @@ export default function PrintCardsPage() {
 
         {/* نافذة تأكيد الكمية */}
         {showConfirm && printedCards.length > 0 && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1000 }}>
-            <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '25px', padding: '30px', maxWidth: '500px', width: '100%', border: '2px solid rgba(124,58,237,0.45)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
+          <div className="print-cards-modal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1000 }}>
+            <div className="print-cards-modal-card" style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '25px', padding: '30px', maxWidth: '500px', width: '100%', border: '2px solid rgba(124,58,237,0.45)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
               <div style={{ textAlign: 'center', marginBottom: '25px' }}>
                 <div style={{ fontSize: '60px', marginBottom: '15px' }}>🖨️</div>
                 <h2 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '24px' }}>تأكيد طباعة الكروت</h2>

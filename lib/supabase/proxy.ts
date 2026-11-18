@@ -35,15 +35,59 @@ export async function updateSession(request: NextRequest) {
     pathname === '/dashboard' ||
     pathname.startsWith('/dashboard/')
 
+  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/')
+  const adminUserIds = (process.env.ADMIN_USER_IDS || '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean)
+  const userId = typeof data?.claims?.sub === 'string' ? data.claims.sub : ''
+  const isAdmin = Boolean(userId && adminUserIds.includes(userId))
+
+  // Same-origin validation for browser mutations prevents cross-site request forgery.
+  const isMutation = !['GET', 'HEAD', 'OPTIONS'].includes(request.method)
+  if (pathname.startsWith('/api/') && isMutation) {
+    const origin = request.headers.get('origin')
+    const referer = request.headers.get('referer')
+    let sameOrigin = false
+
+    try {
+      if (origin) sameOrigin = new URL(origin).origin === request.nextUrl.origin
+      else if (referer) sameOrigin = new URL(referer).origin === request.nextUrl.origin
+    } catch {
+      sameOrigin = false
+    }
+
+    if (!sameOrigin) {
+      return NextResponse.json(
+        { success: false, message: 'تم رفض الطلب لأسباب أمنية.' },
+        { status: 403, headers: { 'Cache-Control': 'private, no-store' } }
+      )
+    }
+  }
+
   const isLogin = pathname === '/login'
   const isRegister = pathname === '/register'
 
-  const isLegacyAuthApi =
-    pathname === '/api/login' ||
-    pathname === '/api/register'
+  // Every API route is authenticated unless it is explicitly handled before this gate.
+  const isProtectedApi = pathname.startsWith('/api/')
 
-  const isProtectedApi =
-    pathname.startsWith('/api/') && !isLegacyAuthApi
+  if (isAdminRoute) {
+    if (!isAuthenticated) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.search = ''
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
+
+    // Server-side UUID allowlist. Browser storage and user-editable metadata are not trusted.
+    if (!isAdmin) {
+      return new NextResponse('Not Found', {
+        status: 404,
+        headers: { 'Cache-Control': 'private, no-store' },
+      })
+    }
+  }
 
   if (isDashboard || isProtectedApi) {
     if (!isAuthenticated) {

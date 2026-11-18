@@ -1,12 +1,12 @@
 {
-  "name": "Jassas Net Card - نظام إدارة شبكات المايكروتك",
-  "short_name": "JassasNet",
-  "description": "نظام إدارة شبكات المايكروتك وطباعة الكروت",
+  "name": "Jassas Net Card - جساس نت كرت",
+  "short_name": "جساس نت",
+  "description": "نظام إدارة شبكات المايكروتك وطباعة كروت الإنترنت",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0e27",
-  "theme_color": "#00ffff",
-  "orientation": "portrait",
+  "background_color": "#eaf8ff",
+  "theme_color": "#2563eb",
+  "orientation": "any",
   "icons": [
     {
       "src": "/icon-192.svg",

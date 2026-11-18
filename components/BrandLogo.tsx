@@ -21,65 +21,53 @@ export default function BrandLogo({ compact = false }: BrandLogoProps) {
           aria-hidden="true"
         >
           <defs>
-            <linearGradient id="jassas-j" x1="20" y1="20" x2="78" y2="85">
-              <stop stopColor="#A9E9FF" />
-              <stop offset="0.55" stopColor="#398BFA" />
-              <stop offset="1" stopColor="#1746A2" />
+            <linearGradient id="jassas-gold" x1="20" y1="15" x2="80" y2="90">
+              <stop stopColor="#FFF5C9" />
+              <stop offset=".35" stopColor="#FFD76B" />
+              <stop offset=".7" stopColor="#D99B25" />
+              <stop offset="1" stopColor="#FFF0B0" />
             </linearGradient>
-            <linearGradient id="jassas-jeem" x1="35" y1="25" x2="72" y2="80">
-              <stop stopColor="#FFF0B5" />
-              <stop offset="0.55" stopColor="#E8BD58" />
-              <stop offset="1" stopColor="#B47A20" />
-            </linearGradient>
-            <linearGradient id="jassas-wifi" x1="30" y1="5" x2="70" y2="32">
-              <stop stopColor="#B9F2FF" />
-              <stop offset="1" stopColor="#D9B65C" />
+            <linearGradient id="jassas-wifi-gold" x1="25" y1="5" x2="75" y2="35">
+              <stop stopColor="#B8F4FF" />
+              <stop offset=".55" stopColor="#55CFFF" />
+              <stop offset="1" stopColor="#E8C36B" />
             </linearGradient>
           </defs>
 
-          {/* إشارة الاتصال */}
-          <path
-            d="M27 24C40 10 60 10 73 24"
-            stroke="url(#jassas-wifi)"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-          <path
-            d="M36 31C44 23 56 23 64 31"
-            stroke="url(#jassas-wifi)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-          <circle cx="50" cy="38" r="3" fill="#F5D47C" />
+          {/* Wi-Fi */}
+          <path d="M25 25C39 10 61 10 75 25"
+            stroke="url(#jassas-wifi-gold)" strokeWidth="5"
+            strokeLinecap="round" />
+          <path d="M35 34C44 25 56 25 65 34"
+            stroke="url(#jassas-wifi-gold)" strokeWidth="4"
+            strokeLinecap="round" />
+          <circle cx="50" cy="41" r="3.5" fill="#FFD76B" />
 
-          {/* حرف J الإنجليزي */}
+          {/* J - gold, never standalone blue */}
           <path
-            d="M66 39V65C66 76 59 82 48 82C39 82 32 78 28 70"
-            stroke="url(#jassas-j)"
-            strokeWidth="9"
+            d="M66 40V66C66 79 58 86 45 86C35 86 27 81 23 72"
+            stroke="url(#jassas-gold)"
+            strokeWidth="11"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          {/* حرف ج العربي */}
+          {/* Arabic ج */}
           <text
             x="43"
-            y="68"
+            y="70"
             textAnchor="middle"
             fontFamily="Tahoma, Arial, sans-serif"
             fontSize="49"
             fontWeight="900"
-            fill="url(#jassas-jeem)"
-            stroke="#FFF0B5"
-            strokeWidth="0.6"
+            fill="url(#jassas-gold)"
+            stroke="#FFF0B0"
+            strokeWidth=".65"
             paintOrder="stroke"
-          >
-            ج
-          </text>
+          >ج</text>
 
-          {/* نقطة الجيم */}
-          <circle cx="28" cy="78" r="4" fill="#F5D47C" />
-          <circle cx="27" cy="77" r="1.4" fill="#FFF4D1" />
+          <circle cx="27" cy="81" r="4.2" fill="#FFD76B" />
+          <circle cx="26" cy="80" r="1.4" fill="#FFF8DE" />
         </svg>
 
         <span className="brand-mark-base" />

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import "./globals.css"
+import InstallPrompt from "@/components/InstallPrompt"
 
 export const metadata: Metadata = {
   title: "Jassas Net Card - نظام إدارة شبكات المايكروتك",
@@ -37,6 +38,7 @@ export default function RootLayout({
       </head>
       <body style={{ margin: 0, padding: 0, background: "#f5f7fc" }}>
         {children}
+        <InstallPrompt />
         <script
         dangerouslySetInnerHTML={{
           __html: `

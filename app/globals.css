@@ -3997,3 +3997,1568 @@ html[data-auth-theme="dark"] .dashboard-topbar .auth-theme-toggle {
     font-size: 10px;
   }
 }
+
+/* =========================================================
+   JASSAS NET CARD — LUXURY DESIGN SYSTEM
+   Arabic typography / Royal blue / Glass / Motion
+   ========================================================= */
+
+:root {
+  --jassas-font: "Noto Sans Arabic", "Noto Kufi Arabic",
+    "Noto Naskh Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+  --jassas-blue: #347fdb;
+  --jassas-blue-deep: #174b91;
+  --jassas-purple: #8060dc;
+  --jassas-gold: #d6ad55;
+}
+
+html,
+body {
+  font-family: var(--jassas-font);
+  text-rendering: optimizeLegibility;
+}
+
+.auth-shell,
+.dashboard-shell,
+.dashboard-state,
+.auth-loading {
+  font-family: var(--jassas-font);
+}
+
+.auth-shell {
+  background:
+    radial-gradient(ellipse at 80% 8%, rgba(151, 119, 255, .25), transparent 34%),
+    radial-gradient(ellipse at 10% 88%, rgba(41, 190, 255, .27), transparent 37%),
+    linear-gradient(140deg, #effaff 0%, #dcefff 47%, #f8f5ff 100%);
+}
+
+.auth-card {
+  border-color: rgba(255, 255, 255, .95);
+  box-shadow:
+    0 30px 75px rgba(47, 91, 150, .17),
+    0 0 0 1px rgba(255, 255, 255, .85) inset,
+    0 12px 36px rgba(91, 104, 190, .10);
+}
+
+.brand-mark {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .2),
+    0 15px 35px rgba(15, 35, 75, .25),
+    0 0 32px rgba(125, 91, 228, .19);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.brand-logo:hover .brand-mark {
+  transform: translateY(-3px) rotate(-1deg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .22),
+    0 19px 42px rgba(15, 35, 75, .29),
+    0 0 38px rgba(125, 91, 228, .24);
+}
+
+.brand-name {
+  font-family: var(--jassas-font);
+  font-weight: 950;
+  letter-spacing: 0;
+  filter: drop-shadow(0 3px 12px rgba(75, 95, 180, .2));
+}
+
+.brand-name-en {
+  font-family: "Segoe UI", Arial, sans-serif;
+  letter-spacing: 2.2px;
+  font-weight: 900;
+}
+
+.auth-heading h1,
+.auth-side h2,
+.dashboard-welcome h1,
+.dashboard-section-heading h2 {
+  font-family: var(--jassas-font);
+  text-wrap: balance;
+}
+
+.auth-heading-icon {
+  box-shadow:
+    0 8px 22px rgba(22, 141, 226, .10),
+    inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.auth-gift {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(201, 154, 40, .48);
+  box-shadow:
+    0 10px 25px rgba(181, 143, 54, .11),
+    inset 0 1px 0 rgba(255, 255, 255, .95);
+}
+
+.auth-gift::after {
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  left: -35%;
+  width: 22%;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: rotate(22deg);
+  animation: jassas-gift-shimmer 7s ease-in-out infinite;
+}
+
+.auth-input-wrap {
+  border-radius: 16px;
+  box-shadow:
+    0 6px 17px rgba(50, 88, 140, .065),
+    inset 0 1px 0 rgba(255, 255, 255, .98);
+}
+
+.auth-submit {
+  min-height: 59px;
+  border-radius: 16px;
+  box-shadow:
+    0 13px 30px rgba(81, 91, 190, .22),
+    inset 0 1px 0 rgba(255, 255, 255, .62);
+}
+
+.auth-submit-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+
+.auth-feature {
+  border-radius: 17px;
+  box-shadow:
+    0 8px 20px rgba(49, 85, 132, .065),
+    inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+.auth-feature-icon {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+}
+
+.auth-feature-icon svg,
+.auth-heading-icon svg,
+.auth-input-icon svg {
+  filter: drop-shadow(0 2px 4px currentColor);
+}
+
+.auth-theme-toggle {
+  border-radius: 13px;
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease;
+}
+
+.auth-theme-toggle-icon {
+  transition: transform .35s ease;
+}
+
+.auth-theme-toggle:hover .auth-theme-toggle-icon {
+  transform: rotate(-18deg) scale(1.08);
+}
+
+.dashboard-shell {
+  transition: background .35s ease, color .35s ease;
+}
+
+.dashboard-topbar {
+  backdrop-filter: blur(12px);
+}
+
+.dashboard-balance-card {
+  box-shadow:
+    0 24px 55px rgba(53, 113, 185, .25),
+    inset 0 1px 0 rgba(255,255,255,.42);
+}
+
+.dashboard-stat-card,
+.dashboard-action-card,
+.dashboard-account-strip {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dashboard-stat-card,
+.dashboard-action-card,
+.dashboard-logout,
+.dashboard-nav-item,
+.dashboard-balance-action {
+  transition:
+    transform .24s cubic-bezier(.2,.75,.25,1),
+    border-color .24s ease,
+    box-shadow .24s ease,
+    background .24s ease;
+}
+
+.dashboard-stat-icon,
+.dashboard-action-icon,
+.dashboard-account-icon,
+.dashboard-balance-icon {
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.dashboard-stat-card:hover .dashboard-stat-icon,
+.dashboard-action-card:hover .dashboard-action-icon {
+  transform: translateY(-2px) scale(1.045);
+  box-shadow: 0 7px 17px rgba(65, 117, 190, .13);
+}
+
+.dashboard-nav-item.is-active {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+}
+
+.dashboard-welcome h1 span {
+  font-weight: 950;
+}
+
+.dashboard-balance-number {
+  font-variant-numeric: tabular-nums;
+  font-weight: 950;
+}
+
+/* الوضع الداكن للوحة التحكم — نفس الأزرق الملكي المعتمد */
+html[data-auth-theme="dark"] .dashboard-shell {
+  --dash-bg: #08172c;
+  --dash-surface: rgba(17, 35, 61, .92);
+  --dash-surface-strong: #142b49;
+  --dash-text: #edf4ff;
+  --dash-muted: #a5b8d3;
+  --dash-border: rgba(143, 177, 224, .19);
+
+  color: #edf4ff;
+  background:
+    radial-gradient(ellipse at 8% 5%, rgba(45, 125, 220, .24), transparent 35%),
+    radial-gradient(ellipse at 92% 18%, rgba(112, 83, 210, .22), transparent 34%),
+    linear-gradient(145deg, #0a1c35 0%, #102747 52%, #111b3b 100%);
+}
+
+html[data-auth-theme="dark"] .dashboard-topbar {
+  border-bottom-color: rgba(143, 177, 224, .18);
+}
+
+html[data-auth-theme="dark"] .dashboard-session-label {
+  color: #c1d2e9;
+}
+
+html[data-auth-theme="dark"] .dashboard-logout {
+  color: #e4efff;
+  border-color: rgba(143, 177, 224, .24);
+  background: linear-gradient(145deg, #1b385b, #142b49);
+}
+
+html[data-auth-theme="dark"] .dashboard-welcome h1 {
+  color: #f2f7ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-welcome h1 span {
+  color: #a9c6ff;
+  background: linear-gradient(100deg, #8bdfff, #b7a3ff 65%, #f0d38b);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-auth-theme="dark"] .dashboard-welcome p,
+html[data-auth-theme="dark"] .dashboard-live-label {
+  color: #a9bbd5;
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-card,
+html[data-auth-theme="dark"] .dashboard-action-card,
+html[data-auth-theme="dark"] .dashboard-account-strip {
+  border-color: rgba(143, 177, 224, .18);
+  background: linear-gradient(145deg, rgba(22, 45, 75, .96), rgba(15, 32, 56, .96));
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, .16),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-card:hover,
+html[data-auth-theme="dark"] button.dashboard-action-card:hover {
+  border-color: rgba(132, 177, 255, .4);
+  background: linear-gradient(145deg, #1b3b63, #172e50);
+  box-shadow: 0 15px 32px rgba(0, 0, 0, .22);
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-caption,
+html[data-auth-theme="dark"] .dashboard-stat-foot,
+html[data-auth-theme="dark"] .dashboard-action-copy > small,
+html[data-auth-theme="dark"] .dashboard-account-copy span {
+  color: #a4b7d2;
+}
+
+html[data-auth-theme="dark"] .dashboard-stat-card > strong,
+html[data-auth-theme="dark"] .dashboard-action-copy > strong,
+html[data-auth-theme="dark"] .dashboard-account-copy strong {
+  color: #edf4ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-action-arrow {
+  color: #b8d1ff;
+  border-color: rgba(143, 177, 224, .2);
+  background: rgba(255,255,255,.045);
+}
+
+html[data-auth-theme="dark"] .dashboard-account-role {
+  color: #c6d9ff;
+  border-color: rgba(120, 164, 255, .25);
+  background: rgba(66, 119, 209, .16);
+}
+
+html[data-auth-theme="dark"] .dashboard-bottom-nav {
+  border-top-color: rgba(143, 177, 224, .2);
+  background: rgba(8, 23, 44, .94);
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, .24);
+}
+
+html[data-auth-theme="dark"] .dashboard-nav-item {
+  color: #9db1ce;
+}
+
+html[data-auth-theme="dark"] .dashboard-nav-item.is-active {
+  color: #b9d3ff;
+  border-color: rgba(111, 157, 244, .24);
+  background: linear-gradient(145deg, rgba(53, 102, 177, .3), rgba(91, 75, 168, .22));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+html[data-auth-theme="dark"] .dashboard-nav-item:hover {
+  color: #eff6ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-footer p {
+  color: #a2b4ce;
+}
+
+html[data-auth-theme="dark"] .dashboard-footer > span {
+  color: #8298b8;
+}
+
+html[data-auth-theme="dark"] .dashboard-state {
+  color: #edf4ff;
+  background: linear-gradient(145deg, #0a1c35, #102747 55%, #111b3b);
+}
+
+html[data-auth-theme="dark"] .dashboard-state-card {
+  border-color: rgba(143, 177, 224, .2);
+  background: rgba(18, 42, 70, .94);
+}
+
+html[data-auth-theme="dark"] .dashboard-state-card h1 {
+  color: #edf4ff;
+}
+
+html[data-auth-theme="dark"] .dashboard-state-card p {
+  color: #afc1da;
+}
+
+/* حركة خفيفة للأيقونات دون إزعاج المستخدم */
+@keyframes jassas-gift-shimmer {
+  0%, 70%, 100% { left: -35%; }
+  88% { left: 125%; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .auth-submit:hover:not(:disabled) {
+    transform: translateY(-3px);
+  }
+
+  .dashboard-action-card:hover,
+  .dashboard-stat-card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-shell {
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+
+  .auth-card {
+    box-shadow:
+      0 18px 48px rgba(47, 91, 150, .15),
+      0 0 0 1px rgba(255,255,255,.8) inset;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell *,
+  .dashboard-shell *,
+  .auth-shell *::before,
+  .dashboard-shell *::before,
+  .auth-shell *::after,
+  .dashboard-shell *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* =========================================================
+   PRINT CARDS LUXURY THEME — JASSAS NET CARD
+   ========================================================= */
+
+.print-cards-shell {
+  min-height: 100vh;
+  padding: 18px !important;
+  color: #233b59;
+  font-family: inherit;
+  transition: background .3s ease, color .3s ease;
+}
+
+html:not([data-auth-theme="dark"]) .print-cards-shell {
+  background: linear-gradient(145deg, #eaf3fc 0%, #e3effb 48%, #edf2ff 100%) !important;
+  color: #243b59;
+}
+
+.print-cards-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid rgba(91, 139, 194, .24);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(248,252,255,.96), rgba(226,240,253,.94));
+  box-shadow: 0 12px 34px rgba(57, 103, 157, .12), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.print-cards-brand,
+.print-cards-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.print-cards-brand-copy h1 {
+  margin: 0 0 5px;
+  color: #174c83;
+  font-size: clamp(19px, 4vw, 25px);
+  line-height: 1.5;
+  font-weight: 900;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.print-cards-brand-copy p {
+  margin: 0;
+  color: #587897;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .4px;
+}
+
+.print-cards-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 13px;
+  background: linear-gradient(135deg, #3988df, #2563b8);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(37, 99, 184, .23), inset 0 1px 0 rgba(255,255,255,.3);
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.print-cards-back:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 9px 22px rgba(37, 99, 184, .3);
+}
+
+.print-cards-back:active {
+  transform: scale(.97);
+}
+
+.print-cards-back:focus-visible {
+  outline: 3px solid #e3ad45;
+  outline-offset: 3px;
+}
+
+html:not([data-auth-theme="dark"]) .print-cards-preview {
+  background: linear-gradient(145deg, #f5f9ff, #e6f1fc) !important;
+  border: 1px solid rgba(94, 142, 194, .3) !important;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(54, 93, 139, .12);
+}
+
+html:not([data-auth-theme="dark"]) .print-cards-settings {
+  background: linear-gradient(145deg, #f5f9ff, #e8f2fc) !important;
+  border: 1px solid rgba(91, 139, 194, .3) !important;
+  box-shadow: 0 12px 34px rgba(54, 93, 139, .12) !important;
+  color: #29415e;
+}
+
+.print-cards-settings h2,
+.print-cards-settings h3 {
+  color: #225b91 !important;
+  text-shadow: none !important;
+  line-height: 1.6;
+}
+
+.print-cards-settings input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+.print-cards-settings select,
+.print-cards-settings textarea {
+  min-height: 44px;
+  padding: 10px 12px !important;
+  border: 1px solid #bfd2e7 !important;
+  border-radius: 11px !important;
+  background: #f8fbff !important;
+  color: #203a58 !important;
+  font: inherit;
+  font-size: 16px !important;
+  box-shadow: inset 0 1px 3px rgba(44, 83, 126, .06);
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.print-cards-settings input:focus,
+.print-cards-settings select:focus,
+.print-cards-settings textarea:focus {
+  border-color: #4389d2 !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(67, 137, 210, .16) !important;
+}
+
+.print-cards-row {
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #edf5fd, #e5effa) !important;
+  border: 1px solid #c8d9eb !important;
+  border-radius: 14px !important;
+  box-shadow: 0 3px 10px rgba(50, 91, 135, .06);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.print-cards-row:focus-within {
+  border-color: #5795d4 !important;
+  box-shadow: 0 0 0 3px rgba(66, 135, 204, .13);
+}
+
+.print-cards-row > div:last-child {
+  color: #28547f !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+}
+
+.print-cards-settings button {
+  transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+}
+
+.print-cards-settings button:active {
+  transform: scale(.98);
+}
+
+.print-cards-modal {
+  background: rgba(24, 48, 76, .58) !important;
+  backdrop-filter: blur(12px);
+}
+
+.print-cards-modal-card {
+  background: linear-gradient(145deg, #f4f8ff, #e3effb) !important;
+  border: 1px solid #b9d0e9 !important;
+  color: #24415f;
+  box-shadow: 0 22px 65px rgba(16, 48, 82, .25) !important;
+}
+
+.print-cards-modal-card h2,
+.print-cards-modal-card h3,
+.print-cards-modal-card p {
+  color: #294966;
+}
+
+/* Dark mode: bright royal blue, not muddy navy */
+html[data-auth-theme="dark"] .print-cards-shell {
+  background: linear-gradient(145deg, #123d6b 0%, #174d83 48%, #263f78 100%) !important;
+  color: #edf5ff;
+}
+
+html[data-auth-theme="dark"] .print-cards-header {
+  background: linear-gradient(135deg, #1d4c7b, #294f86);
+  border-color: rgba(135, 184, 239, .3);
+  box-shadow: 0 12px 34px rgba(5, 24, 52, .25), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+html[data-auth-theme="dark"] .print-cards-brand-copy h1 {
+  color: #f3f8ff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.22);
+}
+
+html[data-auth-theme="dark"] .print-cards-brand-copy p {
+  color: #c1dcf8;
+}
+
+html[data-auth-theme="dark"] .print-cards-preview {
+  background: linear-gradient(145deg, #1b4775, #204d7c) !important;
+  border: 1px solid rgba(144, 190, 239, .3) !important;
+  border-radius: 20px;
+  box-shadow: 0 12px 34px rgba(4, 24, 50, .25);
+}
+
+html[data-auth-theme="dark"] .print-cards-settings {
+  background: linear-gradient(145deg, #1c4774, #214d7d) !important;
+  border: 1px solid rgba(144, 190, 239, .3) !important;
+  box-shadow: 0 12px 34px rgba(4, 24, 50, .25) !important;
+  color: #eaf4ff;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings h2,
+html[data-auth-theme="dark"] .print-cards-settings h3 {
+  color: #f2c96d !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+html[data-auth-theme="dark"] .print-cards-settings select,
+html[data-auth-theme="dark"] .print-cards-settings textarea {
+  background: #173b63 !important;
+  color: #f0f7ff !important;
+  border-color: #527da9 !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.12);
+}
+
+html[data-auth-theme="dark"] .print-cards-settings input::placeholder,
+html[data-auth-theme="dark"] .print-cards-settings textarea::placeholder {
+  color: #b1c8e0;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings input:focus,
+html[data-auth-theme="dark"] .print-cards-settings select:focus,
+html[data-auth-theme="dark"] .print-cards-settings textarea:focus {
+  border-color: #8fc4ff !important;
+  box-shadow: 0 0 0 3px rgba(143, 196, 255, .18) !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-row {
+  background: linear-gradient(135deg, #204f7d, #1b456f) !important;
+  border-color: #527da9 !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,.1);
+}
+
+html[data-auth-theme="dark"] .print-cards-row:focus-within {
+  border-color: #8fc4ff !important;
+  box-shadow: 0 0 0 3px rgba(143, 196, 255, .15);
+}
+
+html[data-auth-theme="dark"] .print-cards-row > div:last-child {
+  color: #f2d58e !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-modal {
+  background: rgba(5, 18, 36, .72) !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-modal-card {
+  background: linear-gradient(145deg, #24517f, #193f69) !important;
+  border-color: #628fbd !important;
+  color: #f0f7ff;
+}
+
+html[data-auth-theme="dark"] .print-cards-modal-card h2,
+html[data-auth-theme="dark"] .print-cards-modal-card h3,
+html[data-auth-theme="dark"] .print-cards-modal-card p {
+  color: #f0f7ff;
+}
+
+@media (max-width: 600px) {
+  .print-cards-shell {
+    padding: 10px !important;
+  }
+
+  .print-cards-header {
+    align-items: stretch;
+    padding: 14px;
+    border-radius: 17px;
+  }
+
+  .print-cards-brand {
+    gap: 9px;
+  }
+
+  .print-cards-brand-copy h1 {
+    font-size: 18px;
+  }
+
+  .print-cards-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .print-cards-back {
+    flex: 1;
+  }
+
+  .print-cards-settings {
+    padding: 16px !important;
+  }
+
+  .print-cards-row {
+    flex-direction: column-reverse;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+
+  .print-cards-row > div:last-child {
+    min-width: 0 !important;
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .print-cards-shell *,
+  .print-cards-shell *::before,
+  .print-cards-shell *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+
+/* =========================================================
+   PRINT CARDS PROFESSIONAL SETTINGS V2
+   ========================================================= */
+
+/* Main page width and typography */
+.print-cards-shell {
+  direction: rtl;
+  padding: 18px !important;
+  font-family: "Tajawal", "Cairo", "Segoe UI", Tahoma, sans-serif !important;
+  line-height: 1.75;
+}
+
+.print-cards-shell > div {
+  width: 100%;
+  max-width: 1120px !important;
+  margin-inline: auto !important;
+}
+
+/* Header */
+.print-cards-header {
+  direction: rtl;
+  gap: 16px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+}
+
+.print-cards-brand {
+  min-width: 0;
+}
+
+.print-cards-brand-copy {
+  min-width: 0;
+}
+
+.print-cards-brand-copy h1 {
+  font-size: clamp(19px, 3vw, 26px) !important;
+  line-height: 1.65 !important;
+  overflow-wrap: anywhere;
+}
+
+.print-cards-header-actions {
+  flex-wrap: wrap;
+}
+
+/* Preview panel */
+.print-cards-preview {
+  position: sticky !important;
+ top: 8px !important;
+ z-index: 30 !important;
+  padding: 16px !important;
+  margin-bottom: 18px !important;
+}
+
+.print-cards-preview-card {
+  display: block;
+  width: 100% !important;
+  max-width: 560px !important;
+  margin-inline: auto !important;
+}
+
+.print-cards-preview > div:first-child {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.print-cards-preview h2 {
+  color: #245b91 !important;
+  font-size: clamp(18px, 2.5vw, 22px) !important;
+  line-height: 1.7 !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-preview h2 {
+  color: #f3d58c !important;
+}
+
+/* Settings panel becomes a balanced responsive grid */
+.print-cards-settings {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px 16px;
+  padding: 24px !important;
+  direction: rtl;
+}
+
+.print-cards-settings > h2,
+.print-cards-settings > h3 {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.print-cards-settings > h2 {
+  margin: 0 0 8px !important;
+  padding: 0 0 14px;
+  border-bottom: 1px solid rgba(86, 139, 194, .28);
+  font-size: 24px !important;
+  line-height: 1.7 !important;
+}
+
+.print-cards-settings > h3 {
+  margin: 18px 0 6px !important;
+  padding: 0 0 10px !important;
+  border-bottom: 2px solid rgba(68, 133, 199, .35) !important;
+  font-size: 19px !important;
+  line-height: 1.7 !important;
+}
+
+/* Each setting: label above its controls */
+.print-cards-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: center;
+  gap: 9px !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 105px;
+  margin: 0 !important;
+  padding: 13px 15px !important;
+  border-radius: 15px !important;
+  direction: rtl;
+}
+
+.print-cards-row > div:first-child {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px !important;
+  width: 100%;
+  min-width: 0;
+  order: 2;
+}
+
+.print-cards-row > div:last-child {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100%;
+  min-width: 0 !important;
+  order: 1;
+  white-space: normal !important;
+  color: #245b91 !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  font-weight: 900 !important;
+  text-align: right;
+}
+
+.print-cards-row > div:last-child span {
+  flex: 0 0 auto;
+  font-size: 18px !important;
+}
+
+/* Inputs and selectors */
+.print-cards-settings input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+.print-cards-settings select,
+.print-cards-settings textarea {
+  box-sizing: border-box !important;
+  min-width: 0;
+  min-height: 46px !important;
+  max-width: 100%;
+  padding: 10px 13px !important;
+  border: 1px solid #b6cde5 !important;
+  border-radius: 12px !important;
+  background: #f8fbff !important;
+  color: #1e3d5e !important;
+  font-family: inherit !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.6 !important;
+  text-align: center;
+  box-shadow: 0 2px 7px rgba(35, 76, 119, .07),
+              inset 0 1px 1px rgba(255,255,255,.8) !important;
+}
+
+.print-cards-settings input::placeholder,
+.print-cards-settings textarea::placeholder {
+  color: #7189a3 !important;
+  opacity: 1;
+}
+
+.print-cards-settings select option {
+  background: #f4f8ff;
+  color: #1e3d5e;
+}
+
+.print-cards-settings input:focus,
+.print-cards-settings select:focus,
+.print-cards-settings textarea:focus {
+  outline: none !important;
+  border-color: #3988df !important;
+  box-shadow: 0 0 0 3px rgba(57, 136, 223, .17) !important;
+}
+
+.print-cards-settings input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #347fca;
+  cursor: pointer;
+}
+
+.print-cards-settings input[type="color"] {
+  width: 100%;
+  min-width: 0;
+  height: 46px !important;
+  padding: 4px !important;
+  border: 1px solid #b6cde5 !important;
+  border-radius: 11px !important;
+  background: #f8fbff !important;
+  cursor: pointer;
+}
+
+.print-cards-settings input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #347fca;
+}
+
+/* Inner option groups */
+.print-cards-row > div:first-child > div {
+  min-width: 0;
+}
+
+.print-cards-row button {
+  min-height: 44px;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(77, 130, 185, .3) !important;
+  border-radius: 11px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  line-height: 1.5 !important;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+
+.print-cards-row button:active {
+  transform: scale(.97);
+}
+
+/* Light mode surfaces */
+html:not([data-auth-theme="dark"]) .print-cards-row {
+  background: linear-gradient(145deg, #f8fbff, #eaf3fc) !important;
+  border: 1px solid #c6d9ed !important;
+  box-shadow: 0 4px 12px rgba(46, 91, 139, .07) !important;
+}
+
+html:not([data-auth-theme="dark"]) .print-cards-row:focus-within {
+  border-color: #5796d5 !important;
+  box-shadow: 0 0 0 3px rgba(57, 136, 223, .12) !important;
+}
+
+html:not([data-auth-theme="dark"]) .print-cards-settings > h2 {
+  color: #245b91 !important;
+}
+
+html:not([data-auth-theme="dark"]) .print-cards-settings > h3 {
+  color: #2869a6 !important;
+}
+
+/* Dark mode surfaces and readable labels */
+html[data-auth-theme="dark"] .print-cards-settings {
+  background: linear-gradient(145deg, #1c4774, #214d7d) !important;
+  border-color: rgba(144, 190, 239, .35) !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings > h2,
+html[data-auth-theme="dark"] .print-cards-settings > h3 {
+  color: #f3d58c !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-row {
+  background: linear-gradient(145deg, #245582, #1b456f) !important;
+  border: 1px solid #527da9 !important;
+  box-shadow: 0 4px 13px rgba(3, 21, 44, .16) !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-row > div:last-child {
+  color: #e9f3ff !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+html[data-auth-theme="dark"] .print-cards-settings select,
+html[data-auth-theme="dark"] .print-cards-settings textarea {
+  background: #153b63 !important;
+  border-color: #628bb4 !important;
+  color: #f4f8ff !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.15) !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings select option {
+  background: #173e67;
+  color: #f4f8ff;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings input::placeholder,
+html[data-auth-theme="dark"] .print-cards-settings textarea::placeholder {
+  color: #b9cee4 !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-settings input:focus,
+html[data-auth-theme="dark"] .print-cards-settings select:focus,
+html[data-auth-theme="dark"] .print-cards-settings textarea:focus {
+  border-color: #9bcaff !important;
+  box-shadow: 0 0 0 3px rgba(155, 202, 255, .18) !important;
+}
+
+html[data-auth-theme="dark"] .print-cards-row:focus-within {
+  border-color: #8fc4ff !important;
+}
+
+/* Main action buttons */
+.print-cards-settings button {
+  min-height: 46px;
+  font-family: inherit !important;
+  font-weight: 850 !important;
+  line-height: 1.5 !important;
+}
+
+.print-cards-settings button:focus-visible,
+.print-cards-back:focus-visible {
+  outline: 3px solid #e4b650 !important;
+  outline-offset: 3px;
+}
+
+/* Confirmation dialog */
+.print-cards-modal {
+  overflow-y: auto;
+  padding: 16px !important;
+}
+
+.print-cards-modal-card {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 24px !important;
+  border-radius: 22px !important;
+}
+
+.print-cards-modal-card h2 {
+  font-size: 22px !important;
+  line-height: 1.7 !important;
+}
+
+.print-cards-modal-card p,
+.print-cards-modal-card span {
+  line-height: 1.8;
+}
+
+/* Small screens */
+@media (max-width: 720px) {
+  .print-cards-shell {
+    padding: 10px !important;
+  }
+
+  .print-cards-header {
+    align-items: stretch;
+    padding: 14px !important;
+    border-radius: 17px !important;
+  }
+
+  .print-cards-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .print-cards-back {
+    flex: 1;
+    min-height: 46px;
+  }
+
+  .print-cards-preview {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .print-cards-preview-card {
+    max-width: 100% !important;
+  }
+
+  .print-cards-preview > div:first-child {
+    align-items: stretch !important;
+  }
+
+  .print-cards-preview h2 {
+    width: 100%;
+  }
+
+  .print-cards-settings {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px !important;
+    border-radius: 17px !important;
+  }
+
+  .print-cards-settings > h2 {
+    font-size: 21px !important;
+  }
+
+  .print-cards-settings > h3 {
+    margin-top: 12px !important;
+    font-size: 18px !important;
+  }
+
+  .print-cards-row {
+    min-height: 96px;
+    padding: 12px !important;
+  }
+
+  .print-cards-row > div:last-child {
+    font-size: 15px !important;
+  }
+
+  .print-cards-row button {
+    min-width: 0;
+    font-size: 13px !important;
+  }
+
+  .print-cards-modal-card {
+    padding: 18px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .print-cards-row > div:first-child {
+    gap: 6px !important;
+  }
+
+  .print-cards-row button {
+    padding: 9px 7px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .print-cards-shell *,
+  .print-cards-shell *::before,
+  .print-cards-shell *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* JASSAS NET CARD — Unified Royal Blue & Gold Identity */
+
+.brand-mark {
+  border: 1px solid rgba(242, 197, 91, .85);
+  background:
+    radial-gradient(circle at 28% 18%, rgba(76, 180, 255, .32), transparent 45%),
+    linear-gradient(145deg, #1269d9 0%, #092e78 55%, #061b4d 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.3),
+    0 12px 30px rgba(5,35,94,.28),
+    0 0 22px rgba(224,183,83,.12);
+}
+
+.brand-mark-halo {
+  border-color: rgba(246, 204, 105, .28);
+}
+
+.brand-mark-inner {
+  border-color: rgba(255, 226, 158, .3);
+}
+
+.brand-svg {
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,.32));
+}
+
+.brand-mark-base {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #F4C65E,
+    #FFF0B0,
+    #F4C65E,
+    transparent
+  );
+}
+
+.brand-name {
+  background: linear-gradient(
+    100deg,
+    #D39A2E,
+    #FFE6A0 48%,
+    #C38A25 95%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.brand-name-en {
+  color: #D5B66F;
+}
+
+.jassas-logo-size {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.jassas-logo-small .brand-mark {
+  width: 58px;
+  height: 58px;
+}
+
+.jassas-logo-small .brand-svg {
+  width: 45px;
+  height: 45px;
+}
+
+.jassas-logo-large .brand-mark {
+  width: 112px;
+  height: 112px;
+}
+
+.jassas-logo-large .brand-svg {
+  width: 86px;
+  height: 86px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .brand-logo * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Jassas Card Studio — responsive navigation and stable mobile editing */
+.studio-preview-dock {
+  top: max(6px, env(safe-area-inset-top));
+  isolation: isolate;
+  border-color: color-mix(in srgb, var(--accent, #d6ad55) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--surface, #0b1830) 92%, transparent) !important;
+  box-shadow: 0 14px 42px rgba(2, 8, 23, .24) !important;
+}
+
+.studio-section-nav {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 8px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  border: 1px solid rgba(148, 163, 184, .24);
+  border-radius: 16px;
+  background: var(--surface, rgba(15, 23, 42, .9));
+  box-shadow: 0 8px 24px rgba(2, 8, 23, .12);
+  -webkit-overflow-scrolling: touch;
+}
+
+.studio-section-tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--foreground, #e5edf9);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+  touch-action: manipulation;
+}
+
+.studio-section-tab:hover {
+  background: rgba(59, 130, 246, .10);
+  border-color: rgba(96, 165, 250, .3);
+}
+
+.studio-section-tab.is-active {
+  color: #fff;
+  border-color: rgba(96, 165, 250, .55);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  box-shadow: 0 5px 16px rgba(29, 78, 216, .2);
+}
+
+#studio-field-profile,
+#studio-field-prefix,
+#studio-field-validity,
+#studio-field-cardTime,
+#studio-field-customMessage,
+#studio-field-count,
+#studio-section-design,
+#studio-section-typography,
+#batch-history-heading {
+  scroll-margin-top: 24px;
+}
+
+.print-cards-settings input,
+.print-cards-settings select,
+.print-cards-settings textarea,
+.print-cards-settings button {
+  font-family: inherit;
+}
+
+.print-cards-settings input:not([type="checkbox"]):not([type="range"]),
+.print-cards-settings select,
+.print-cards-settings textarea {
+  min-height: 44px;
+  font-size: 16px !important;
+  line-height: 1.45;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.print-cards-settings input[type="checkbox"],
+.print-cards-settings input[type="range"],
+.print-cards-settings input[type="color"] {
+  accent-color: #2563eb;
+  touch-action: manipulation;
+}
+
+.print-cards-settings input:focus-visible,
+.print-cards-settings select:focus-visible,
+.print-cards-settings textarea:focus-visible,
+.studio-section-tab:focus-visible {
+  outline: 3px solid rgba(96, 165, 250, .8);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .print-cards-shell {
+    padding: 8px !important;
+  }
+
+  .print-cards-preview.studio-preview-dock {
+    top: max(4px, env(safe-area-inset-top));
+    margin-bottom: 12px !important;
+    padding: 10px !important;
+    border-radius: 15px !important;
+    max-height: min(46svh, 340px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .print-cards-preview h2 {
+    font-size: 15px !important;
+  }
+
+  .print-cards-preview-card {
+    max-width: 100% !important;
+    gap: 5px !important;
+    padding: 8px !important;
+  }
+
+  .studio-section-nav {
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .studio-section-tab {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .print-cards-settings {
+    padding: 12px !important;
+    border-radius: 15px !important;
+  }
+
+  .print-cards-settings .print-cards-row {
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+
+  .print-cards-settings .print-cards-row > div:last-child {
+    min-width: 98px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-section-tab,
+  .print-cards-settings * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
+/* Jassas Card Vault */
+.vault-shell {
+  min-height: 100vh;
+  padding: max(14px, env(safe-area-inset-top)) 14px 34px;
+  color: var(--foreground, #172b45);
+  background: var(--page-bg, linear-gradient(145deg, #eff8ff, #e8f0fb 55%, #f7f4ff));
+  direction: rtl;
+}
+
+.vault-container {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+}
+
+.vault-header,
+.vault-brand,
+.vault-header-actions,
+.vault-panel-heading,
+.vault-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.vault-header {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid rgba(90, 139, 190, .22);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .76);
+  box-shadow: 0 12px 32px rgba(29, 68, 111, .08);
+  backdrop-filter: blur(16px);
+}
+
+.vault-brand { justify-content: flex-start; min-width: 0; }
+.vault-brand > div { min-width: 0; }
+.vault-eyebrow, .vault-kicker { color: #3975b5; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.vault-brand h1 { margin: 2px 0; color: #173d68; font-size: clamp(20px, 4vw, 28px); font-weight: 900; }
+.vault-brand p { margin: 0; color: #667f9c; font-size: 12px; line-height: 1.7; }
+.vault-header-actions { flex-shrink: 0; }
+.vault-back, .vault-refresh, .vault-search button, .vault-empty button, .vault-pagination button, .vault-copy {
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid rgba(59, 130, 246, .25);
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.vault-back { display: inline-flex; align-items: center; gap: 8px; }
+.vault-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 20px 24px;
+  border: 1px solid rgba(96, 165, 250, .25);
+  border-radius: 20px;
+  color: #fff;
+  background: radial-gradient(circle at 85% 10%, rgba(125, 211, 252, .24), transparent 35%), linear-gradient(125deg, #0b2b55, #174f91 58%, #1d4ed8);
+  box-shadow: 0 16px 34px rgba(20, 67, 126, .18);
+}
+.vault-summary div { display: grid; gap: 5px; }
+.vault-summary div span { color: #d5e9ff; font-size: 13px; font-weight: 700; }
+.vault-summary strong { font-size: clamp(30px, 6vw, 42px); line-height: 1.1; }
+.vault-summary-mark { color: #f5d98d; font-size: 40px; }
+.vault-panel {
+  padding: 22px;
+  border: 1px solid rgba(90, 139, 190, .2);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 12px 34px rgba(29, 68, 111, .07);
+}
+.vault-panel-heading { margin-bottom: 18px; }
+.vault-panel-heading h2 { margin: 3px 0 0; color: #183e69; font-size: 21px; font-weight: 900; }
+.vault-refresh { color: #1d4d7d; background: #edf5ff; border-color: #c8ddf5; }
+.vault-refresh:disabled, .vault-pagination button:disabled { opacity: .5; cursor: not-allowed; }
+.vault-search { margin-bottom: 18px; }
+.vault-search label { display: block; margin-bottom: 7px; color: #345777; font-size: 13px; font-weight: 800; }
+.vault-search > div { display: flex; gap: 8px; }
+.vault-search input { flex: 1; min-width: 0; min-height: 46px; padding: 10px 14px; border: 1px solid #c7d9eb; border-radius: 12px; color: #183e69; background: #f7fbff; font: inherit; font-size: 16px; text-align: center; }
+.vault-search input:focus-visible { outline: 3px solid rgba(59, 130, 246, .28); border-color: #3b82f6; }
+.vault-search .vault-clear { color: #315574; background: #e8f0f8; border-color: #d1dfed; }
+.vault-error { padding: 12px 14px; border: 1px solid #fecaca; border-radius: 12px; color: #991b1b; background: #fef2f2; font-size: 13px; }
+.vault-state { display: flex; min-height: 170px; align-items: center; justify-content: center; gap: 10px; color: #59728e; font-size: 14px; }
+.vault-empty { flex-direction: column; gap: 8px; text-align: center; }
+.vault-empty > span { color: #8fb4d8; font-size: 42px; }
+.vault-empty strong { color: #244d75; font-size: 17px; }
+.vault-empty p { margin: 0 0 8px; color: #6c829a; font-size: 13px; }
+.vault-spinner { width: 20px; height: 20px; border: 2px solid #c8ddf5; border-top-color: #2563eb; border-radius: 50%; animation: vault-spin .8s linear infinite; }
+@keyframes vault-spin { to { transform: rotate(360deg); } }
+.vault-card-list { display: grid; gap: 11px; }
+.vault-card-item { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(0, 2fr) auto; align-items: center; gap: 14px; padding: 14px; border: 1px solid #d5e3f1; border-radius: 15px; background: linear-gradient(145deg, #fff, #f5f9ff); }
+.vault-card-number { display: grid; gap: 5px; }
+.vault-card-number span, .vault-card-details span { color: #71879e; font-size: 11px; font-weight: 700; }
+.vault-card-number strong { color: #164b83; font-size: 21px; letter-spacing: .06em; }
+.vault-card-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.vault-card-details div { display: grid; gap: 4px; min-width: 0; }
+.vault-card-details strong { overflow-wrap: anywhere; color: #294b6b; font-size: 12px; line-height: 1.6; }
+.vault-copy { min-width: 92px; color: #1e4c78; background: #eaf3ff; border-color: #c6dcf5; }
+.vault-pagination { justify-content: center; margin-top: 20px; }
+.vault-pagination span { color: #607991; font-size: 12px; font-weight: 800; }
+.vault-pagination button { min-width: 76px; }
+.vault-footer { padding: 22px 0 8px; color: #8296ab; font-size: 11px; font-weight: 800; text-align: center; }
+
+html[data-auth-theme="dark"] .vault-shell { color: #e6f1ff; background: linear-gradient(145deg, #06152b, #0a2140 58%, #111b3b); }
+html[data-auth-theme="dark"] .vault-header, html[data-auth-theme="dark"] .vault-panel { border-color: rgba(120, 169, 220, .22); background: rgba(11, 32, 58, .88); }
+html[data-auth-theme="dark"] .vault-brand h1, html[data-auth-theme="dark"] .vault-panel-heading h2, html[data-auth-theme="dark"] .vault-empty strong { color: #e4f1ff; }
+html[data-auth-theme="dark"] .vault-brand p, html[data-auth-theme="dark"] .vault-kicker, html[data-auth-theme="dark"] .vault-eyebrow, html[data-auth-theme="dark"] .vault-search label { color: #a8c9ec; }
+html[data-auth-theme="dark"] .vault-search input { color: #eff6ff; border-color: #355b82; background: #102d4d; }
+html[data-auth-theme="dark"] .vault-card-item { border-color: #315579; background: linear-gradient(145deg, #153b61, #102d4d); }
+html[data-auth-theme="dark"] .vault-card-number strong, html[data-auth-theme="dark"] .vault-card-details strong { color: #e7f2ff; }
+html[data-auth-theme="dark"] .vault-card-number span, html[data-auth-theme="dark"] .vault-card-details span, html[data-auth-theme="dark"] .vault-pagination span, html[data-auth-theme="dark"] .vault-empty p { color: #b5cbe1; }
+html[data-auth-theme="dark"] .vault-refresh, html[data-auth-theme="dark"] .vault-copy { color: #dbeafe; border-color: #355b82; background: #173e68; }
+
+@media (max-width: 720px) {
+  .vault-shell { padding: 8px 8px 28px; }
+  .vault-header { align-items: flex-start; flex-direction: column; padding: 13px; }
+  .vault-header-actions { width: 100%; justify-content: space-between; }
+  .vault-back { flex: 1; justify-content: center; }
+  .vault-panel { padding: 14px; }
+  .vault-card-item { grid-template-columns: 1fr auto; gap: 10px; }
+  .vault-card-number { grid-column: 1 / -1; }
+  .vault-card-details { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vault-copy { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-spinner { animation: none; }
+}
