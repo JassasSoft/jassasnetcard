@@ -19,6 +19,43 @@ const escapeHtml = (value: unknown): string =>
     return entities[char]
   })
 
+const compressCardBackground = async (file: File): Promise<string> => {
+  if (!/^image\\/(jpeg|png|webp)$/i.test(file.type)) throw new Error('اختر صورة JPG أو PNG أو WEBP.')
+  if (file.size > 8 * 1024 * 1024) throw new Error('حجم الصورة الأصلية يجب ألا يتجاوز 8 ميجابايت.')
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const image = new Image()
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve()
+      image.onerror = () => reject(new Error('تعذر قراءة الصورة المحددة.'))
+      image.src = objectUrl
+    })
+    let scale = Math.min(1, 1200 / image.naturalWidth, 760 / image.naturalHeight)
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    if (!context) throw new Error('تعذر تجهيز الصورة للمعاينة.')
+    for (let attempt = 0; attempt < 5; attempt++) {
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', attempt < 2 ? 0.68 : 0.56))
+      if (blob && blob.size <= 135 * 1024) {
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('تعذر تجهيز ملف الصورة.'))
+          reader.onerror = () => reject(new Error('تعذر قراءة الصورة المضغوطة.'))
+          reader.readAsDataURL(blob)
+        })
+      }
+      scale *= 0.78
+    }
+    throw new Error('الصورة كبيرة بعد الضغط. اختر صورة أبسط أو أصغر.')
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 const createBatchIdempotencyKey = (): string => {
   if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
     throw new Error('Secure random generator is unavailable')
@@ -176,6 +213,7 @@ export default function PrintCardsPage() {
     cardsCount: 100,
     colsCount: 3,
     cardStyle: 'colored',
+    cardBackgroundImage: '',
     cardEffect: 'gradient',
     colorScheme: 'blue-gold',
     cardShape: 'rectangle',
@@ -359,6 +397,20 @@ const fontFamilies: any = {
     };
   };
 
+  const getCardBackgroundImage = (card: any) => {
+    const layers: string[] = []
+    if (card.cardShape === 'triangle' && card.cardStyle !== 'plain') {
+      layers.push('linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)')
+    }
+    if (card.cardStyle === 'colored' && typeof card.cardBackgroundImage === 'string' &&
+      /^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(card.cardBackgroundImage) &&
+      card.cardBackgroundImage.length <= 200000) {
+      layers.push('linear-gradient(rgba(7,17,38,0.38), rgba(7,17,38,0.38))')
+      layers.push('url("' + card.cardBackgroundImage + '")')
+    }
+    return layers.length ? layers.join(', ') : undefined
+  }
+
   const getCardTextCss = (card: any, key: string) => {
     const s = getCardTextStyle(card, key);
     return `display:${s.display};font-size:${s.fontSize}px;color:${s.color};font-family:${s.fontFamily};text-align:${s.textAlign};border:${s.border};background:${s.background};border-radius:${s.borderRadius};padding:${s.padding};box-sizing:border-box;`;
@@ -413,9 +465,18 @@ const fontFamilies: any = {
           : fallback
       }
 
+      const rawBackgroundImage = snapshot.template &&
+        typeof snapshot.template === 'object' &&
+        typeof (snapshot.template as Record<string, unknown>).cardBackgroundImage === 'string'
+          ? (snapshot.template as Record<string, unknown>).cardBackgroundImage as string
+          : ''
+      const safeBackgroundImage = /^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(rawBackgroundImage) &&
+        rawBackgroundImage.length <= 200000 ? rawBackgroundImage : ''
+
       const safeSettings = {
         ...formData,
         ...rawSettings,
+        cardBackgroundImage: safeBackgroundImage,
         profile: allowedProfiles.includes(rawSettings.profile) ? rawSettings.profile : 'DEFAULT',
         cardStyle: allowedStyles.includes(rawSettings.cardStyle) ? rawSettings.cardStyle : 'colored',
         colorScheme: Object.prototype.hasOwnProperty.call(colorSchemes, rawSettings.colorScheme)
@@ -487,6 +548,7 @@ const fontFamilies: any = {
         return {
           ...template,
           textStyles: safeSettings.textStyles,
+          cardBackgroundImage: safeSettings.cardBackgroundImage,
           customMessage: String(template.customMessage ?? safeSettings.customMessage ?? '').slice(0, 240),
           id: 'restored-' + index + '-' + username,
           username,
@@ -601,6 +663,7 @@ const fontFamilies: any = {
     rechargeText: formData.rechargeText,
     specialOffer: formData.specialOffer,
     cardStyle: formData.cardStyle,
+    cardBackgroundImage: formData.cardBackgroundImage,
     cardEffect: formData.cardEffect,
     cardShape: formData.cardShape,
     colors: getCardColors(formData.cardStyle, formData.colorScheme),
@@ -643,9 +706,9 @@ const fontFamilies: any = {
     }
     return {
       background: bg,
-      backgroundImage: card.cardShape === 'triangle'
-        ? 'linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)'
-        : undefined,
+      backgroundImage: getCardBackgroundImage(card),
+      backgroundSize: card.cardBackgroundImage ? 'cover' : undefined,
+      backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
       boxShadow: shadow,
       borderRadius: radius,
       border: border,
@@ -715,6 +778,7 @@ const fontFamilies: any = {
         specialOffer: formData.specialOffer,
         customMessage: formData.customMessage,
         textStyles: formData.textStyles,
+        cardBackgroundImage: formData.cardBackgroundImage,
         cardStyle: formData.cardStyle,
         cardEffect: formData.cardEffect,
         cardShape: formData.cardShape,
@@ -740,7 +804,7 @@ const fontFamilies: any = {
       version: 1,
       template: cards[0],
       usernames: cards.map((card) => String(card.username)),
-      settings: { ...formData, cardsCount: qty, colsCount: columns },
+      settings: { ...formData, cardBackgroundImage: '', cardsCount: qty, colsCount: columns },
     })
     setBatchIdempotencyKey(nextIdempotencyKey)
     setPrintRetryAvailable(false)
@@ -855,8 +919,8 @@ const fontFamilies: any = {
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
 
-    let shadow = '0 10px 30px rgba(0,0,0,0.3)'
-    let border = card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
+    let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
+    let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
 
     if (card.cardEffect === '3d') {
       shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
@@ -874,8 +938,8 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${card.cardShape === 'triangle' ? 'background-image: linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%);' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+            ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
           <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.borderWidth}px ${card.borderStyle} ${card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:inset 0 2px 10px rgba(0,0,0,0.2);">
             <div style="font-size:${card.labelFontSize}px; color:${card.labelColor}; opacity:0.9; margin-bottom:4px;">🌐 الشبكة</div>
@@ -1327,6 +1391,34 @@ const fontFamilies: any = {
                   </option>
                 ))}
               </select>
+            </InputRow>
+          )}
+
+          {formData.cardStyle === 'colored' && (
+            <InputRow activeField={activeField} label="صورة خلفية" icon="🖼️" fieldId="cardBackgroundImage">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: 0 }}>
+                <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="اختيار صورة خلفية للكرت"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0]
+                    if (!file) return
+                    try {
+                      const compressed = await compressCardBackground(file)
+                      setFormData((current) => ({ ...current, cardBackgroundImage: compressed }))
+                      setActiveField('cardBackgroundImage')
+                    } catch (error) {
+                      alert(error instanceof Error ? error.message : 'تعذر تجهيز الصورة.')
+                    } finally {
+                      event.target.value = ''
+                    }
+                  }}
+                  style={{ width: '100%', color: '#e2e8f0', fontSize: '12px' }} />
+                <div style={{ color: '#cbd5e1', fontSize: '11px', lineHeight: 1.6 }}>صورة JPG أو PNG أو WEBP؛ يتم ضغطها تلقائياً قبل حفظ التصميم.</div>
+                {formData.cardBackgroundImage && <button type="button"
+                  onClick={() => setFormData((current) => ({ ...current, cardBackgroundImage: '' }))}
+                  style={{ alignSelf: 'flex-start', padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(248,113,113,.55)', background: 'rgba(127,29,29,.25)', color: '#fecaca', cursor: 'pointer' }}>
+                  إزالة صورة الخلفية
+                </button>}
+              </div>
             </InputRow>
           )}
 
