@@ -5563,3 +5563,95 @@ html[data-auth-theme="dark"] .vault-refresh, html[data-auth-theme="dark"] .vault
 @media (prefers-reduced-motion: reduce) {
   .vault-spinner { animation: none; }
 }
+
+
+/* Jassas Studio — premium readable typography */
+.print-cards-shell {
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-text-size-adjust: 100%;
+}
+.print-cards-shell .print-cards-header h1 {
+  color: #174b82 !important;
+  font-size: clamp(23px, 4.5vw, 30px) !important;
+  font-weight: 900 !important;
+  line-height: 1.45;
+  text-shadow: 0 1px 0 rgba(255,255,255,.7);
+}
+.print-cards-shell .print-cards-header p {
+  font-size: 14px !important;
+  line-height: 1.7;
+  font-weight: 700;
+}
+.print-cards-shell .print-cards-preview h2 {
+  color: #d6a83f !important;
+  font-size: clamp(17px, 3.5vw, 21px) !important;
+  font-weight: 900 !important;
+}
+.print-cards-shell .print-cards-settings > h2,
+.print-cards-shell #batch-history-heading {
+  color: #d6ad55 !important;
+  font-size: clamp(21px, 4vw, 25px) !important;
+  font-weight: 900 !important;
+  line-height: 1.55;
+  text-shadow: 0 2px 12px rgba(214,173,85,.16);
+}
+.print-cards-shell .print-cards-settings h3,
+.print-cards-shell #studio-section-design,
+.print-cards-shell #studio-section-typography {
+  color: #2563a6 !important;
+  font-size: clamp(19px, 3.8vw, 22px) !important;
+  font-weight: 900 !important;
+  line-height: 1.6;
+  border-bottom-color: rgba(214,173,85,.7) !important;
+}
+.print-cards-shell .print-cards-row > div:last-child {
+  color: #d6ad55 !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1.55;
+}
+.print-cards-shell .print-cards-settings label,
+.print-cards-shell .print-cards-settings p,
+.print-cards-shell .print-cards-settings small {
+  font-size: 15px;
+  line-height: 1.75;
+}
+.print-cards-shell .print-cards-settings input:not([type="checkbox"]):not([type="range"]):not([type="color"]),
+.print-cards-shell .print-cards-settings select,
+.print-cards-shell .print-cards-settings textarea {
+  font-size: 17px !important;
+  font-weight: 700;
+}
+.print-cards-shell .studio-section-tab {
+  min-height: 46px;
+  padding: 10px 15px;
+  font-size: 15px;
+  font-weight: 900;
+}
+.print-cards-shell button {
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .print-cards-shell .print-cards-header h1 { font-size: 23px !important; }
+  .print-cards-shell .print-cards-settings > h2,
+  .print-cards-shell #batch-history-heading { font-size: 21px !important; }
+  .print-cards-shell .print-cards-settings h3,
+  .print-cards-shell #studio-section-design,
+  .print-cards-shell #studio-section-typography { font-size: 19px !important; }
+  .print-cards-shell .print-cards-row > div:last-child { font-size: 14px !important; }
+  .print-cards-shell .studio-section-tab { min-height: 44px; font-size: 14px; }
+  .print-cards-shell .print-cards-settings label,
+  .print-cards-shell .print-cards-settings p { font-size: 15px; }
+}
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-header h1,
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-settings h3,
+html[data-auth-theme="dark"] .print-cards-shell #studio-section-design,
+html[data-auth-theme="dark"] .print-cards-shell #studio-section-typography {
+  color: #9bc9ff !important;
+}
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-row > div:last-child,
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-settings > h2,
+html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
+  color: #f2d58c !important;
+}
