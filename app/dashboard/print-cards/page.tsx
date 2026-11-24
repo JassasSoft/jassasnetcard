@@ -237,6 +237,52 @@ export default function PrintCardsPage() {
   }, [])
 
   useEffect(() => {
+    const sections = [
+      ['identity', 'studio-field-profile'],
+      ['numbers', 'studio-field-prefix'],
+      ['duration', 'studio-field-validity'],
+      ['time', 'studio-field-cardTime'],
+      ['content', 'studio-field-customMessage'],
+      ['design', 'studio-section-design'],
+      ['typography', 'studio-section-typography'],
+      ['print', 'studio-field-count'],
+      ['history', 'batch-history-heading'],
+    ] as const
+
+    if (typeof IntersectionObserver === 'undefined') return
+
+    const visibleSections = new Map<string, number>()
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const sectionId = sections.find(([, targetId]) => targetId === entry.target.id)?.[0]
+        if (!sectionId) continue
+
+        if (entry.isIntersecting) {
+          visibleSections.set(sectionId, entry.intersectionRatio)
+        } else {
+          visibleSections.delete(sectionId)
+        }
+      }
+
+      const activeSection = [...visibleSections.entries()]
+        .sort((a, b) => b[1] - a[1])[0]?.[0]
+
+      if (activeSection) setActiveStudioSection(activeSection)
+    }, {
+      root: null,
+      rootMargin: '-18% 0px -62% 0px',
+      threshold: [0, 0.1, 0.25, 0.5],
+    })
+
+    sections.forEach(([, targetId]) => {
+      const target = document.getElementById(targetId)
+      if (target) observer.observe(target)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
     if (!user) return
 
     let mounted = true
@@ -1073,7 +1119,7 @@ const fontFamilies: any = {
               aria-current={activeStudioSection === section.id ? 'location' : undefined}
               onClick={() => {
                 setActiveStudioSection(section.id)
-                document.getElementById(section.target)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                document.getElementById(section.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }}
             >
               <span aria-hidden="true">{section.icon}</span>
@@ -1178,7 +1224,7 @@ const fontFamilies: any = {
 
           <InputRow activeField={activeField} label="الصلاحية" icon="✓" fieldId="validity">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
-              <input type="number" value={formData.validity} onChange={(e) => { setFormData({...formData, validity: e.target.value}); setActiveField('validity') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+              <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={formData.validity} onChange={(e) => { setFormData({...formData, validity: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('validity') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
               <select value={formData.validityType} onChange={(e) => { setFormData({...formData, validityType: e.target.value}); setActiveField('validity') }} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                 <option value="no-expiry">بدون مدة</option>
                 <option value="hour">ساعة</option>
@@ -1191,7 +1237,7 @@ const fontFamilies: any = {
 
           <InputRow activeField={activeField} label="مدة المستخدم" icon="⏱️" fieldId="userDuration">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
-              <input type="number" value={formData.userDuration} onChange={(e) => { setFormData({...formData, userDuration: e.target.value}); setActiveField('userDuration') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+              <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={formData.userDuration} onChange={(e) => { setFormData({...formData, userDuration: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('userDuration') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
               <select value={formData.userDurationType} onChange={(e) => { setFormData({...formData, userDurationType: e.target.value}); setActiveField('userDuration') }} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                 <option value="no-expiry">بدون مدة</option>
                 <option value="hour">ساعة</option>
@@ -1210,7 +1256,7 @@ const fontFamilies: any = {
               </select>
               {formData.dataPackage === 'limited' && (
                 <>
-                  <input type="number" value={formData.dataAmount} onChange={(e) => { setFormData({...formData, dataAmount: e.target.value}); setActiveField('dataPackage') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={formData.dataAmount} onChange={(e) => { setFormData({...formData, dataAmount: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('dataPackage') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
                   <select value={formData.dataUnit} onChange={(e) => { setFormData({...formData, dataUnit: e.target.value}); setActiveField('dataPackage') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                     <option value="MB">MB</option>
                     <option value="GB">GB</option>
@@ -1226,7 +1272,7 @@ const fontFamilies: any = {
 
           <InputRow activeField={activeField} label="وقت الكرت" icon="" fieldId="cardTime">
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
-              <input type="number" value={formData.cardTime} onChange={(e) => { setFormData({...formData, cardTime: e.target.value}); setActiveField('cardTime') }} min="1" style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
+              <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={formData.cardTime} onChange={(e) => { setFormData({...formData, cardTime: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('cardTime') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }} />
               <select value={formData.cardTimeType} onChange={(e) => { setFormData({...formData, cardTimeType: e.target.value}); setActiveField('cardTime') }} style={{ flex: 2, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
                 <option value="hour">ساعة</option>
                 <option value="day">يوم</option>
@@ -1237,7 +1283,7 @@ const fontFamilies: any = {
           </InputRow>
 
           <InputRow activeField={activeField} label="سعر الكرت" icon="💰" fieldId="price">
-            <input type="number" value={formData.cardPrice} onChange={(e) => { setFormData({...formData, cardPrice: e.target.value}); setActiveField('price') }} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(183,243,74,0.65)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+            <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={formData.cardPrice} onChange={(e) => { setFormData({...formData, cardPrice: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('price') }} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(183,243,74,0.65)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
           <InputRow activeField={activeField} label="الموزع" icon="" fieldId="distributor">
@@ -1245,7 +1291,7 @@ const fontFamilies: any = {
           </InputRow>
 
           <InputRow activeField={activeField} label="بداية اسم المستخدم" icon="🔢" fieldId="prefix">
-            <input type="text" value={formData.usernamePrefix} onChange={(e) => { setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('prefix') }} placeholder="86" maxLength={5} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
+            <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" value={formData.usernamePrefix} onChange={(e) => { setFormData({...formData, usernamePrefix: e.target.value.replace(/[^0-9]/g, '')}); setActiveField('prefix') }} placeholder="86" maxLength={5} style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '15px', textAlign: 'center' }} />
           </InputRow>
 
           <InputRow activeField={activeField} label={`عدد الأرقام: ${formData.usernameLength}`} icon="" fieldId="length">
