@@ -383,7 +383,7 @@ const fontFamilies: any = {
     return {
       display: config.show === false ? 'none' : 'block',
       fontSize: Math.min(40, Math.max(8, Number(config.fontSize) || safeDefaults.fontSize)),
-      color: card.cardStyle === 'plain' ? '#111827' : (config.color || safeDefaults.color),
+      color: card.cardStyle === 'plain' ? '#111827' : card.cardStyle === 'three-color' ? '#172033' : (config.color || safeDefaults.color),
       fontFamily: fontFamilies[config.fontFamily] || fontFamilies.default,
       textAlign: config.align || safeDefaults.align,
       border: Math.min(6, Math.max(0, Number(config.borderWidth) || 0)) + 'px ' +
@@ -677,7 +677,7 @@ const fontFamilies: any = {
     networkColor: formData.networkColor,
     cardNumberColor: formData.cardNumberColor,
     infoColor: formData.infoColor,
-    labelColor: formData.labelColor,
+    labelColor: formData.cardStyle === 'plain' || formData.cardStyle === 'three-color' ? '#4b5563' : formData.labelColor,
     borderWidth: formData.borderWidth,
     borderStyle: formData.borderStyle,
     borderColor: formData.borderColor,
@@ -702,7 +702,7 @@ const fontFamilies: any = {
       shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
     }
-    if (isActive) {
+    if (isActive && card.cardStyle !== 'plain') {
       shadow = '0 0 0 4px rgba(124,58,237,0.45), ' + shadow
       extraStyle.transform = 'scale(1.02)'
     }
@@ -1070,19 +1070,19 @@ const fontFamilies: any = {
                 {previewCard.textStyles?.username?.show !== false && <div style={{ ...getCardTextStyle(previewCard, 'username'), fontWeight: 'bold', letterSpacing: '3px', textShadow: '0 3px 10px rgba(0,0,0,0.5)' }}>{previewCard.username}</div>}
               </div>
               <div style={{ gridArea: 'info', minWidth: 0, fontSize: previewCard.infoFontSize + 'px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏱️ الصلاحية</div>
                   {previewCard.textStyles?.validity?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'validity') }}>{previewCard.validity}</div>}
                 </div>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏰ الوقت</div>
                   {previewCard.textStyles?.time?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'time') }}>{previewCard.cardTime}</div>}
                 </div>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💾 البيانات</div>
                   {previewCard.textStyles?.data?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'data') }}>{previewCard.dataPackage}</div>}
                 </div>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💰 السعر</div>
                   {previewCard.textStyles?.price?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'price') }}>{previewCard.price}</div>}
                 </div>
