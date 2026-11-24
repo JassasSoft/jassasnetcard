@@ -321,10 +321,10 @@ export default function PrintCardsPage() {
     labelText: light ? "#4b5563" : "#e5e7eb",
     infoText: light ? "#111827" : base.text,
     numberText: light ? "#111827" : base.accent,
-    offerBg: light ? "#ede9fe" : "rgba(215,175,80,0.2)",
-    offerText: light ? "#5b21b6" : "#f7d77a",
-    rechargeBg: "linear-gradient(135deg, #2563eb, #7c3aed)",
-    rechargeText: "#ffffff",
+    offerBg: style === "plain" ? "#f3f4f6" : light ? "#ede9fe" : "rgba(215,175,80,0.2)",
+    offerText: style === "plain" ? "#374151" : light ? "#5b21b6" : "#f7d77a",
+    rechargeBg: style === "plain" ? "#e5e7eb" : "linear-gradient(135deg, #2563eb, #7c3aed)",
+    rechargeText: style === "plain" ? "#111827" : "#ffffff",
   };
 };
 
@@ -345,7 +345,7 @@ const fontFamilies: any = {
     return {
       display: config.show === false ? 'none' : 'block',
       fontSize: Math.min(40, Math.max(8, Number(config.fontSize) || safeDefaults.fontSize)),
-      color: config.color || safeDefaults.color,
+      color: card.cardStyle === 'plain' ? '#111827' : (config.color || safeDefaults.color),
       fontFamily: fontFamilies[config.fontFamily] || fontFamilies.default,
       textAlign: config.align || safeDefaults.align,
       border: Math.min(6, Math.max(0, Number(config.borderWidth) || 0)) + 'px ' +
@@ -625,15 +625,15 @@ const fontFamilies: any = {
     let radius = '15px'
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
-    let shadow = '0 10px 30px rgba(0,0,0,0.3)'
-    let border = card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
+    let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
+    let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
     let extraStyle: any = {}
-    if (card.cardEffect === '3d') {
+    if (card.cardStyle !== 'plain' && card.cardEffect === '3d') {
       shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
-    } else if (card.cardEffect === 'shadow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'shadow') {
       shadow = '0 25px 60px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.4)'
-    } else if (card.cardEffect === 'glow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'glow') {
       shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
     }
@@ -861,9 +861,9 @@ const fontFamilies: any = {
     if (card.cardEffect === '3d') {
       shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
-    } else if (card.cardEffect === 'shadow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'shadow') {
       shadow = '0 25px 60px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.4)'
-    } else if (card.cardEffect === 'glow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'glow') {
       shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
     }
@@ -1284,17 +1284,29 @@ const fontFamilies: any = {
             }} aria-label="عدد الأعمدة من 1 إلى 6" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
-          {/* تصميم الكرت */}
-          <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 تصميم الكرت</h3>
-
-          <InputRow activeField={activeField} label="نوع التصميم" icon="🎭" fieldId="cardStyle">
-            <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'plain'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'plain' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'plain' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>عادي</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'colored'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'colored' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'colored' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ملون</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'three-color'}); setActiveField('cardStyle') }} style={{ flex: 1, minWidth: '92px', padding: '12px', background: formData.cardStyle === 'three-color' ? 'linear-gradient(135deg, #2563eb, #a855f7)' : 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ثلاثي الألوان</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'luxury'}); setActiveField('cardStyle') }} style={{ flex: 1, minWidth: '92px', padding: '12px', background: formData.cardStyle === 'luxury' ? 'linear-gradient(135deg, #d6ad55, #8b6a28)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'luxury' ? '#101827' : '#fff', border: '1px solid rgba(214,173,85,.55)', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>فاخر</button>
-            </div>
-          </InputRow>
+          {/* أوضاع التصميم الأربعة المعتمدة */}
+          <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 أوضاع تصميم الكرت</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginBottom: '14px' }}>
+            {([
+              { value: 'plain', title: 'كروت عادي', detail: 'نظيف وعملي بلا زخارف أو ألوان تصميم', active: 'linear-gradient(135deg,#e5e7eb,#9ca3af)', ink: '#111827' },
+              { value: 'luxury', title: 'كروت عادي فاخر', detail: 'إطارات وزخارف راقية بألوان هادئة', active: 'linear-gradient(135deg,#123f78,#d6ad55)', ink: '#fffaf0' },
+              { value: 'three-color', title: 'كروت ملونه', detail: 'تدرج متناسق من 3 إلى 4 ألوان', active: 'linear-gradient(135deg,#2563eb,#7c3aed)', ink: '#ffffff' },
+              { value: 'colored', title: 'كروت ملونه فخمه', detail: 'لوحات ألوان وصورة خلفية وتأثيرات كاملة', active: 'linear-gradient(135deg,#0f766e,#2563eb,#d4af37)', ink: '#ffffff' },
+            ] as const).map((mode) => {
+              const selected = formData.cardStyle === mode.value
+              return (
+                <button key={mode.value} type="button" aria-pressed={selected}
+                  onClick={() => { setFormData((current) => ({ ...current, cardStyle: mode.value })); setActiveField('cardStyle') }}
+                  style={{ minHeight: '88px', padding: '12px', textAlign: 'right', borderRadius: '12px',
+                    border: selected ? '2px solid #f7d77a' : '1px solid rgba(148,163,184,.35)',
+                    background: selected ? mode.active : 'rgba(15,23,42,.62)',
+                    color: selected ? mode.ink : '#f8fafc', boxShadow: selected ? '0 8px 22px rgba(0,0,0,.22)' : 'none', cursor: 'pointer' }}>
+                  <span style={{ display: 'block', fontWeight: 800, fontSize: '14px', marginBottom: '5px' }}>{mode.title}</span>
+                  <span style={{ display: 'block', fontSize: '11px', lineHeight: 1.5, opacity: .88 }}>{mode.detail}</span>
+                </button>
+              )
+            })}
+          </div>
 
           {formData.cardStyle === 'colored' && (
             <InputRow activeField={activeField} label="نظام الألوان" icon="🌈" fieldId="colorScheme">
