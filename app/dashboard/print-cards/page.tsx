@@ -20,7 +20,7 @@ const escapeHtml = (value: unknown): string =>
   })
 
 const compressCardBackground = async (file: File): Promise<string> => {
-  if (!/^image\\/(jpeg|png|webp)$/i.test(file.type)) throw new Error('اختر صورة JPG أو PNG أو WEBP.')
+  if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) throw new Error('اختر صورة JPG أو PNG أو WEBP.')
   if (file.size > 8 * 1024 * 1024) throw new Error('حجم الصورة الأصلية يجب ألا يتجاوز 8 ميجابايت.')
   const objectUrl = URL.createObjectURL(file)
   try {
@@ -403,7 +403,7 @@ const fontFamilies: any = {
       layers.push('linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)')
     }
     if (card.cardStyle === 'colored' && typeof card.cardBackgroundImage === 'string' &&
-      /^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(card.cardBackgroundImage) &&
+      /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(card.cardBackgroundImage) &&
       card.cardBackgroundImage.length <= 200000) {
       layers.push('linear-gradient(rgba(7,17,38,0.38), rgba(7,17,38,0.38))')
       layers.push('url("' + card.cardBackgroundImage + '")')
@@ -470,7 +470,7 @@ const fontFamilies: any = {
         typeof (snapshot.template as Record<string, unknown>).cardBackgroundImage === 'string'
           ? (snapshot.template as Record<string, unknown>).cardBackgroundImage as string
           : ''
-      const safeBackgroundImage = /^data:image\\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(rawBackgroundImage) &&
+      const safeBackgroundImage = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(rawBackgroundImage) &&
         rawBackgroundImage.length <= 200000 ? rawBackgroundImage : ''
 
       const safeSettings = {
