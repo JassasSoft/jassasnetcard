@@ -1,6 +1,6 @@
 # Jassas Net Card — Engineering Work Log
 
-Last updated: 2026-11-24
+Last updated: 2026-11-24 (after first four-mode implementation)
 
 ## Canonical project identity
 - Product: Jassas Net Card / جساس نت كرت
@@ -52,15 +52,15 @@ Do not rename persisted IDs without a migration. Existing print snapshots use ve
 ## Latest implementation on the feature branch
 Updated `app/dashboard/print-cards/page.tsx`:
 - Replaced the old ambiguous style buttons with four clearly named mode cards and descriptions.
-- Plain mode now uses neutral colors, a flat frame, no watermark, and no decorative effects.
-- The full-color luxury mode now offers a local image background upload.
+- Plain mode now uses neutral colors and readable dark text, a flat frame, no watermark, and no decorative effects or focus glow.
+- The full-color luxury mode now offers a local image background upload, with the same background helper used by live preview and PDF.
 - Uploaded images are validated, resized/compressed to JPEG, and capped at 135 KB before being included in a saved batch template.
 - Image data is stored once in the version-1 snapshot template (not duplicated in settings), restored with strict data-URL validation and a 200,000-character ceiling, and used by both live preview and PDF rendering.
 - Existing persisted style identifiers, QR generation, server card creation, idempotency, batch restore and reprint flows remain in place.
 - No database schema or API route was changed.
 
 Current source blob SHA:
-- `app/dashboard/print-cards/page.tsx`: `b1d0ec2d9b8fba744b7da85f180d9f148dd53d70`
+- `app/dashboard/print-cards/page.tsx`: `143503e3341492a3fb3d1df8ce922487e7e90eab`
 
 Unchanged during this work:
 - `app/globals.css`
@@ -70,6 +70,7 @@ Unchanged during this work:
 - Live preview and PDF still have separate markup trees. Palette, text styling and background-image logic are shared, but full single-source rendering is not yet complete.
 - The existing `triangle` option still needs a dedicated geometry review; its earlier implementation is a triangular corner treatment rather than a true triangular card silhouette.
 - The new image background path has not yet been exercised in a real mobile browser or print dialog.
+- GitHub compare reports the feature branch is 8 commits ahead of `production`, 0 behind; changed files are the Studio page, roadmap and work log. No changes to the API route or global stylesheet.
 - Old version-1 snapshots without a background image remain valid; image is optional.
 - Do not claim TypeScript, build, visual, or print tests have passed until run locally.
 
@@ -77,7 +78,7 @@ Unchanged during this work:
 - GitHub connector: **DONE — repository access verified**.
 - Isolated feature branch: **DONE — based on production**.
 - Four-mode selector: **IMPLEMENTED — pending local verification**.
-- Plain-mode neutral rendering: **IMPLEMENTED — pending visual verification**.
+- Plain-mode neutral rendering and contrast fixes for both light modes: **IMPLEMENTED — pending visual verification**.
 - Full-color image background upload and snapshot restore: **IMPLEMENTED — pending mobile/PDF verification**.
 - Preview/PDF single-source rendering: **PENDING**.
 - True triangle geometry: **PENDING**.
