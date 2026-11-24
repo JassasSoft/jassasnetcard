@@ -19,6 +19,43 @@ const escapeHtml = (value: unknown): string =>
     return entities[char]
   })
 
+const compressCardBackground = async (file: File): Promise<string> => {
+  if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) throw new Error('اختر صورة JPG أو PNG أو WEBP.')
+  if (file.size > 8 * 1024 * 1024) throw new Error('حجم الصورة الأصلية يجب ألا يتجاوز 8 ميجابايت.')
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const image = new Image()
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve()
+      image.onerror = () => reject(new Error('تعذر قراءة الصورة المحددة.'))
+      image.src = objectUrl
+    })
+    let scale = Math.min(1, 1200 / image.naturalWidth, 760 / image.naturalHeight)
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    if (!context) throw new Error('تعذر تجهيز الصورة للمعاينة.')
+    for (let attempt = 0; attempt < 5; attempt++) {
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', attempt < 2 ? 0.68 : 0.56))
+      if (blob && blob.size <= 135 * 1024) {
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('تعذر تجهيز ملف الصورة.'))
+          reader.onerror = () => reject(new Error('تعذر قراءة الصورة المضغوطة.'))
+          reader.readAsDataURL(blob)
+        })
+      }
+      scale *= 0.78
+    }
+    throw new Error('الصورة كبيرة بعد الضغط. اختر صورة أبسط أو أصغر.')
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 const createBatchIdempotencyKey = (): string => {
   if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
     throw new Error('Secure random generator is unavailable')
@@ -176,6 +213,7 @@ export default function PrintCardsPage() {
     cardsCount: 100,
     colsCount: 3,
     cardStyle: 'colored',
+    cardBackgroundImage: '',
     cardEffect: 'gradient',
     colorScheme: 'blue-gold',
     cardShape: 'rectangle',
@@ -367,10 +405,10 @@ export default function PrintCardsPage() {
     labelText: light ? "#4b5563" : "#e5e7eb",
     infoText: light ? "#111827" : base.text,
     numberText: light ? "#111827" : base.accent,
-    offerBg: light ? "#ede9fe" : "rgba(215,175,80,0.2)",
-    offerText: light ? "#5b21b6" : "#f7d77a",
-    rechargeBg: "linear-gradient(135deg, #2563eb, #7c3aed)",
-    rechargeText: "#ffffff",
+    offerBg: style === "plain" ? "#f3f4f6" : light ? "#ede9fe" : "rgba(215,175,80,0.2)",
+    offerText: style === "plain" ? "#374151" : light ? "#5b21b6" : "#f7d77a",
+    rechargeBg: style === "plain" ? "#e5e7eb" : "linear-gradient(135deg, #2563eb, #7c3aed)",
+    rechargeText: style === "plain" ? "#111827" : "#ffffff",
   };
 };
 
@@ -391,12 +429,14 @@ const fontFamilies: any = {
     return {
       display: config.show === false ? 'none' : 'block',
       fontSize: Math.min(40, Math.max(8, Number(config.fontSize) || safeDefaults.fontSize)),
-      color: config.color || safeDefaults.color,
+      color: card.cardStyle === 'plain' ? '#111827' : card.cardStyle === 'three-color' ? '#172033' : (config.color || safeDefaults.color),
       fontFamily: fontFamilies[config.fontFamily] || fontFamilies.default,
       textAlign: config.align || safeDefaults.align,
       border: Math.min(6, Math.max(0, Number(config.borderWidth) || 0)) + 'px ' +
-        (config.borderStyle || 'solid') + ' ' + (config.borderColor || safeDefaults.borderColor),
-      background: config.background || 'transparent',
+        (config.borderStyle || 'solid') + ' ' + (card.cardStyle === 'plain' ? '#d1d5db' : (config.borderColor || safeDefaults.borderColor)),
+      background: card.cardStyle === 'plain'
+        ? (config.background !== 'transparent' ? '#f3f4f6' : 'transparent')
+        : (config.background || 'transparent'),
       borderRadius: '8px',
       padding: Number(config.borderWidth) > 0 || config.background !== 'transparent'
         ? '5px 7px'
@@ -404,6 +444,20 @@ const fontFamilies: any = {
       boxSizing: 'border-box' as const,
     };
   };
+
+  const getCardBackgroundImage = (card: any) => {
+    const layers: string[] = []
+    if (card.cardShape === 'triangle' && card.cardStyle !== 'plain') {
+      layers.push('linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)')
+    }
+    if (card.cardStyle === 'colored' && typeof card.cardBackgroundImage === 'string' &&
+      /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(card.cardBackgroundImage) &&
+      card.cardBackgroundImage.length <= 200000) {
+      layers.push('linear-gradient(rgba(7,17,38,0.38), rgba(7,17,38,0.38))')
+      layers.push('url("' + card.cardBackgroundImage + '")')
+    }
+    return layers.length ? layers.join(', ') : undefined
+  }
 
   const getCardTextCss = (card: any, key: string) => {
     const s = getCardTextStyle(card, key);
@@ -459,9 +513,18 @@ const fontFamilies: any = {
           : fallback
       }
 
+      const rawBackgroundImage = snapshot.template &&
+        typeof snapshot.template === 'object' &&
+        typeof (snapshot.template as Record<string, unknown>).cardBackgroundImage === 'string'
+          ? (snapshot.template as Record<string, unknown>).cardBackgroundImage as string
+          : ''
+      const safeBackgroundImage = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(rawBackgroundImage) &&
+        rawBackgroundImage.length <= 200000 ? rawBackgroundImage : ''
+
       const safeSettings = {
         ...formData,
         ...rawSettings,
+        cardBackgroundImage: safeBackgroundImage,
         profile: allowedProfiles.includes(rawSettings.profile) ? rawSettings.profile : 'DEFAULT',
         cardStyle: allowedStyles.includes(rawSettings.cardStyle) ? rawSettings.cardStyle : 'colored',
         colorScheme: Object.prototype.hasOwnProperty.call(colorSchemes, rawSettings.colorScheme)
@@ -533,6 +596,7 @@ const fontFamilies: any = {
         return {
           ...template,
           textStyles: safeSettings.textStyles,
+          cardBackgroundImage: safeSettings.cardBackgroundImage,
           customMessage: String(template.customMessage ?? safeSettings.customMessage ?? '').slice(0, 240),
           id: 'restored-' + index + '-' + username,
           username,
@@ -647,6 +711,7 @@ const fontFamilies: any = {
     rechargeText: formData.rechargeText,
     specialOffer: formData.specialOffer,
     cardStyle: formData.cardStyle,
+    cardBackgroundImage: formData.cardBackgroundImage,
     cardEffect: formData.cardEffect,
     cardShape: formData.cardShape,
     colors: getCardColors(formData.cardStyle, formData.colorScheme),
@@ -658,7 +723,7 @@ const fontFamilies: any = {
     networkColor: formData.networkColor,
     cardNumberColor: formData.cardNumberColor,
     infoColor: formData.infoColor,
-    labelColor: formData.labelColor,
+    labelColor: formData.cardStyle === 'plain' || formData.cardStyle === 'three-color' ? '#4b5563' : formData.labelColor,
     borderWidth: formData.borderWidth,
     borderStyle: formData.borderStyle,
     borderColor: formData.borderColor,
@@ -671,27 +736,27 @@ const fontFamilies: any = {
     let radius = '15px'
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
-    let shadow = '0 10px 30px rgba(0,0,0,0.3)'
-    let border = card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
+    let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
+    let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
     let extraStyle: any = {}
-    if (card.cardEffect === '3d') {
+    if (card.cardStyle !== 'plain' && card.cardEffect === '3d') {
       shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
-    } else if (card.cardEffect === 'shadow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'shadow') {
       shadow = '0 25px 60px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.4)'
-    } else if (card.cardEffect === 'glow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'glow') {
       shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
     }
-    if (isActive) {
+    if (isActive && card.cardStyle !== 'plain') {
       shadow = '0 0 0 4px rgba(124,58,237,0.45), ' + shadow
       extraStyle.transform = 'scale(1.02)'
     }
     return {
       background: bg,
-      backgroundImage: card.cardShape === 'triangle'
-        ? 'linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)'
-        : undefined,
+      backgroundImage: getCardBackgroundImage(card),
+      backgroundSize: card.cardBackgroundImage ? 'cover' : undefined,
+      backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
       boxShadow: shadow,
       borderRadius: radius,
       border: border,
@@ -761,6 +826,7 @@ const fontFamilies: any = {
         specialOffer: formData.specialOffer,
         customMessage: formData.customMessage,
         textStyles: formData.textStyles,
+        cardBackgroundImage: formData.cardBackgroundImage,
         cardStyle: formData.cardStyle,
         cardEffect: formData.cardEffect,
         cardShape: formData.cardShape,
@@ -786,7 +852,7 @@ const fontFamilies: any = {
       version: 1,
       template: cards[0],
       usernames: cards.map((card) => String(card.username)),
-      settings: { ...formData, cardsCount: qty, colsCount: columns },
+      settings: { ...formData, cardBackgroundImage: '', cardsCount: qty, colsCount: columns },
     })
     setBatchIdempotencyKey(nextIdempotencyKey)
     setPrintRetryAvailable(false)
@@ -901,15 +967,15 @@ const fontFamilies: any = {
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
 
-    let shadow = '0 10px 30px rgba(0,0,0,0.3)'
-    let border = card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
+    let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
+    let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
 
-    if (card.cardEffect === '3d') {
+    if (card.cardStyle !== 'plain' && card.cardEffect === '3d') {
       shadow = '0 20px 50px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.2)'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
-    } else if (card.cardEffect === 'shadow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'shadow') {
       shadow = '0 25px 60px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.4)'
-    } else if (card.cardEffect === 'glow') {
+    } else if (card.cardStyle !== 'plain' && card.cardEffect === 'glow') {
       shadow = '0 0 30px ' + c.accent + ', 0 0 60px ' + c.accent + '88'
       border = (card.borderWidth + 2) + 'px ' + card.borderStyle + ' ' + c.accent
     }
@@ -920,11 +986,11 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${card.cardShape === 'triangle' ? 'background-image: linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%);' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+            ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
-          <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.borderWidth}px ${card.borderStyle} ${card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:inset 0 2px 10px rgba(0,0,0,0.2);">
-            <div style="font-size:${card.labelFontSize}px; color:${card.labelColor}; opacity:0.9; margin-bottom:4px;">🌐 الشبكة</div>
+          <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.cardStyle === 'plain' ? '0' : card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:${card.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)'};">
+            <div style="font-size:${card.labelFontSize}px; color:${card.labelColor}; opacity:0.9; margin-bottom:4px;">${card.cardStyle === 'plain' ? 'الشبكة' : '🌐 الشبكة'}</div>
             ${card.textStyles?.network?.show !== false ? `<div style="${getCardTextCss(card, 'network')}font-weight:bold;line-height:1.2;text-shadow:0 3px 10px rgba(0,0,0,0.4);">${escapeHtml(card.network)}</div>` : ''}
           </div>
           ${(card.qrEnabled || card.rechargeText) ? `<div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
@@ -936,8 +1002,8 @@ const fontFamilies: any = {
             </div>` : ''}
           </div>` : ''}
         </div>
-        <div style="grid-area:username; min-width:0; align-self:stretch; background: ${c.panel}; border-radius: 12px; padding: 10px 8px; margin:0; border: 2px dashed ${c.accent}; text-align: center;">
-          <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 5px;">🔢 رقم الكرت / بيانات الدخول</div>
+        <div style="grid-area:username; min-width:0; align-self:stretch; background: ${c.panel}; border-radius: 12px; padding: 10px 8px; margin:0; border: ${card.cardStyle === 'plain' ? '1px solid #d1d5db' : '2px dashed ' + c.accent}; text-align: center;">
+          <div style="font-size: ${card.labelFontSize}px; color: ${card.labelColor}; margin-bottom: 5px;">${card.cardStyle === 'plain' ? 'رقم الكرت / بيانات الدخول' : '🔢 رقم الكرت / بيانات الدخول'}</div>
           ${card.textStyles?.username?.show !== false ? `<div style="${getCardTextCss(card, 'username')}font-weight:bold;letter-spacing:3px;text-shadow:0 3px 10px rgba(0,0,0,0.5);">${escapeHtml(card.username)}</div>` : ''}
         </div>
         <div style="grid-area:info; min-width:0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: ${card.infoFontSize}px;">
@@ -1024,10 +1090,10 @@ const fontFamilies: any = {
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div className="print-cards-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '560px', width: '100%', position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '8px', padding: '12px' }}>
-              <div aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-25deg)', width: '95%', textAlign: 'center', fontSize: '16px', opacity: 0.12, fontWeight: 900, whiteSpace: 'normal', lineHeight: 1.8, pointerEvents: 'none', zIndex: 0, color: previewCard.colors.accent }}>جساس نت كرت<br />JASSAS NET CARD</div>
+              {previewCard.cardStyle !== 'plain' && <div aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-25deg)', width: '95%', textAlign: 'center', fontSize: '16px', opacity: 0.12, fontWeight: 900, whiteSpace: 'normal', lineHeight: 1.8, pointerEvents: 'none', zIndex: 0, color: previewCard.colors.accent }}>جساس نت كرت<br />JASSAS NET CARD</div>}
               <div style={{ gridArea: 'header', minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 0 }}>
-                <div style={{ flex: 1, background: previewCard.colors.panelAlt, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
-                  <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, marginBottom: '4px' }}>🌐 الشبكة</div>
+                <div style={{ flex: 1, background: previewCard.colors.panelAlt, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.cardStyle === 'plain' ? '0' : previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
+                  <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, marginBottom: '4px' }}>{previewCard.cardStyle === 'plain' ? 'الشبكة' : '🌐 الشبكة'}</div>
                   {previewCard.textStyles?.network?.show !== false && <h3 style={{ margin: 0, fontWeight: 'bold', lineHeight: 1.2, textShadow: '0 3px 10px rgba(0,0,0,0.4)', ...getCardTextStyle(previewCard, 'network') }}>{previewCard.network}</h3>}
                 </div>
                 {(previewCard.qrEnabled || previewCard.rechargeText) && (
@@ -1045,24 +1111,24 @@ const fontFamilies: any = {
                   </div>
                 )}
               </div>
-              <div style={{ gridArea: 'username', minWidth: 0, alignSelf: 'stretch', background: previewCard.colors.panel, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 8px', position: 'relative', zIndex: 1, border: '2px dashed ' + previewCard.colors.accent, marginBottom: 0, boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.3)' }}>
-                <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px' }}>🔢 رقم الكرت / اسم المستخدم</div>
+              <div style={{ gridArea: 'username', minWidth: 0, alignSelf: 'stretch', background: previewCard.colors.panel, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 8px', position: 'relative', zIndex: 1, border: previewCard.cardStyle === 'plain' ? '1px solid #d1d5db' : '2px dashed ' + previewCard.colors.accent, marginBottom: 0, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 3px 10px rgba(0,0,0,0.3)' }}>
+                <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.9, textAlign: 'center', marginBottom: '5px' }}>{previewCard.cardStyle === 'plain' ? 'رقم الكرت / اسم المستخدم' : '🔢 رقم الكرت / اسم المستخدم'}</div>
                 {previewCard.textStyles?.username?.show !== false && <div style={{ ...getCardTextStyle(previewCard, 'username'), fontWeight: 'bold', letterSpacing: '3px', textShadow: '0 3px 10px rgba(0,0,0,0.5)' }}>{previewCard.username}</div>}
               </div>
               <div style={{ gridArea: 'info', minWidth: 0, fontSize: previewCard.infoFontSize + 'px', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏱️ الصلاحية</div>
                   {previewCard.textStyles?.validity?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'validity') }}>{previewCard.validity}</div>}
                 </div>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>⏰ الوقت</div>
                   {previewCard.textStyles?.time?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'time') }}>{previewCard.cardTime}</div>}
                 </div>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💾 البيانات</div>
                   {previewCard.textStyles?.data?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'data') }}>{previewCard.dataPackage}</div>}
                 </div>
-                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                <div style={{ background: previewCard.colors.panel, padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid ' + previewCard.colors.accent, boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
                   <div style={{ fontSize: previewCard.labelFontSize + 'px', color: previewCard.labelColor, opacity: 0.8, marginBottom: '3px' }}>💰 السعر</div>
                   {previewCard.textStyles?.price?.show !== false && <div style={{ fontWeight: 'bold', ...getCardTextStyle(previewCard, 'price') }}>{previewCard.price}</div>}
                 </div>
@@ -1330,17 +1396,29 @@ const fontFamilies: any = {
             }} aria-label="عدد الأعمدة من 1 إلى 6" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
-          {/* تصميم الكرت */}
-          <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 تصميم الكرت</h3>
-
-          <InputRow activeField={activeField} label="نوع التصميم" icon="🎭" fieldId="cardStyle">
-            <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'plain'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'plain' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'plain' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>عادي</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'colored'}); setActiveField('cardStyle') }} style={{ flex: 1, padding: '12px', background: formData.cardStyle === 'colored' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'colored' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ملون</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'three-color'}); setActiveField('cardStyle') }} style={{ flex: 1, minWidth: '92px', padding: '12px', background: formData.cardStyle === 'three-color' ? 'linear-gradient(135deg, #2563eb, #a855f7)' : 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>ثلاثي الألوان</button>
-              <button onClick={() => { setFormData({...formData, cardStyle: 'luxury'}); setActiveField('cardStyle') }} style={{ flex: 1, minWidth: '92px', padding: '12px', background: formData.cardStyle === 'luxury' ? 'linear-gradient(135deg, #d6ad55, #8b6a28)' : 'rgba(0,0,0,0.5)', color: formData.cardStyle === 'luxury' ? '#101827' : '#fff', border: '1px solid rgba(214,173,85,.55)', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>فاخر</button>
-            </div>
-          </InputRow>
+          {/* أوضاع التصميم الأربعة المعتمدة */}
+          <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 أوضاع تصميم الكرت</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginBottom: '14px' }}>
+            {([
+              { value: 'plain', title: 'كروت عادي', detail: 'نظيف وعملي بلا زخارف أو ألوان تصميم', active: 'linear-gradient(135deg,#e5e7eb,#9ca3af)', ink: '#111827' },
+              { value: 'luxury', title: 'كروت عادي فاخر', detail: 'إطارات وزخارف راقية بألوان هادئة', active: 'linear-gradient(135deg,#123f78,#d6ad55)', ink: '#fffaf0' },
+              { value: 'three-color', title: 'كروت ملونه', detail: 'تدرج متناسق من 3 إلى 4 ألوان', active: 'linear-gradient(135deg,#2563eb,#7c3aed)', ink: '#ffffff' },
+              { value: 'colored', title: 'كروت ملونه فخمه', detail: 'لوحات ألوان وصورة خلفية وتأثيرات كاملة', active: 'linear-gradient(135deg,#0f766e,#2563eb,#d4af37)', ink: '#ffffff' },
+            ] as const).map((mode) => {
+              const selected = formData.cardStyle === mode.value
+              return (
+                <button key={mode.value} type="button" aria-pressed={selected}
+                  onClick={() => { setFormData((current) => ({ ...current, cardStyle: mode.value })); setActiveField('cardStyle') }}
+                  style={{ minHeight: '88px', padding: '12px', textAlign: 'right', borderRadius: '12px',
+                    border: selected ? '2px solid #f7d77a' : '1px solid rgba(148,163,184,.35)',
+                    background: selected ? mode.active : 'rgba(15,23,42,.62)',
+                    color: selected ? mode.ink : '#f8fafc', boxShadow: selected ? '0 8px 22px rgba(0,0,0,.22)' : 'none', cursor: 'pointer' }}>
+                  <span style={{ display: 'block', fontWeight: 800, fontSize: '14px', marginBottom: '5px' }}>{mode.title}</span>
+                  <span style={{ display: 'block', fontSize: '11px', lineHeight: 1.5, opacity: .88 }}>{mode.detail}</span>
+                </button>
+              )
+            })}
+          </div>
 
           {formData.cardStyle === 'colored' && (
             <InputRow activeField={activeField} label="نظام الألوان" icon="🌈" fieldId="colorScheme">
@@ -1364,6 +1442,35 @@ const fontFamilies: any = {
             </InputRow>
           )}
 
+          {formData.cardStyle === 'colored' && (
+            <InputRow activeField={activeField} label="صورة خلفية" icon="🖼️" fieldId="cardBackgroundImage">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: 0 }}>
+                <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="اختيار صورة خلفية للكرت"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0]
+                    if (!file) return
+                    try {
+                      const compressed = await compressCardBackground(file)
+                      setFormData((current) => ({ ...current, cardBackgroundImage: compressed }))
+                      setActiveField('cardBackgroundImage')
+                    } catch (error) {
+                      alert(error instanceof Error ? error.message : 'تعذر تجهيز الصورة.')
+                    } finally {
+                      event.target.value = ''
+                    }
+                  }}
+                  style={{ width: '100%', color: '#e2e8f0', fontSize: '12px' }} />
+                <div style={{ color: '#cbd5e1', fontSize: '11px', lineHeight: 1.6 }}>صورة JPG أو PNG أو WEBP؛ يتم ضغطها تلقائياً قبل حفظ التصميم.</div>
+                {formData.cardBackgroundImage && <button type="button"
+                  onClick={() => setFormData((current) => ({ ...current, cardBackgroundImage: '' }))}
+                  style={{ alignSelf: 'flex-start', padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(248,113,113,.55)', background: 'rgba(127,29,29,.25)', color: '#fecaca', cursor: 'pointer' }}>
+                  إزالة صورة الخلفية
+                </button>}
+              </div>
+            </InputRow>
+          )}
+
+          {formData.cardStyle !== 'plain' && (
           <InputRow activeField={activeField} label="التأثير" icon="✨" fieldId="cardEffect">
             <select value={formData.cardEffect} onChange={(e) => { setFormData({...formData, cardEffect: e.target.value}); setActiveField('cardEffect') }} style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '8px', color: '#fff', fontSize: '14px', textAlign: 'center' }}>
               <option value="plain">عادي</option>
@@ -1373,6 +1480,7 @@ const fontFamilies: any = {
               <option value="glow">موهج</option>
             </select>
           </InputRow>
+          )}
 
           <InputRow activeField={activeField} label="شكل الكرت" icon="📱" fieldId="cardShape">
             <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
