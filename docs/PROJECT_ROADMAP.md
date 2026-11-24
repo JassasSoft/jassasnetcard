@@ -1,12 +1,13 @@
 # Jassas Net Card — Project Roadmap
 
-Last updated: 2026-11-05
+Last updated: 2026-11-24
 
 ## Project identity
 - Product: Jassas Net Card / جساس نت كرت
 - Service brand: JASSAS SOFT PRO
 - Repository: JassasSoft/jassasnetcard
-- Branch: production
+- Production branch: production
+- Active feature branch: studio-four-design-modes
 - Stack: Next.js 16, React 19, Supabase, MikroTik RouterOS
 - Primary interface: Arabic RTL, with English LTR option
 - Light theme: calm, cool, readable colors
@@ -92,12 +93,15 @@ Last updated: 2026-11-05
   7. Shapes, borders and decorations
   8. Templates and design styles
   9. Card size, layout and printing
-- Real rectangle, square, circle and triangle designs.
+- Card shapes: rectangle, square, rounded and triangle; verify the triangle as a true silhouette, not only a corner ornament.
+- Four approved modes: كروت عادي، كروت عادي فاخر، كروت ملونه، كروت ملونه فخمه.
+- Plain mode stays neutral and undecorated; luxury mode uses restrained accents; color mode uses a coordinated 3–4 color gradient; full-color luxury mode supports optional compressed image backgrounds.
+- Keep persisted style IDs backward compatible: plain, luxury, three-color and colored.
 - Functional frames, borders, colors and typography.
 - Save designs, templates, reset section, undo and redo.
 - Show and hide card elements.
 - Local autosave.
-- One normalized design specification shared by preview and PDF.
+- Shared palette, text-style and background-image helpers for preview and PDF; finish a single normalized renderer so both outputs cannot drift.
 - Preserve QR, Supabase saving, balance charging and print retry.
 - Preserve existing uncommitted work in the print page and global CSS.
 
@@ -121,14 +125,14 @@ Last updated: 2026-11-05
 5. Implement first-login onboarding and saved progress.
 6. Implement Rewards database logic and secure server APIs.
 7. Implement Card Vault and storage-only card creation.
-8. Unify Card Design preview and PDF rendering, then complete the nine sections.
-9. Run full security, mobile, performance and production-build checks.
+8. Complete the four Card Studio design modes, image backgrounds, true shape geometry, and single-source preview/PDF rendering.
+9. Run full security, mobile, performance and production-build checks; merge only after review.
 
-## Current known working-tree changes
-- app/dashboard/print-cards/page.tsx
-- app/globals.css
-
-These changes must be preserved and inspected before any edits.
+## Current feature-branch work
+- Active branch: studio-four-design-modes (created from production).
+- app/dashboard/print-cards/page.tsx has the first implementation of the four modes and optional compressed background image.
+- app/globals.css and app/api/print-cards/route.ts were not changed in this phase.
+- Local TypeScript, production build, Android preview, PDF, restore and reprint tests are still pending.
 
 ## Status convention
 - APPROVED: product direction confirmed.
