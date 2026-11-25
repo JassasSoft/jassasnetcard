@@ -255,7 +255,11 @@ export default function PrintCardsPage() {
     const step = studioSectionSteps.find((item) => item.id === stepId)
     if (!step) return
     setActiveStudioSection(step.id)
-    document.getElementById(step.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.getElementById(step.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    })
   }
 
 
@@ -1228,7 +1232,7 @@ const fontFamilies: any = {
           </div>
         </div>
 
-        <section aria-labelledby="batch-history-heading" style={{ marginBottom: '20px', padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(214,173,85,0.45)', boxShadow: '0 8px 28px rgba(0,0,0,0.18)' }}>
+        <section aria-labelledby="batch-history-heading" data-active-step={activeStudioSection} style={{ marginBottom: '20px', padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(214,173,85,0.45)', boxShadow: '0 8px 28px rgba(0,0,0,0.18)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
             <div>
               <h2 id="batch-history-heading" style={{ color: '#f3d58a', margin: 0, fontSize: '19px' }}>🗂️ سجل دفعات الطباعة</h2>
@@ -1309,7 +1313,7 @@ const fontFamilies: any = {
         )}
 
         {/* إعدادات الكرت */}
-        <div className="print-cards-settings" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(124,58,237,0.30)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
+        <div className="print-cards-settings" data-active-step={activeStudioSection} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(124,58,237,0.30)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
           <h2 style={{ color: '#FFD700', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '28px' }}>⚙️</span> إعدادات الكرت
           </h2>
