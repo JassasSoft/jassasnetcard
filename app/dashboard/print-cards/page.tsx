@@ -239,6 +239,26 @@ export default function PrintCardsPage() {
     (formData.textStyles as any)?.[selectedTextStyleKey] ||
     (DEFAULT_TEXT_STYLES as any)[selectedTextStyleKey]
 
+  const studioSectionSteps = [
+    { id: 'identity', label: 'الهوية', icon: '🌐', target: 'studio-field-profile' },
+    { id: 'numbers', label: 'الأرقام', icon: '🔢', target: 'studio-field-prefix' },
+    { id: 'duration', label: 'الصلاحية', icon: '⏱️', target: 'studio-field-validity' },
+    { id: 'time', label: 'الوقت والسعر', icon: '💳', target: 'studio-field-cardTime' },
+    { id: 'content', label: 'النصوص', icon: '✍️', target: 'studio-field-customMessage' },
+    { id: 'design', label: 'التصميم', icon: '🎨', target: 'studio-section-design' },
+    { id: 'typography', label: 'الخطوط', icon: '🔤', target: 'studio-section-typography' },
+    { id: 'print', label: 'الطباعة', icon: '🖨️', target: 'studio-field-count' },
+    { id: 'history', label: 'السجل', icon: '🗂️', target: 'batch-history-heading' },
+  ] as const
+
+  const goToStudioStep = (stepId: string) => {
+    const step = studioSectionSteps.find((item) => item.id === stepId)
+    if (!step) return
+    setActiveStudioSection(step.id)
+    document.getElementById(step.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+
 
   useEffect(() => {
     let mounted = true
@@ -1061,9 +1081,11 @@ const fontFamilies: any = {
           </div>
           <div className="print-cards-header-actions">
             <AuthThemeToggle />
-            <button type="button" className="print-cards-back" onClick={() => router.push("/dashboard")}>
-              <span aria-hidden="true">→</span>
-              العودة للوحة التحكم
+            <button type="button" className="print-cards-back studio-back-icon" aria-label="الرجوع للصفحة السابقة" title="الرجوع للصفحة السابقة" onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) router.back()
+              else router.push('/dashboard')
+            }}>
+              <span aria-hidden="true">›</span>
             </button>
           </div>
         </header>
@@ -1076,10 +1098,7 @@ const fontFamilies: any = {
           border: '1px solid rgba(124,58,237,0.38)',
           boxShadow: '0 10px 30px rgba(0,0,0,0.28)'
         }}>
-          <div className="studio-preview-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <h2 style={{ color: '#FFD700', margin: 0, fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '24px' }}>👁️</span> معاينة الكرت (مباشرة)
-            </h2>
+          <div className="studio-preview-toolbar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '6px' }}>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => { void exportSamplePDF() }} style={{ padding: '8px 15px', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(37,99,235,0.30)' }}>
                 📄 عينة PDF
@@ -1162,35 +1181,52 @@ const fontFamilies: any = {
                             {previewCard.textStyles?.warning?.show !== false && <div style={{ gridColumn: '1 / -1', marginTop: 0, position: 'relative', zIndex: 1, lineHeight: 1.6, fontWeight: 600, ...getCardTextStyle(previewCard, 'warning') }}>احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>}
             </div>
           </div>
+          <div className="studio-preview-caption" dir="rtl">
+            <span>👁️ معاينة الكرت</span>
+            <small>تتحدث مباشرة مع كل تعديل</small>
+          </div>
         </div>
 
-        <nav className="studio-section-nav" aria-label="أقسام استوديو تصميم الكروت">
-          {[
-            { id: 'identity', label: 'الشبكة والبروفايل', icon: '🌐', target: 'studio-field-profile' },
-            { id: 'numbers', label: 'أرقام الكروت', icon: '🔢', target: 'studio-field-prefix' },
-            { id: 'duration', label: 'الصلاحية والسعة', icon: '⏱️', target: 'studio-field-validity' },
-            { id: 'time', label: 'الوقت والسعر', icon: '💳', target: 'studio-field-cardTime' },
-            { id: 'content', label: 'النصوص والعروض', icon: '✍️', target: 'studio-field-customMessage' },
-            { id: 'design', label: 'شكل وألوان الكرت', icon: '🎨', target: 'studio-section-design' },
-            { id: 'typography', label: 'الخطوط والتنسيق', icon: '🔤', target: 'studio-section-typography' },
-            { id: 'print', label: 'الكمية والطباعة', icon: '🖨️', target: 'studio-field-count' },
-            { id: 'history', label: 'سجل الدفعات', icon: '🗂️', target: 'batch-history-heading' },
-          ].map((section) => (
+        <section className="studio-design-mode" aria-label="اختيار نوع تصميم الكروت">
+          <button type="button" className={formData.cardStyle === 'plain' ? 'studio-mode-card is-active' : 'studio-mode-card'} onClick={() => setFormData((current) => ({ ...current, cardStyle: 'plain' }))}>
+            <span className="studio-mode-icon" aria-hidden="true">▤</span>
+            <span><strong>الكروت العادية</strong><small>تصميم بسيط وواضح للطباعة الاقتصادية</small></span>
+            <span className="studio-mode-check" aria-hidden="true">{formData.cardStyle === 'plain' ? '✓' : ''}</span>
+          </button>
+          <button type="button" className={formData.cardStyle !== 'plain' ? 'studio-mode-card is-active' : 'studio-mode-card'} onClick={() => setFormData((current) => ({ ...current, cardStyle: 'colored' }))}>
+            <span className="studio-mode-icon studio-mode-color-icon" aria-hidden="true">✦</span>
+            <span><strong>الكروت الملونة</strong><small>ألوان كاملة وتأثيرات وقوالب فاخرة</small></span>
+            <span className="studio-mode-check" aria-hidden="true">{formData.cardStyle !== 'plain' ? '✓' : ''}</span>
+          </button>
+        </section>
+
+        <div className="studio-stepper-wrap">
+          <nav className="studio-section-nav" aria-label="خطوات إعداد تصميم الكرت">
+          {studioSectionSteps.map((section) => (
             <button
               key={section.id}
               type="button"
               className={`studio-section-tab${activeStudioSection === section.id ? ' is-active' : ''}`}
               aria-current={activeStudioSection === section.id ? 'location' : undefined}
-              onClick={() => {
-                setActiveStudioSection(section.id)
-                document.getElementById(section.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
+              onClick={() => goToStudioStep(section.id)}
             >
               <span aria-hidden="true">{section.icon}</span>
               <span>{section.label}</span>
             </button>
           ))}
-        </nav>
+          </nav>
+          <div className="studio-step-controls">
+            <button type="button" onClick={() => {
+              const index = studioSectionSteps.findIndex((item) => item.id === activeStudioSection)
+              goToStudioStep(studioSectionSteps[Math.max(0, index - 1)].id)
+            }} disabled={activeStudioSection === studioSectionSteps[0].id}>السابق</button>
+            <span>{Math.max(1, studioSectionSteps.findIndex((item) => item.id === activeStudioSection) + 1)} / {studioSectionSteps.length}</span>
+            <button type="button" onClick={() => {
+              const index = studioSectionSteps.findIndex((item) => item.id === activeStudioSection)
+              goToStudioStep(studioSectionSteps[Math.min(studioSectionSteps.length - 1, index + 1)].id)
+            }} disabled={activeStudioSection === studioSectionSteps[studioSectionSteps.length - 1].id}>التالي ←</button>
+          </div>
+        </div>
 
         <section aria-labelledby="batch-history-heading" style={{ marginBottom: '20px', padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(214,173,85,0.45)', boxShadow: '0 8px 28px rgba(0,0,0,0.18)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
