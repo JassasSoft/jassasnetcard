@@ -736,6 +736,7 @@ const fontFamilies: any = {
     let radius = '15px'
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
+    const triangleClip = card.cardShape === 'triangle' ? 'polygon(50% 0%, 100% 100%, 0% 100%)' : undefined
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
     let extraStyle: any = {}
@@ -759,6 +760,7 @@ const fontFamilies: any = {
       backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
       boxShadow: shadow,
       borderRadius: radius,
+      clipPath: triangleClip,
       border: border,
       color: c.text,
       padding: '15px',
@@ -966,6 +968,7 @@ const fontFamilies: any = {
 
     if (card.cardShape === 'square') radius = '10px'
     if (card.cardShape === 'rounded') radius = '25px'
+    const triangleClip = card.cardShape === 'triangle' ? 'polygon(50% 0%, 100% 100%, 0% 100%)' : ''
 
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
@@ -986,7 +989,7 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius}; ${triangleClip ? 'clip-path: ' + triangleClip + ';' : ''} border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
             ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
           <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.cardStyle === 'plain' ? '0' : card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:${card.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)'};">
@@ -1067,18 +1070,13 @@ const fontFamilies: any = {
 
         {/* المعاينة الديناميكية - ثابتة في الأعلى */}
         <div ref={previewRef} className="print-cards-preview studio-preview-dock" style={{
-          position: 'sticky', 
-          top: '10px', 
-          zIndex: 100, 
-          marginBottom: '20px', 
-          background: 'rgba(255,255,255,0.05)', 
-          backdropFilter: 'blur(20px)', 
-          borderRadius: '20px', 
-          padding: '20px', 
-          border: '2px solid rgba(124,58,237,0.45)',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+          position: 'sticky', top: '4px', zIndex: 100, marginBottom: '12px',
+          background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(18px)',
+          borderRadius: '16px', padding: '10px',
+          border: '1px solid rgba(124,58,237,0.38)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.28)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <div className="studio-preview-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <h2 style={{ color: '#FFD700', margin: 0, fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontSize: '24px' }}>👁️</span> معاينة الكرت (مباشرة)
             </h2>
@@ -1089,7 +1087,7 @@ const fontFamilies: any = {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="print-cards-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '560px', width: '100%', position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '8px', padding: '12px' }}>
+            <div className="print-cards-preview-card studio-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '620px', width: '100%', aspectRatio: '1.78 / 1', minHeight: 0, position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '6px', padding: '10px' }}>
               {previewCard.cardStyle !== 'plain' && <div aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-25deg)', width: '95%', textAlign: 'center', fontSize: '16px', opacity: 0.12, fontWeight: 900, whiteSpace: 'normal', lineHeight: 1.8, pointerEvents: 'none', zIndex: 0, color: previewCard.colors.accent }}>جساس نت كرت<br />JASSAS NET CARD</div>}
               <div style={{ gridArea: 'header', minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 0 }}>
                 <div style={{ flex: 1, background: previewCard.colors.panelAlt, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.cardStyle === 'plain' ? '0' : previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
