@@ -119,3 +119,16 @@ Unchanged during this work:
 6. Review and refine triangle geometry and font fallbacks based on actual output.
 7. Continue with user-saved custom templates and undo/redo only after the first phase passes verification.
 8. Open a PR to `production` only after review and explicit user approval; do not merge or deploy manually.
+
+## 2026-11-25 — Approved shape correction and feature audit
+
+- User clarified the final shape decision: **rectangle and square only**. The rounded/circular and triangle options must not appear in the design UI.
+- Updated `app/dashboard/print-cards/page.tsx`: removed rounded/triangle choices and geometry, restricted accepted restored shape values to rectangle/square, and normalized legacy rounded/triangle values to rectangle. Existing version-1 snapshot structure and server API contract were not changed.
+- Updated all seven built-in presets so none selects a retired shape. Square presets use a square aspect ratio; rectangle presets use the landscape ratio in preview and print markup.
+- Updated `docs/PROJECT_ROADMAP.md` to make the current approved shape decision authoritative and record a source-based feature audit.
+- Confirmed present capabilities: nine-section navigation, sticky live preview, four design modes, seven built-in presets, palette/background/effects/fonts, per-field typography/visibility controls, QR, batch generation, sample print/PDF, server batch save/idempotency, batch history, snapshot restore and print retry.
+- Confirmed gaps from source inspection: no undo/redo controls, no local draft autosave, no personal custom-template save/load, no drag/reposition or layer ordering, and preview/print still have separate markup trees.
+- Reference-study scope carried forward: Cards Pro (MikroTik setup and card workflow), One Zero Net (network/service management and reporting), Tiger Cloud (cloud multi-router, agents/wallets, design/print and backup). This is inspiration only; no competitor code or identity is copied.
+- API route, Supabase schema, balance logic and production branch were not modified.
+- Verification: TypeScript and production build passed locally before this correction. The corrected branch still requires a fresh TypeScript/build run and Android preview/PDF/print/restore tests. Do not mark the shape work fully verified until those tests pass.
+- Next: pull this feature branch on Termux, inspect the diff, rerun TypeScript/build, then test rectangle and square in preview, PDF and saved-batch restore.
