@@ -5932,3 +5932,10 @@ html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
   .print-cards-shell .studio-mode-card small { display:none; }
   .print-cards-shell .studio-preview-caption small { display:none; }
 }
+
+
+/* Keep viewport sticky positioning working while clipping horizontal overflow. */
+html,
+body {
+  overflow-x:clip !important;
+}
