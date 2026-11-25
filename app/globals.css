@@ -5671,7 +5671,7 @@ html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
   transform:none !important;
 }
 .print-cards-shell .studio-section-nav {
-  position:sticky; top:calc(env(safe-area-inset-top) + 8px); z-index:80;
+  position:relative; top:auto; z-index:20;
   margin:0 0 14px; background:var(--surface,#102b4c); backdrop-filter:blur(16px);
 }
 .print-cards-shell .print-cards-settings .print-cards-row {
@@ -5695,7 +5695,7 @@ html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
     width:100% !important; max-height:190px; aspect-ratio:1.78 / 1;
     padding:6px !important; gap:4px !important; border-radius:10px !important;
   }
-  .print-cards-shell .studio-section-nav { top:calc(env(safe-area-inset-top) + 4px); padding:5px; gap:5px; margin-bottom:10px; }
+  .print-cards-shell .studio-section-nav { position:relative; top:auto; padding:5px; gap:5px; margin-bottom:10px; }
   .print-cards-shell .studio-section-tab { min-height:36px; padding:6px 9px; font-size:11px; }
   .print-cards-shell .print-cards-settings .print-cards-row {
     display:flex; flex-direction:column-reverse; align-items:stretch !important;
