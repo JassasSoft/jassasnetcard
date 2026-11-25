@@ -81,7 +81,7 @@ Unchanged during this work:
 - Plain-mode neutral rendering and contrast fixes for both light modes: **IMPLEMENTED — pending visual verification**.
 - Full-color image background upload and snapshot restore: **IMPLEMENTED — pending mobile/PDF verification**.
 - Preview/PDF single-source rendering: **PENDING**.
-- True triangle geometry: **PENDING**.
+- Rounded/circular and triangle shapes are retired by the later 2026-11-25 user decision; do not implement them.
 - TypeScript/build/mobile/print verification: **PENDING**.
 - Pull request and merge: **NOT STARTED**.
 
@@ -101,7 +101,7 @@ Unchanged during this work:
 - Active implementation branch: `studio-creative-library`, based on the reviewed `studio-mobile-ux` branch; production remains untouched.
 - Added seven built-in, editable starting templates: royal blue, emerald/gold, purple/silver, midnight/gold, calm sky, classic clean, and royal luxury.
 - Templates change visual settings only (design mode, palette, effect, shape, frame, and typography). They deliberately do not alter network identity, card generation values, quantities, or subscription/balance behavior.
-- Added four selectable silhouettes: rectangle, square, rounded, and triangle. Existing rectangle/square values remain supported in restored version-1 snapshots.
+- Historical note: the first implementation temporarily added rectangle, square, rounded and triangle; the later 2026-11-25 user decision superseded this and limits the editor to rectangle and square.
 - Extended text-font choices with Kufi, Naskh, and system font stacks, retaining the existing five font identifiers. These use device/browser fonts with fallbacks; no remote font dependency was added.
 - Applied the shape helper to both live preview and print HTML. Added CSS so the template library is visible only during the Design step.
 - API route and database schema were not changed.
@@ -113,10 +113,10 @@ Unchanged during this work:
 
 1. Sync `studio-creative-library` to Termux without resetting or overwriting local work; inspect `git status` and the diff first.
 2. Run `git diff --check`, `npx tsc --noEmit`, and `npm run build`; fix failures only on this feature branch.
-3. Test all seven presets and all four shapes in the sticky live preview on Android.
-4. Generate sample PDF and a real batch print preview for rectangle, square, rounded, and triangle; verify QR and text clipping.
+3. Test all seven presets and both approved shapes (rectangle and square) in the sticky live preview on Android.
+4. Generate sample PDF and a real batch print preview for rectangle and square; verify QR, text clipping and square proportions.
 5. Verify old version-1 batch restore and reprint still work.
-6. Review and refine triangle geometry and font fallbacks based on actual output.
+6. Review and refine rectangle/square proportions and font fallbacks based on actual output.
 7. Continue with user-saved custom templates and undo/redo only after the first phase passes verification.
 8. Open a PR to `production` only after review and explicit user approval; do not merge or deploy manually.
 
