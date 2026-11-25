@@ -6029,3 +6029,11 @@ body {
 .print-cards-settings[data-active-step="print"] > #studio-field-cols {
   display:flex !important;
 }
+
+/* Keep the template library inside the Design step only. */
+.print-cards-settings[data-active-step] > #studio-section-templates {
+  display:none !important;
+}
+.print-cards-settings[data-active-step="design"] > #studio-section-templates {
+  display:block !important;
+}
