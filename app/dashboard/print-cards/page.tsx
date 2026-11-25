@@ -1080,13 +1080,13 @@ const fontFamilies: any = {
             </div>
           </div>
           <div className="print-cards-header-actions">
-            <AuthThemeToggle />
             <button type="button" className="print-cards-back studio-back-icon" aria-label="الرجوع للصفحة السابقة" title="الرجوع للصفحة السابقة" onClick={() => {
               if (typeof window !== 'undefined' && window.history.length > 1) router.back()
               else router.push('/dashboard')
             }}>
               <span aria-hidden="true">›</span>
             </button>
+            <AuthThemeToggle />
           </div>
         </header>
 
