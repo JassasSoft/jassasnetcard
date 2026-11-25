@@ -96,6 +96,16 @@ const DEFAULT_TEXT_STYLES = {
   warning: { show: true, fontSize: 10, color: '#e0e0e0', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
 };
 
+const CARD_DESIGN_TEMPLATES = [
+  { id: 'royal-blue', name: 'الأزرق الملكي', note: 'أزرق عميق ولمسات ذهبية', cardStyle: 'colored', colorScheme: 'blue-gold', cardEffect: 'gradient', cardShape: 'rectangle', borderWidth: 2, borderColor: '#f7d77a', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
+  { id: 'emerald-gold', name: 'زمرد وذهب', note: 'أخضر راقٍ وهوية دافئة', cardStyle: 'colored', colorScheme: 'green-gold', cardEffect: '3d', cardShape: 'rounded', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#ffffff', fontFamily: 'arabic' },
+  { id: 'purple-silver', name: 'بنفسجي فضي', note: 'طابع عصري هادئ', cardStyle: 'colored', colorScheme: 'purple-silver', cardEffect: 'gradient', cardShape: 'rounded', borderWidth: 2, borderColor: '#c0c0c0', accent: '#e5e7eb', textColor: '#ffffff', fontFamily: 'sans' },
+  { id: 'midnight-gold', name: 'أسود وذهبي', note: 'مظهر فاخر بتباين قوي', cardStyle: 'colored', colorScheme: 'black-gold', cardEffect: 'glow', cardShape: 'rectangle', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#fff7d6', fontFamily: 'serif' },
+  { id: 'sky-minimal', name: 'سماء هادئة', note: 'مساحة بيضاء وأزرق واضح', cardStyle: 'three-color', colorScheme: 'white-blue', cardEffect: 'gradient', cardShape: 'rounded', borderWidth: 1, borderColor: '#60a5fa', accent: '#2563eb', textColor: '#172033', fontFamily: 'system' },
+  { id: 'classic-clean', name: 'كلاسيكي بسيط', note: 'اقتصادي وواضح للطباعة', cardStyle: 'plain', colorScheme: 'blue-gold', cardEffect: 'plain', cardShape: 'rectangle', borderWidth: 1, borderColor: '#9ca3af', accent: '#374151', textColor: '#111827', fontFamily: 'naskh' },
+  { id: 'royal-luxury', name: 'ملكي فاخر', note: 'إطار ملكي ولمسات ذهبية', cardStyle: 'luxury', colorScheme: 'blue-gold', cardEffect: '3d', cardShape: 'rounded', borderWidth: 3, borderColor: '#d6ad55', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
+] as const
+
 const sanitizeTextStyles = (value: unknown) => {
   const input = value && typeof value === 'object' && !Array.isArray(value)
     ? value as Record<string, any>
@@ -104,7 +114,7 @@ const sanitizeTextStyles = (value: unknown) => {
   const positions = ['top', 'bottom', 'left', 'right', 'center'];
   const aligns = ['right', 'center', 'left'];
   const borders = ['solid', 'dashed', 'dotted'];
-  const fonts = ['default', 'arabic', 'mono', 'serif', 'sans'];
+  const fonts = ['default', 'arabic', 'mono', 'serif', 'sans', 'kufi', 'naskh', 'system'];
 
   const safeColor = (v: unknown, fallback: string) =>
     typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : fallback;
@@ -187,6 +197,7 @@ export default function PrintCardsPage() {
   const [activeField, setActiveField] = useState('')
   const [selectedTextStyleKey, setSelectedTextStyleKey] = useState('network')
   const [activeStudioSection, setActiveStudioSection] = useState('identity')
+  const [activeDesignTemplate, setActiveDesignTemplate] = useState('royal-blue')
   const [cardsCountDraft, setCardsCountDraft] = useState('100')
   const [colsCountDraft, setColsCountDraft] = useState('3')
   const previewRef = useRef<HTMLDivElement>(null)
@@ -439,9 +450,22 @@ export default function PrintCardsPage() {
 const fontFamilies: any = {
     'default': 'Segoe UI, Tahoma, Arial, sans-serif',
     'arabic': 'Arial, Tahoma, sans-serif',
-    'mono': 'Courier New, monospace',
-    'serif': 'Georgia, serif',
+    'kufi': '"Noto Kufi Arabic", Tahoma, Arial, sans-serif',
+    'naskh': '"Noto Naskh Arabic", "Times New Roman", serif',
+    'system': 'system-ui, "Segoe UI", Tahoma, Arial, sans-serif',
+    'mono': '"Courier New", monospace',
+    'serif': 'Georgia, "Times New Roman", serif',
     'sans': 'Helvetica, Arial, sans-serif'
+  }
+
+  const getCardShapeStyle = (shape: string) => {
+    if (shape === 'triangle') {
+      return { borderRadius: '0px', clipPath: 'polygon(50% 0%, 100% 100%, 0 100%)' }
+    }
+    return {
+      borderRadius: shape === 'rounded' ? '28px' : shape === 'square' ? '10px' : '15px',
+      clipPath: undefined,
+    }
   }
 
   // محرك موحد لتنسيق النصوص في المعاينة وPDF
@@ -520,7 +544,7 @@ const fontFamilies: any = {
 
       const rawSettings = snapshot.settings
       const allowedStyles = ['colored', 'plain', 'three-color', 'luxury']
-      const allowedShapes = ['rectangle', 'square']
+      const allowedShapes = ['rectangle', 'square', 'rounded', 'triangle']
       const allowedBorders = ['solid', 'dashed', 'dotted']
       const allowedProfiles = ['DEFAULT', 'PREMIUM', 'BASIC']
       const safeHex = (value: unknown, fallback: string) =>
@@ -754,8 +778,7 @@ const fontFamilies: any = {
   const getCardStyle = (card: any, isActive: boolean = false) => {
     const c = card.colors
     let bg = c.bg
-    let radius = '15px'
-    if (card.cardShape === 'square') radius = '10px'
+    const shapeStyle = getCardShapeStyle(card.cardShape)
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
     let extraStyle: any = {}
@@ -778,7 +801,8 @@ const fontFamilies: any = {
       backgroundSize: card.cardBackgroundImage ? 'cover' : undefined,
       backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
       boxShadow: shadow,
-      borderRadius: radius,
+      borderRadius: shapeStyle.borderRadius,
+      clipPath: shapeStyle.clipPath,
       border: border,
       color: c.text,
       padding: '15px',
@@ -982,9 +1006,7 @@ const fontFamilies: any = {
 
     const c = card.colors
     let bg = c.bg
-    let radius = '15px'
-
-    if (card.cardShape === 'square') radius = '10px'
+    const shapeStyle = getCardShapeStyle(card.cardShape)
 
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
@@ -1005,7 +1027,7 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius};  border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${shapeStyle.borderRadius}; ${shapeStyle.clipPath ? 'clip-path:' + shapeStyle.clipPath + ';' : ''} border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
             ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
           <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.cardStyle === 'plain' ? '0' : card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:${card.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)'};">
@@ -1426,6 +1448,63 @@ const fontFamilies: any = {
             }} aria-label="عدد الأعمدة من 1 إلى 6" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
+          <section aria-label="مكتبة قوالب التصميم" style={{ margin: '18px 0 22px', padding: '14px', borderRadius: '16px', background: 'rgba(15,23,42,.42)', border: '1px solid rgba(214,173,85,.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '5px' }}>
+              <h3 style={{ margin: 0, color: '#f3d58a', fontSize: '16px', fontWeight: 800 }}>✦ مكتبة قوالب جساس</h3>
+              <span style={{ color: '#94a3b8', fontSize: '11px' }}>قوالب جاهزة قابلة للتعديل</span>
+            </div>
+            <p style={{ margin: '0 0 12px', color: '#cbd5e1', fontSize: '12px', lineHeight: 1.7 }}>اختر نقطة بداية، ثم عدّل الألوان والخطوط والخانات بحرية. القالب يغيّر المظهر فقط ولا يغيّر بيانات الشبكة أو إعدادات إنشاء الكروت.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px' }}>
+              {CARD_DESIGN_TEMPLATES.map((template) => {
+                const selected = activeDesignTemplate === template.id
+                const swatch = template.id === 'classic-clean'
+                  ? 'linear-gradient(135deg,#fff,#e5e7eb)'
+                  : template.id === 'sky-minimal'
+                    ? 'linear-gradient(135deg,#fff,#bfdbfe,#2563eb)'
+                    : template.id === 'emerald-gold'
+                      ? 'linear-gradient(135deg,#134e4a,#65a30d,#facc15)'
+                      : template.id === 'purple-silver'
+                        ? 'linear-gradient(135deg,#312e81,#8b5cf6,#cbd5e1)'
+                        : template.id === 'midnight-gold'
+                          ? 'linear-gradient(135deg,#020617,#1e293b,#facc15)'
+                          : template.id === 'royal-luxury'
+                            ? 'linear-gradient(135deg,#071b3a,#123f78,#d6ad55)'
+                            : 'linear-gradient(135deg,#1e3c72,#2a5298,#d4af37)'
+                return (
+                  <button key={template.id} type="button" aria-pressed={selected}
+                    onClick={() => {
+                      setFormData((current) => ({
+                        ...current,
+                        cardStyle: template.cardStyle,
+                        colorScheme: template.colorScheme,
+                        cardEffect: template.cardEffect,
+                        cardShape: template.cardShape,
+                        borderWidth: template.borderWidth,
+                        borderColor: template.borderColor,
+                        usernameColor: template.accent,
+                        fontFamily: template.fontFamily,
+                        textStyles: {
+                          ...current.textStyles,
+                          network: { ...current.textStyles.network, color: template.textColor, fontFamily: template.fontFamily },
+                          username: { ...current.textStyles.username, color: template.accent, fontFamily: template.fontFamily },
+                        },
+                      }))
+                      setActiveDesignTemplate(template.id)
+                      setActiveField('cardStyle')
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0, minHeight: '64px', padding: '9px', textAlign: 'right', borderRadius: '12px', border: selected ? '2px solid #f7d77a' : '1px solid rgba(148,163,184,.28)', background: selected ? 'rgba(37,99,235,.2)' : 'rgba(15,23,42,.58)', color: '#f8fafc', cursor: 'pointer' }}>
+                    <span aria-hidden="true" style={{ width: '32px', height: '32px', flex: '0 0 32px', borderRadius: '9px', background: swatch, border: '1px solid rgba(255,255,255,.35)' }} />
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                      <strong style={{ fontSize: '12px', lineHeight: 1.4 }}>{template.name}</strong>
+                      <small style={{ color: '#cbd5e1', fontSize: '10px', lineHeight: 1.4 }}>{template.note}</small>
+                    </span>
+                    <span aria-hidden="true" style={{ marginInlineStart: 'auto', color: selected ? '#6ee7b7' : '#64748b', fontWeight: 900 }}>{selected ? '✓' : ''}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
           {/* أوضاع التصميم الأربعة المعتمدة */}
           <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 أوضاع تصميم الكرت</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginBottom: '14px' }}>
@@ -1513,9 +1592,22 @@ const fontFamilies: any = {
           )}
 
           <InputRow activeField={activeField} label="شكل الكرت" icon="📱" fieldId="cardShape">
-            <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
-              <button onClick={() => { setFormData({...formData, cardShape: 'rectangle'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rectangle' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rectangle' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مستطيل</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'square'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'square' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'square' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مربع</button>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px', flex: 1 }}>
+              {([
+                { value: 'rectangle', label: 'مستطيل', icon: '▭' },
+                { value: 'square', label: 'مربع', icon: '□' },
+                { value: 'rounded', label: 'مستدير', icon: '▢' },
+                { value: 'triangle', label: 'مثلث', icon: '△' },
+              ] as const).map((shape) => {
+                const selected = formData.cardShape === shape.value
+                return (
+                  <button key={shape.value} type="button" aria-pressed={selected}
+                    onClick={() => { setFormData((current) => ({ ...current, cardShape: shape.value })); setActiveField('cardShape') }}
+                    style={{ minHeight: '42px', padding: '8px', background: selected ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: selected ? '#0f172a' : '#fff', border: selected ? '2px solid #f7d77a' : '1px solid rgba(148,163,184,.3)', borderRadius: '9px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    <span aria-hidden="true" style={{ marginInlineEnd: '6px' }}>{shape.icon}</span>{shape.label}
+                  </button>
+                )
+              })}
             </div>
           </InputRow>
 
@@ -1763,7 +1855,10 @@ const fontFamilies: any = {
                   }}
                 >
                   <option value="default">افتراضي</option>
-                  <option value="arabic">عربي</option>
+                  <option value="arabic">عربي واضح</option>
+                  <option value="kufi">كوفي</option>
+                  <option value="naskh">نسخ</option>
+                  <option value="system">خط النظام</option>
                   <option value="sans">حديث</option>
                   <option value="serif">كلاسيكي</option>
                   <option value="mono">رقمي</option>
