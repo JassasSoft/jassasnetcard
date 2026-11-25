@@ -5939,3 +5939,93 @@ html,
 body {
   overflow-x:clip !important;
 }
+
+
+/* Each editor tab is a focused settings page; keep the live preview outside it. */
+.print-cards-settings[data-active-step] > .print-cards-row,
+.print-cards-settings[data-active-step] > #studio-section-design,
+.print-cards-settings[data-active-step] > #studio-section-design + div,
+.print-cards-settings[data-active-step] > #studio-section-typography,
+.print-cards-settings[data-active-step] > div:last-child {
+  display:none !important;
+}
+.print-cards-settings[data-active-step="identity"] > #studio-field-profile,
+.print-cards-settings[data-active-step="identity"] > #studio-field-network,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-prefix,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-length,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-usernameColor,
+.print-cards-settings[data-active-step="duration"] > #studio-field-validity,
+.print-cards-settings[data-active-step="duration"] > #studio-field-userDuration,
+.print-cards-settings[data-active-step="duration"] > #studio-field-dataPackage,
+.print-cards-settings[data-active-step="time"] > #studio-field-cardTime,
+.print-cards-settings[data-active-step="time"] > #studio-field-price,
+.print-cards-settings[data-active-step="time"] > #studio-field-distributor,
+.print-cards-settings[data-active-step="content"] > #studio-field-recharge,
+.print-cards-settings[data-active-step="content"] > #studio-field-special,
+.print-cards-settings[data-active-step="content"] > #studio-field-customMessage,
+.print-cards-settings[data-active-step="design"] > #studio-section-design,
+.print-cards-settings[data-active-step="design"] > #studio-section-design + div,
+.print-cards-settings[data-active-step="design"] > #studio-field-colorScheme,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardBackgroundImage,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardEffect,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardShape,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderStyle,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderWidth,
+.print-cards-settings[data-active-step="design"] > #studio-field-qr,
+.print-cards-settings[data-active-step="design"] > #studio-field-qrSize,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderColor,
+.print-cards-settings[data-active-step="typography"] > #studio-section-typography,
+.print-cards-settings[data-active-step="print"] > #studio-field-count,
+.print-cards-settings[data-active-step="print"] > #studio-field-cols,
+.print-cards-settings[data-active-step="print"] > div:last-child {
+  display:block !important;
+}
+.print-cards-settings[data-active-step="design"] > #studio-section-design + div {
+  display:grid !important;
+}
+.print-cards-settings[data-active-step="typography"] > #studio-section-typography {
+  display:block !important;
+}
+.print-cards-settings[data-active-step="print"] > div:last-child {
+  display:grid !important;
+}
+.print-cards-shell > div > section[aria-labelledby="batch-history-heading"] {
+  display:none;
+}
+.print-cards-shell > div > section[aria-labelledby="batch-history-heading"][data-active-step="history"] {
+  display:block;
+}
+.print-cards-settings[data-active-step="history"] {
+  display:none !important;
+}
+.print-cards-settings[data-active-step] > h2 {
+  margin-bottom:12px !important;
+  font-size:18px !important;
+}
+.print-cards-settings[data-active-step="identity"] > #studio-field-profile,
+.print-cards-settings[data-active-step="identity"] > #studio-field-network,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-prefix,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-length,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-usernameColor,
+.print-cards-settings[data-active-step="duration"] > #studio-field-validity,
+.print-cards-settings[data-active-step="duration"] > #studio-field-userDuration,
+.print-cards-settings[data-active-step="duration"] > #studio-field-dataPackage,
+.print-cards-settings[data-active-step="time"] > #studio-field-cardTime,
+.print-cards-settings[data-active-step="time"] > #studio-field-price,
+.print-cards-settings[data-active-step="time"] > #studio-field-distributor,
+.print-cards-settings[data-active-step="content"] > #studio-field-recharge,
+.print-cards-settings[data-active-step="content"] > #studio-field-special,
+.print-cards-settings[data-active-step="content"] > #studio-field-customMessage,
+.print-cards-settings[data-active-step="design"] > #studio-field-colorScheme,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardBackgroundImage,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardEffect,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardShape,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderStyle,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderWidth,
+.print-cards-settings[data-active-step="design"] > #studio-field-qr,
+.print-cards-settings[data-active-step="design"] > #studio-field-qrSize,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderColor,
+.print-cards-settings[data-active-step="print"] > #studio-field-count,
+.print-cards-settings[data-active-step="print"] > #studio-field-cols {
+  display:flex !important;
+}
