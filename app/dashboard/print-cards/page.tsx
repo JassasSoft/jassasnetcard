@@ -471,9 +471,6 @@ const fontFamilies: any = {
 
   const getCardBackgroundImage = (card: any) => {
     const layers: string[] = []
-    if (card.cardShape === 'triangle' && card.cardStyle !== 'plain') {
-      layers.push('linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)')
-    }
     if (card.cardStyle === 'colored' && typeof card.cardBackgroundImage === 'string' &&
       /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(card.cardBackgroundImage) &&
       card.cardBackgroundImage.length <= 200000) {
@@ -523,7 +520,7 @@ const fontFamilies: any = {
 
       const rawSettings = snapshot.settings
       const allowedStyles = ['colored', 'plain', 'three-color', 'luxury']
-      const allowedShapes = ['rectangle', 'square', 'rounded', 'triangle']
+      const allowedShapes = ['rectangle', 'square']
       const allowedBorders = ['solid', 'dashed', 'dotted']
       const allowedProfiles = ['DEFAULT', 'PREMIUM', 'BASIC']
       const safeHex = (value: unknown, fallback: string) =>
@@ -554,7 +551,7 @@ const fontFamilies: any = {
         colorScheme: Object.prototype.hasOwnProperty.call(colorSchemes, rawSettings.colorScheme)
           ? rawSettings.colorScheme
           : 'blue-gold',
-        cardShape: allowedShapes.includes(rawSettings.cardShape) ? rawSettings.cardShape : 'rectangle',
+        cardShape: rawSettings.cardShape === 'square' ? 'square' : 'rectangle',
         borderStyle: allowedBorders.includes(rawSettings.borderStyle) ? rawSettings.borderStyle : 'solid',
         fontFamily: Object.prototype.hasOwnProperty.call(fontFamilies, rawSettings.fontFamily)
           ? rawSettings.fontFamily
@@ -759,8 +756,6 @@ const fontFamilies: any = {
     let bg = c.bg
     let radius = '15px'
     if (card.cardShape === 'square') radius = '10px'
-    if (card.cardShape === 'rounded') radius = '25px'
-    const triangleClip = card.cardShape === 'triangle' ? 'polygon(50% 0%, 100% 100%, 0% 100%)' : undefined
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
     let extraStyle: any = {}
@@ -784,7 +779,6 @@ const fontFamilies: any = {
       backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
       boxShadow: shadow,
       borderRadius: radius,
-      clipPath: triangleClip,
       border: border,
       color: c.text,
       padding: '15px',
@@ -991,8 +985,6 @@ const fontFamilies: any = {
     let radius = '15px'
 
     if (card.cardShape === 'square') radius = '10px'
-    if (card.cardShape === 'rounded') radius = '25px'
-    const triangleClip = card.cardShape === 'triangle' ? 'polygon(50% 0%, 100% 100%, 0% 100%)' : ''
 
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
@@ -1013,7 +1005,7 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius}; ${triangleClip ? 'clip-path: ' + triangleClip + ';' : ''} border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius};  border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
             ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
           <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.cardStyle === 'plain' ? '0' : card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:${card.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)'};">
@@ -1524,8 +1516,6 @@ const fontFamilies: any = {
             <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
               <button onClick={() => { setFormData({...formData, cardShape: 'rectangle'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rectangle' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rectangle' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مستطيل</button>
               <button onClick={() => { setFormData({...formData, cardShape: 'square'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'square' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'square' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مربع</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'rounded'}); setActiveField('cardShape') }} style={{ flex: 1, minWidth: '75px', padding: '10px', background: formData.cardShape === 'rounded' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rounded' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مدور</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'triangle'}); setActiveField('cardShape') }} style={{ flex: 1, minWidth: '100px', padding: '10px', background: formData.cardShape === 'triangle' ? 'linear-gradient(135deg, #d6ad55, #8b6a28)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'triangle' ? '#101827' : '#fff', border: '1px solid rgba(214,173,85,.55)', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>زخرفة مثلثية</button>
             </div>
           </InputRow>
 
