@@ -1,13 +1,13 @@
 # Jassas Net Card — Project Roadmap
 
-Last updated: 2026-11-24
+Last updated: 2026-11-25
 
 ## Project identity
 - Product: Jassas Net Card / جساس نت كرت
 - Service brand: JASSAS SOFT PRO
 - Repository: JassasSoft/jassasnetcard
 - Production branch: production
-- Active feature branch: studio-four-design-modes
+- Active feature branch: studio-creative-library (based on studio-mobile-ux)
 - Stack: Next.js 16, React 19, Supabase, MikroTik RouterOS
 - Primary interface: Arabic RTL, with English LTR option
 - Light theme: calm, cool, readable colors
@@ -129,10 +129,12 @@ Last updated: 2026-11-24
 9. Run full security, mobile, performance and production-build checks; merge only after review.
 
 ## Current feature-branch work
-- Active branch: studio-four-design-modes (created from production).
-- app/dashboard/print-cards/page.tsx has the first implementation of the four modes and optional compressed background image.
-- app/globals.css and app/api/print-cards/route.ts were not changed in this phase.
-- Local TypeScript, production build, Android preview, PDF, restore and reprint tests are still pending.
+- Active branch: studio-creative-library, based on studio-mobile-ux; production is untouched.
+- Existing four-mode selector, compressed image background, and mobile landscape preview are retained.
+- Added seven editable built-in design presets, four card silhouettes (rectangle, square, rounded, triangle), and three additional font stacks (Kufi, Naskh, system) with browser/device fallbacks.
+- Updated both live preview and print HTML shape styling; scoped the template library to the Design step.
+- app/api/print-cards/route.ts and database schema were not changed.
+- TypeScript, lint, production build, Android visual, PDF/print, restore and reprint tests remain pending.
 
 ## Status convention
 - APPROVED: product direction confirmed.
