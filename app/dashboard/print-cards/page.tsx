@@ -98,12 +98,12 @@ const DEFAULT_TEXT_STYLES = {
 
 const CARD_DESIGN_TEMPLATES = [
   { id: 'royal-blue', name: 'الأزرق الملكي', note: 'أزرق عميق ولمسات ذهبية', cardStyle: 'colored', colorScheme: 'blue-gold', cardEffect: 'gradient', cardShape: 'rectangle', borderWidth: 2, borderColor: '#f7d77a', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
-  { id: 'emerald-gold', name: 'زمرد وذهب', note: 'أخضر راقٍ وهوية دافئة', cardStyle: 'colored', colorScheme: 'green-gold', cardEffect: '3d', cardShape: 'rounded', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#ffffff', fontFamily: 'arabic' },
-  { id: 'purple-silver', name: 'بنفسجي فضي', note: 'طابع عصري هادئ', cardStyle: 'colored', colorScheme: 'purple-silver', cardEffect: 'gradient', cardShape: 'rounded', borderWidth: 2, borderColor: '#c0c0c0', accent: '#e5e7eb', textColor: '#ffffff', fontFamily: 'sans' },
+  { id: 'emerald-gold', name: 'زمرد وذهب', note: 'أخضر راقٍ وهوية دافئة', cardStyle: 'colored', colorScheme: 'green-gold', cardEffect: '3d', cardShape: 'square', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#ffffff', fontFamily: 'arabic' },
+  { id: 'purple-silver', name: 'بنفسجي فضي', note: 'طابع عصري هادئ', cardStyle: 'colored', colorScheme: 'purple-silver', cardEffect: 'gradient', cardShape: 'square', borderWidth: 2, borderColor: '#c0c0c0', accent: '#e5e7eb', textColor: '#ffffff', fontFamily: 'sans' },
   { id: 'midnight-gold', name: 'أسود وذهبي', note: 'مظهر فاخر بتباين قوي', cardStyle: 'colored', colorScheme: 'black-gold', cardEffect: 'glow', cardShape: 'rectangle', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#fff7d6', fontFamily: 'serif' },
-  { id: 'sky-minimal', name: 'سماء هادئة', note: 'مساحة بيضاء وأزرق واضح', cardStyle: 'three-color', colorScheme: 'white-blue', cardEffect: 'gradient', cardShape: 'rounded', borderWidth: 1, borderColor: '#60a5fa', accent: '#2563eb', textColor: '#172033', fontFamily: 'system' },
+  { id: 'sky-minimal', name: 'سماء هادئة', note: 'مساحة بيضاء وأزرق واضح', cardStyle: 'three-color', colorScheme: 'white-blue', cardEffect: 'gradient', cardShape: 'square', borderWidth: 1, borderColor: '#60a5fa', accent: '#2563eb', textColor: '#172033', fontFamily: 'system' },
   { id: 'classic-clean', name: 'كلاسيكي بسيط', note: 'اقتصادي وواضح للطباعة', cardStyle: 'plain', colorScheme: 'blue-gold', cardEffect: 'plain', cardShape: 'rectangle', borderWidth: 1, borderColor: '#9ca3af', accent: '#374151', textColor: '#111827', fontFamily: 'naskh' },
-  { id: 'royal-luxury', name: 'ملكي فاخر', note: 'إطار ملكي ولمسات ذهبية', cardStyle: 'luxury', colorScheme: 'blue-gold', cardEffect: '3d', cardShape: 'rounded', borderWidth: 3, borderColor: '#d6ad55', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
+  { id: 'royal-luxury', name: 'ملكي فاخر', note: 'إطار ملكي ولمسات ذهبية', cardStyle: 'luxury', colorScheme: 'blue-gold', cardEffect: '3d', cardShape: 'square', borderWidth: 3, borderColor: '#d6ad55', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
 ] as const
 
 const sanitizeTextStyles = (value: unknown) => {
@@ -458,15 +458,10 @@ const fontFamilies: any = {
     'sans': 'Helvetica, Arial, sans-serif'
   }
 
-  const getCardShapeStyle = (shape: string) => {
-    if (shape === 'triangle') {
-      return { borderRadius: '0px', clipPath: 'polygon(50% 0%, 100% 100%, 0 100%)' }
-    }
-    return {
-      borderRadius: shape === 'rounded' ? '28px' : shape === 'square' ? '10px' : '15px',
-      clipPath: undefined,
-    }
-  }
+  const getCardShapeStyle = (shape: string) => ({
+    borderRadius: '0px',
+    aspectRatio: shape === 'square' ? '1 / 1' : '1.78 / 1',
+  })
 
   // محرك موحد لتنسيق النصوص في المعاينة وPDF
   const getCardTextStyle = (card: any, key: string) => {
@@ -544,7 +539,7 @@ const fontFamilies: any = {
 
       const rawSettings = snapshot.settings
       const allowedStyles = ['colored', 'plain', 'three-color', 'luxury']
-      const allowedShapes = ['rectangle', 'square', 'rounded', 'triangle']
+      const allowedShapes = ['rectangle', 'square']
       const allowedBorders = ['solid', 'dashed', 'dotted']
       const allowedProfiles = ['DEFAULT', 'PREMIUM', 'BASIC']
       const safeHex = (value: unknown, fallback: string) =>
@@ -802,7 +797,7 @@ const fontFamilies: any = {
       backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
       boxShadow: shadow,
       borderRadius: shapeStyle.borderRadius,
-      clipPath: shapeStyle.clipPath,
+      aspectRatio: shapeStyle.aspectRatio,
       border: border,
       color: c.text,
       padding: '15px',
@@ -1027,7 +1022,7 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${shapeStyle.borderRadius}; ${shapeStyle.clipPath ? 'clip-path:' + shapeStyle.clipPath + ';' : ''} border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${shapeStyle.borderRadius}; aspect-ratio: ${shapeStyle.aspectRatio}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
             ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
           <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.cardStyle === 'plain' ? '0' : card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:${card.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)'};">
@@ -1124,7 +1119,7 @@ const fontFamilies: any = {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="print-cards-preview-card studio-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '620px', width: '100%', aspectRatio: '1.78 / 1', minHeight: 0, position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '6px', padding: '10px' }}>
+            <div className="print-cards-preview-card studio-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '620px', width: '100%', aspectRatio: previewCard.cardShape === 'square' ? '1 / 1' : '1.78 / 1', minHeight: 0, position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '6px', padding: '10px' }}>
               {previewCard.cardStyle !== 'plain' && <div aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-25deg)', width: '95%', textAlign: 'center', fontSize: '16px', opacity: 0.12, fontWeight: 900, whiteSpace: 'normal', lineHeight: 1.8, pointerEvents: 'none', zIndex: 0, color: previewCard.colors.accent }}>جساس نت كرت<br />JASSAS NET CARD</div>}
               <div style={{ gridArea: 'header', minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 0 }}>
                 <div style={{ flex: 1, background: previewCard.colors.panelAlt, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.cardStyle === 'plain' ? '0' : previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
@@ -1596,8 +1591,6 @@ const fontFamilies: any = {
               {([
                 { value: 'rectangle', label: 'مستطيل', icon: '▭' },
                 { value: 'square', label: 'مربع', icon: '□' },
-                { value: 'rounded', label: 'مستدير', icon: '▢' },
-                { value: 'triangle', label: 'مثلث', icon: '△' },
               ] as const).map((shape) => {
                 const selected = formData.cardShape === shape.value
                 return (
