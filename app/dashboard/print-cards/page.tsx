@@ -1448,7 +1448,7 @@ const fontFamilies: any = {
             }} aria-label="عدد الأعمدة من 1 إلى 6" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
-          <section aria-label="مكتبة قوالب التصميم" style={{ margin: '18px 0 22px', padding: '14px', borderRadius: '16px', background: 'rgba(15,23,42,.42)', border: '1px solid rgba(214,173,85,.35)' }}>
+          <section id="studio-section-templates" aria-label="مكتبة قوالب التصميم" style={{ margin: '18px 0 22px', padding: '14px', borderRadius: '16px', background: 'rgba(15,23,42,.42)', border: '1px solid rgba(214,173,85,.35)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '5px' }}>
               <h3 style={{ margin: 0, color: '#f3d58a', fontSize: '16px', fontWeight: 800 }}>✦ مكتبة قوالب جساس</h3>
               <span style={{ color: '#94a3b8', fontSize: '11px' }}>قوالب جاهزة قابلة للتعديل</span>
