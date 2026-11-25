@@ -551,7 +551,7 @@ const fontFamilies: any = {
         colorScheme: Object.prototype.hasOwnProperty.call(colorSchemes, rawSettings.colorScheme)
           ? rawSettings.colorScheme
           : 'blue-gold',
-        cardShape: rawSettings.cardShape === 'square' ? 'square' : 'rectangle',
+        cardShape: allowedShapes.includes(rawSettings.cardShape) ? rawSettings.cardShape : 'rectangle',
         borderStyle: allowedBorders.includes(rawSettings.borderStyle) ? rawSettings.borderStyle : 'solid',
         fontFamily: Object.prototype.hasOwnProperty.call(fontFamilies, rawSettings.fontFamily)
           ? rawSettings.fontFamily
