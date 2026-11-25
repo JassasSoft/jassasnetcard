@@ -7,7 +7,7 @@ Last updated: 2026-11-24 (after first four-mode implementation)
 - Brand: JASSAS SOFT PRO
 - Repository: JassasSoft/jassasnetcard
 - Production branch: `production`
-- Active feature branch: `studio-four-design-modes`
+- Active feature branch: `studio-creative-library` (branched from `studio-mobile-ux`)
 - Public app: https://jassasnetcard.vercel.app
 
 ## Continuity rule
@@ -94,3 +94,28 @@ Unchanged during this work:
 6. Review the existing API's 2 MB request and 512 KB snapshot limits against representative batch sizes; keep the image payload within those limits.
 7. Continue the single-source preview/PDF rendering and true triangle-shape work.
 8. Review the complete diff and open a PR to `production` only after verification and user approval.
+
+
+## 2026-11-25 — Creative template library and typography/shape expansion
+
+- Active implementation branch: `studio-creative-library`, based on the reviewed `studio-mobile-ux` branch; production remains untouched.
+- Added seven built-in, editable starting templates: royal blue, emerald/gold, purple/silver, midnight/gold, calm sky, classic clean, and royal luxury.
+- Templates change visual settings only (design mode, palette, effect, shape, frame, and typography). They deliberately do not alter network identity, card generation values, quantities, or subscription/balance behavior.
+- Added four selectable silhouettes: rectangle, square, rounded, and triangle. Existing rectangle/square values remain supported in restored version-1 snapshots.
+- Extended text-font choices with Kufi, Naskh, and system font stacks, retaining the existing five font identifiers. These use device/browser fonts with fallbacks; no remote font dependency was added.
+- Applied the shape helper to both live preview and print HTML. Added CSS so the template library is visible only during the Design step.
+- API route and database schema were not changed.
+- Implementation commits: `2c92e567` (library and shapes), `1d94d2d` (scope template section), `1d26d5d` (step visibility).
+- Verification status: **PENDING**. No TypeScript, lint, production build, Android visual, PDF/print, or restore tests have been run in this session. Vercel status for the first feature commit was pending at the time checked.
+- Known visual risk: the triangular silhouette uses CSS clip-path and needs real-device inspection to confirm that the internal card content remains legible and that print browsers preserve the cut shape.
+
+## Exact next tasks after this session
+
+1. Sync `studio-creative-library` to Termux without resetting or overwriting local work; inspect `git status` and the diff first.
+2. Run `git diff --check`, `npx tsc --noEmit`, and `npm run build`; fix failures only on this feature branch.
+3. Test all seven presets and all four shapes in the sticky live preview on Android.
+4. Generate sample PDF and a real batch print preview for rectangle, square, rounded, and triangle; verify QR and text clipping.
+5. Verify old version-1 batch restore and reprint still work.
+6. Review and refine triangle geometry and font fallbacks based on actual output.
+7. Continue with user-saved custom templates and undo/redo only after the first phase passes verification.
+8. Open a PR to `production` only after review and explicit user approval; do not merge or deploy manually.
