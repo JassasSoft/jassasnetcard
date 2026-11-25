@@ -93,7 +93,7 @@ Last updated: 2026-11-25
   7. Shapes, borders and decorations
   8. Templates and design styles
   9. Card size, layout and printing
-- Card shapes: rectangle, square, rounded and triangle; verify the triangle as a true silhouette, not only a corner ornament.
+- Card shapes: **rectangle and square only**. Rounded/circular and triangle options are retired from the editor. Legacy version-1 snapshots containing retired shape values restore safely as rectangle.
 - Four approved modes: كروت عادي، كروت عادي فاخر، كروت ملونه، كروت ملونه فخمه.
 - Plain mode stays neutral and undecorated; luxury mode uses restrained accents; color mode uses a coordinated 3–4 color gradient; full-color luxury mode supports optional compressed image backgrounds.
 - Keep persisted style IDs backward compatible: plain, luxury, three-color and colored.
@@ -131,8 +131,9 @@ Last updated: 2026-11-25
 ## Current feature-branch work
 - Active branch: studio-creative-library, based on studio-mobile-ux; production is untouched.
 - Existing four-mode selector, compressed image background, and mobile landscape preview are retained.
-- Added seven editable built-in design presets, four card silhouettes (rectangle, square, rounded, triangle), and three additional font stacks (Kufi, Naskh, system) with browser/device fallbacks.
-- Updated both live preview and print HTML shape styling; scoped the template library to the Design step.
+- Added seven editable built-in design presets and three additional font stacks (Kufi, Naskh, system) with browser/device fallbacks.
+- Corrected the shape selector to rectangle and square only; legacy rounded/triangle snapshot values normalize to rectangle. Preview and print markup receive the same shape ratio.
+- Scoped the template library to the Design step.
 - app/api/print-cards/route.ts and database schema were not changed.
 - TypeScript, lint, production build, Android visual, PDF/print, restore and reprint tests remain pending.
 
@@ -141,3 +142,39 @@ Last updated: 2026-11-25
 - PROPOSED: details still need approval.
 - PENDING: not implemented or not verified.
 - DONE: implemented and tested.
+
+
+## Card Studio feature audit — 2026-11-25
+
+### Existing in the active feature branch
+- Nine section navigation with scroll-to-section and active-section tracking.
+- Sticky live preview with immediate form-driven updates.
+- Four design modes: plain, luxury, three-color and full-color luxury.
+- Seven built-in editable presets; presets change visual settings, not network/card-generation or subscription data.
+- Palette selection, compressed local background image for full-color mode, borders, effects and multiple font stacks.
+- Per-field visibility, font size, color, font family, alignment, border and text-background controls.
+- QR generation, username prefix/length, batch quantity and print columns.
+- Sample PDF/print window and saved batch print flow.
+- Server-confirmed batch save, idempotency key, balance handling through existing API/RPC, batch history, version-1 snapshot restore and print retry.
+
+### Gaps confirmed by source inspection — not yet implemented
+- No undo/redo history controls.
+- No local autosave/restore of an in-progress unsaved design.
+- Built-in presets are selectable, but user-created custom templates are not saved to a personal template library.
+- Live preview and print/PDF still use separate markup trees; a shared normalized renderer remains a reliability improvement.
+- No explicit card-layout controls for element drag/reposition or layer ordering.
+- Real-device PDF, physical print, QR scan, restore and retry tests still require execution.
+
+### Reference-product study boundaries
+- Cards Pro: reference for MikroTik initial setup, card management and print workflow.
+- One Zero Net: reference for network/service management and reporting.
+- Tiger Cloud: reference for cloud multi-router management, agents/wallets, design/printing and backup.
+- These are product-study directions, not claims that every reference feature has been independently re-tested in this work session. Jassas implementation must remain original and preserve its own product identity.
+
+### Next implementation order
+1. Finish rectangle/square validation on Android preview and print output.
+2. Build a single-source card renderer shared by preview and print/PDF.
+3. Add safe local draft autosave and explicit restore/reset behavior.
+4. Add undo/redo using bounded state snapshots; exclude card creation, balance and server operations from undo.
+5. Add personal custom-template save/load only after storage scope and privacy behavior are defined.
+6. Evaluate drag/reposition and layer ordering after renderer normalization; do not add controls that cannot be represented identically in print.
