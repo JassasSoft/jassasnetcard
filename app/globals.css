@@ -5666,7 +5666,7 @@ html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
 }
 .print-cards-shell .studio-preview-toolbar { min-height:34px; }
 .print-cards-shell .studio-preview-card {
-  width:min(100%,620px) !important; aspect-ratio:1.78 / 1; min-height:0 !important;
+  width:min(100%,620px) !important;  min-height:0 !important;
   max-height:350px; padding:clamp(7px,1.5vw,12px) !important; gap:6px !important;
   transform:none !important;
 }
@@ -5692,7 +5692,7 @@ html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
   .print-cards-shell .studio-preview-toolbar h2 { font-size:13px !important; }
   .print-cards-shell .studio-preview-toolbar button { min-height:30px; padding:5px 9px !important; font-size:11px !important; }
   .print-cards-shell .studio-preview-card {
-    width:100% !important; max-height:190px; aspect-ratio:1.78 / 1;
+    width:100% !important; max-height:190px; 
     padding:6px !important; gap:4px !important; border-radius:10px !important;
   }
   .print-cards-shell .studio-section-nav { position:relative; top:auto; padding:5px; gap:5px; margin-bottom:10px; }
@@ -5761,7 +5761,7 @@ html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
 }
 .print-cards-shell .studio-preview-card {
   width:min(100%,620px) !important;
-  aspect-ratio:1.78 / 1 !important;
+  
   max-height:190px !important;
   min-height:0 !important;
   padding:6px !important;
@@ -6036,4 +6036,17 @@ body {
 }
 .print-cards-settings[data-active-step="design"] > #studio-section-templates {
   display:block !important;
+}
+
+/* Live card preview: preserve the selected physical card ratio without clipping. */
+.print-cards-shell .studio-preview-dock {
+  max-height:none !important;
+  overflow:visible !important;
+}
+.print-cards-shell .studio-preview-card {
+  height:auto !important;
+  max-height:none !important;
+  min-height:0 !important;
+  box-sizing:border-box !important;
+  flex:none;
 }
