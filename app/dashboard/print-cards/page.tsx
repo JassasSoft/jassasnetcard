@@ -197,6 +197,8 @@ export default function PrintCardsPage() {
   const [activeField, setActiveField] = useState('')
   const [selectedTextStyleKey, setSelectedTextStyleKey] = useState('network')
   const [activeStudioSection, setActiveStudioSection] = useState('identity')
+  const [studioEntry, setStudioEntry] = useState<'choose' | 'workspace'>('choose')
+  const [studioTask, setStudioTask] = useState<'design' | 'print'>('design')
   const [activeDesignTemplate, setActiveDesignTemplate] = useState('royal-blue')
   const [cardsCountDraft, setCardsCountDraft] = useState('100')
   const [colsCountDraft, setColsCountDraft] = useState('3')
@@ -1103,7 +1105,38 @@ const fontFamilies: any = {
           </div>
         </header>
 
-        {/* المعاينة الديناميكية - ثابتة في الأعلى */}
+        {studioEntry === 'choose' ? (
+          <section className="studio-entry-screen" aria-labelledby="studio-entry-title">
+            <div className="studio-entry-heading">
+              <span className="studio-entry-kicker">JASSAS CARD STUDIO PRO</span>
+              <h2 id="studio-entry-title">ابدأ تصميم كروتك</h2>
+              <p>اختر نوع الكروت، ثم انتقل إلى التصميم أو تجهيز الطباعة.</p>
+            </div>
+            <div className="studio-entry-grid">
+              <button type="button" className="studio-entry-card studio-entry-plain" onClick={() => { setFormData(current => ({ ...current, cardStyle: 'plain' })); setStudioTask('design'); setStudioEntry('workspace') }}>
+                <span className="studio-entry-art"><span>▤</span><i>JASSAS NET</i><small>HOTSPOT VOUCHER</small></span>
+                <strong>الكروت العادية</strong>
+                <small>تصميم عملي واقتصادي، واضح وسهل القراءة</small>
+                <span className="studio-entry-features">قوالب بسيطة · خطوط واضحة · طباعة اقتصادية</span>
+                <b>اختيار الكروت العادية ←</b>
+              </button>
+              <button type="button" className="studio-entry-card studio-entry-color" onClick={() => { setFormData(current => ({ ...current, cardStyle: 'colored' })); setStudioTask('design'); setStudioEntry('workspace') }}>
+                <span className="studio-entry-art"><span>✦</span><i>JASSAS NET</i><small>PREMIUM HOTSPOT</small></span>
+                <strong>الكروت الملونة</strong>
+                <small>ألوان متناسقة وإطارات وتأثيرات فاخرة</small>
+                <span className="studio-entry-features">تدرجات · زخارف · قوالب ملونة</span>
+                <b>اختيار الكروت الملونة ←</b>
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="studio-workspace-topline">
+              <button type="button" onClick={() => setStudioEntry('choose')}>← تغيير نوع الكرت</button>
+              <span>{formData.cardStyle === 'plain' ? 'الكروت العادية' : 'الكروت الملونة'}</span>
+            </div>
+                    {studioTask === 'design' && <>
+        {/* المعاينة الديناميكية - تظهر في وضع التصميم فقط */}
         <div ref={previewRef} className="print-cards-preview studio-preview-dock" style={{
           position: 'sticky', top: '4px', zIndex: 100, marginBottom: '12px',
           background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(18px)',
@@ -1200,20 +1233,15 @@ const fontFamilies: any = {
           </div>
         </div>
 
-        <section className="studio-design-mode" aria-label="اختيار نوع تصميم الكروت">
-          <button type="button" className={formData.cardStyle === 'plain' ? 'studio-mode-card is-active' : 'studio-mode-card'} onClick={() => setFormData((current) => ({ ...current, cardStyle: 'plain' }))}>
-            <span className="studio-mode-icon" aria-hidden="true">▤</span>
-            <span><strong>الكروت العادية</strong><small>تصميم بسيط وواضح للطباعة الاقتصادية</small></span>
-            <span className="studio-mode-check" aria-hidden="true">{formData.cardStyle === 'plain' ? '✓' : ''}</span>
-          </button>
-          <button type="button" className={formData.cardStyle !== 'plain' ? 'studio-mode-card is-active' : 'studio-mode-card'} onClick={() => setFormData((current) => ({ ...current, cardStyle: 'colored' }))}>
-            <span className="studio-mode-icon studio-mode-color-icon" aria-hidden="true">✦</span>
-            <span><strong>الكروت الملونة</strong><small>ألوان كاملة وتأثيرات وقوالب فاخرة</small></span>
-            <span className="studio-mode-check" aria-hidden="true">{formData.cardStyle !== 'plain' ? '✓' : ''}</span>
-          </button>
-        </section>
 
-        <div className="studio-stepper-wrap">
+        </>}
+
+        <nav className="studio-workspace-tabs" aria-label="مساحة العمل">
+          <button type="button" className={studioTask === 'design' ? 'is-active' : ''} onClick={() => { setStudioTask('design'); goToStudioStep('identity') }}><span>🎨</span><strong>التصميم</strong><small>القوالب والألوان والخطوط</small></button>
+          <button type="button" className={studioTask === 'print' ? 'is-active' : ''} onClick={() => { setStudioTask('print'); goToStudioStep('print') }}><span>🖨️</span><strong>الطباعة</strong><small>المقاسات والتوزيع وملف PDF</small></button>
+        </nav>
+
+        <div className="studio-stepper-wrap" hidden={studioTask === 'print'}>
           <nav className="studio-section-nav" aria-label="خطوات إعداد تصميم الكرت">
           {studioSectionSteps.map((section) => (
             <button
@@ -2031,6 +2059,9 @@ const fontFamilies: any = {
             </button>
           </div>
         </div>
+          </>
+        )}
+
 
         {/* نافذة تأكيد الكمية */}
         {showConfirm && printedCards.length > 0 && (
