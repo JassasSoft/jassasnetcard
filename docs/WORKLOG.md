@@ -132,3 +132,16 @@ Unchanged during this work:
 - API route, Supabase schema, balance logic and production branch were not modified.
 - Verification: TypeScript and production build passed locally before this correction. The corrected branch still requires a fresh TypeScript/build run and Android preview/PDF/print/restore tests. Do not mark the shape work fully verified until those tests pass.
 - Next: pull this feature branch on Termux, inspect the diff, rerun TypeScript/build, then test rectangle and square in preview, PDF and saved-batch restore.
+
+## 2026-11-27 — Studio entry flow and design/print workspace
+
+- Added a first-entry screen with two explicit choices: ordinary cards and colored cards. Each choice includes a short feature summary and opens the corresponding persisted design mode.
+- Removed the duplicated ordinary/colored mode selector from the top of the editing workspace; mode selection now happens before entering the workspace.
+- Added a workspace task switcher for Design and Print. The live card preview is rendered only in Design mode; Print mode moves the user to the existing print settings step.
+- Added a compact visual language for the entry cards and task switcher, including mobile layouts, focus-visible states and restrained Jassas blue/gold styling.
+- Kept existing design mode IDs, seven presets, QR, batch generation, Supabase save/idempotency, history, restore and retry logic intact.
+- Reference review: Cards Pro describes ready-made voucher templates and cut-ready PDF; Card Designer Pro describes element-level design and page margins; SAMM/RADTik document real card dimensions, paper sizes, A4 layouts and thermal 58/80mm outputs. These are inspiration only, not claims of implementation.
+- **Not yet implemented in this change:** physical card width/height controls, paper size/orientation/margins, per-page layout preview, unified preview/PDF renderer, and actual split of all controls into isolated Design vs Print panels. The Print tab currently routes to the existing print step, which still shares the broader settings form.
+- No API route, database schema, Supabase balance logic or production branch changed.
+- Verification: no fresh TypeScript/build/mobile interaction test has been run after this UI change. Must run on Termux before considering it verified.
+- Next: add explicit mm-based card dimensions and paper presets (A4/A5/Letter and 58/80mm thermal), page orientation, margins and per-sheet preview; ensure print CSS consumes the same values; then split print-only controls cleanly from design controls.
