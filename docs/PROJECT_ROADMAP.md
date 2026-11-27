@@ -178,3 +178,11 @@ Last updated: 2026-11-25
 4. Add undo/redo using bounded state snapshots; exclude card creation, balance and server operations from undo.
 5. Add personal custom-template save/load only after storage scope and privacy behavior are defined.
 6. Evaluate drag/reposition and layer ordering after renderer normalization; do not add controls that cannot be represented identically in print.
+
+
+## 2026-11-27 — Guided studio workflow
+
+- New entry step: choose ordinary or colored cards before opening the editor.
+- Workspace task switcher: Design or Print; live card preview is shown in Design mode only.
+- The print task currently focuses the existing print settings step; dedicated print-only panel separation and physical sizing controls remain pending.
+- Next print-layout requirements: explicit card width/height in millimetres, paper presets (A4/A5/Letter and thermal 58/80mm), orientation, margins/gaps, cards-per-sheet preview, and PDF output using the same settings.
