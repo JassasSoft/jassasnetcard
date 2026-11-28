@@ -803,8 +803,8 @@ const fontFamilies: any = {
       // updated together on the same element.
       backgroundColor: card.cardStyle === 'plain' ? bg : '#1e3c72',
       backgroundImage: backgroundLayers.length ? backgroundLayers.join(', ') : undefined,
-      backgroundSize: card.cardBackgroundImage ? 'cover, cover, 100% 100%' : undefined,
-      backgroundPosition: card.cardBackgroundImage ? 'center, center, center' : undefined,
+      backgroundSize: uploadedBackground ? 'cover, cover, 100% 100%' : undefined,
+      backgroundPosition: uploadedBackground ? 'center, center, center' : undefined,
       boxShadow: shadow,
       borderRadius: shapeStyle.borderRadius,
       aspectRatio: shapeStyle.aspectRatio,
