@@ -96,6 +96,16 @@ const DEFAULT_TEXT_STYLES = {
   warning: { show: true, fontSize: 10, color: '#e0e0e0', fontFamily: 'default', position: 'bottom', align: 'center', borderWidth: 0, borderColor: '#FFD700', borderStyle: 'solid', background: 'transparent' },
 };
 
+const CARD_DESIGN_TEMPLATES = [
+  { id: 'royal-blue', name: 'الأزرق الملكي', note: 'أزرق عميق ولمسات ذهبية', cardStyle: 'colored', colorScheme: 'blue-gold', cardEffect: 'gradient', cardShape: 'rectangle', borderWidth: 2, borderColor: '#f7d77a', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
+  { id: 'emerald-gold', name: 'زمرد وذهب', note: 'أخضر راقٍ وهوية دافئة', cardStyle: 'colored', colorScheme: 'green-gold', cardEffect: '3d', cardShape: 'square', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#ffffff', fontFamily: 'arabic' },
+  { id: 'purple-silver', name: 'بنفسجي فضي', note: 'طابع عصري هادئ', cardStyle: 'colored', colorScheme: 'purple-silver', cardEffect: 'gradient', cardShape: 'square', borderWidth: 2, borderColor: '#c0c0c0', accent: '#e5e7eb', textColor: '#ffffff', fontFamily: 'sans' },
+  { id: 'midnight-gold', name: 'أسود وذهبي', note: 'مظهر فاخر بتباين قوي', cardStyle: 'colored', colorScheme: 'black-gold', cardEffect: 'glow', cardShape: 'rectangle', borderWidth: 2, borderColor: '#facc15', accent: '#facc15', textColor: '#fff7d6', fontFamily: 'serif' },
+  { id: 'sky-minimal', name: 'سماء هادئة', note: 'مساحة بيضاء وأزرق واضح', cardStyle: 'three-color', colorScheme: 'white-blue', cardEffect: 'gradient', cardShape: 'square', borderWidth: 1, borderColor: '#60a5fa', accent: '#2563eb', textColor: '#172033', fontFamily: 'system' },
+  { id: 'classic-clean', name: 'كلاسيكي بسيط', note: 'اقتصادي وواضح للطباعة', cardStyle: 'plain', colorScheme: 'blue-gold', cardEffect: 'plain', cardShape: 'rectangle', borderWidth: 1, borderColor: '#9ca3af', accent: '#374151', textColor: '#111827', fontFamily: 'naskh' },
+  { id: 'royal-luxury', name: 'ملكي فاخر', note: 'إطار ملكي ولمسات ذهبية', cardStyle: 'luxury', colorScheme: 'blue-gold', cardEffect: '3d', cardShape: 'square', borderWidth: 3, borderColor: '#d6ad55', accent: '#f7d77a', textColor: '#fffaf0', fontFamily: 'kufi' },
+] as const
+
 const sanitizeTextStyles = (value: unknown) => {
   const input = value && typeof value === 'object' && !Array.isArray(value)
     ? value as Record<string, any>
@@ -104,7 +114,7 @@ const sanitizeTextStyles = (value: unknown) => {
   const positions = ['top', 'bottom', 'left', 'right', 'center'];
   const aligns = ['right', 'center', 'left'];
   const borders = ['solid', 'dashed', 'dotted'];
-  const fonts = ['default', 'arabic', 'mono', 'serif', 'sans'];
+  const fonts = ['default', 'arabic', 'mono', 'serif', 'sans', 'kufi', 'naskh', 'system'];
 
   const safeColor = (v: unknown, fallback: string) =>
     typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : fallback;
@@ -187,6 +197,9 @@ export default function PrintCardsPage() {
   const [activeField, setActiveField] = useState('')
   const [selectedTextStyleKey, setSelectedTextStyleKey] = useState('network')
   const [activeStudioSection, setActiveStudioSection] = useState('identity')
+  const [studioEntry, setStudioEntry] = useState<'choose' | 'workspace'>('choose')
+  const [studioTask, setStudioTask] = useState<'design' | 'print'>('design')
+  const [activeDesignTemplate, setActiveDesignTemplate] = useState('royal-blue')
   const [cardsCountDraft, setCardsCountDraft] = useState('100')
   const [colsCountDraft, setColsCountDraft] = useState('3')
   const previewRef = useRef<HTMLDivElement>(null)
@@ -238,6 +251,30 @@ export default function PrintCardsPage() {
   const selectedTextStyle =
     (formData.textStyles as any)?.[selectedTextStyleKey] ||
     (DEFAULT_TEXT_STYLES as any)[selectedTextStyleKey]
+
+  const studioSectionSteps = [
+    { id: 'identity', label: 'الهوية', icon: '🌐', target: 'studio-field-profile' },
+    { id: 'numbers', label: 'الأرقام', icon: '🔢', target: 'studio-field-prefix' },
+    { id: 'duration', label: 'الصلاحية', icon: '⏱️', target: 'studio-field-validity' },
+    { id: 'time', label: 'الوقت والسعر', icon: '💳', target: 'studio-field-cardTime' },
+    { id: 'content', label: 'النصوص', icon: '✍️', target: 'studio-field-customMessage' },
+    { id: 'design', label: 'التصميم', icon: '🎨', target: 'studio-section-design' },
+    { id: 'typography', label: 'الخطوط', icon: '🔤', target: 'studio-section-typography' },
+    { id: 'print', label: 'الطباعة', icon: '🖨️', target: 'studio-field-count' },
+    { id: 'history', label: 'السجل', icon: '🗂️', target: 'batch-history-heading' },
+  ] as const
+
+  const goToStudioStep = (stepId: string) => {
+    const step = studioSectionSteps.find((item) => item.id === stepId)
+    if (!step) return
+    setActiveStudioSection(step.id)
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.getElementById(step.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    })
+  }
+
 
 
   useEffect(() => {
@@ -415,10 +452,18 @@ export default function PrintCardsPage() {
 const fontFamilies: any = {
     'default': 'Segoe UI, Tahoma, Arial, sans-serif',
     'arabic': 'Arial, Tahoma, sans-serif',
-    'mono': 'Courier New, monospace',
-    'serif': 'Georgia, serif',
+    'kufi': '"Noto Kufi Arabic", Tahoma, Arial, sans-serif',
+    'naskh': '"Noto Naskh Arabic", "Times New Roman", serif',
+    'system': 'system-ui, "Segoe UI", Tahoma, Arial, sans-serif',
+    'mono': '"Courier New", monospace',
+    'serif': 'Georgia, "Times New Roman", serif',
     'sans': 'Helvetica, Arial, sans-serif'
   }
+
+  const getCardShapeStyle = (shape: string) => ({
+    borderRadius: '0px',
+    aspectRatio: shape === 'square' ? '1 / 1' : '1.78 / 1',
+  })
 
   // محرك موحد لتنسيق النصوص في المعاينة وPDF
   const getCardTextStyle = (card: any, key: string) => {
@@ -447,9 +492,6 @@ const fontFamilies: any = {
 
   const getCardBackgroundImage = (card: any) => {
     const layers: string[] = []
-    if (card.cardShape === 'triangle' && card.cardStyle !== 'plain') {
-      layers.push('linear-gradient(135deg, transparent 0 84%, rgba(214,173,85,0.88) 84% 100%)')
-    }
     if (card.cardStyle === 'colored' && typeof card.cardBackgroundImage === 'string' &&
       /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(card.cardBackgroundImage) &&
       card.cardBackgroundImage.length <= 200000) {
@@ -499,7 +541,7 @@ const fontFamilies: any = {
 
       const rawSettings = snapshot.settings
       const allowedStyles = ['colored', 'plain', 'three-color', 'luxury']
-      const allowedShapes = ['rectangle', 'square', 'rounded', 'triangle']
+      const allowedShapes = ['rectangle', 'square']
       const allowedBorders = ['solid', 'dashed', 'dotted']
       const allowedProfiles = ['DEFAULT', 'PREMIUM', 'BASIC']
       const safeHex = (value: unknown, fallback: string) =>
@@ -733,9 +775,7 @@ const fontFamilies: any = {
   const getCardStyle = (card: any, isActive: boolean = false) => {
     const c = card.colors
     let bg = c.bg
-    let radius = '15px'
-    if (card.cardShape === 'square') radius = '10px'
-    if (card.cardShape === 'rounded') radius = '25px'
+    const shapeStyle = getCardShapeStyle(card.cardShape)
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
     let extraStyle: any = {}
@@ -752,13 +792,22 @@ const fontFamilies: any = {
       shadow = '0 0 0 4px rgba(124,58,237,0.45), ' + shadow
       extraStyle.transform = 'scale(1.02)'
     }
+    const uploadedBackground = getCardBackgroundImage(card)
+    const backgroundLayers = [uploadedBackground, bg].filter(
+      (layer): layer is string => typeof layer === 'string' && layer.length > 0
+    )
+
     return {
-      background: bg,
-      backgroundImage: getCardBackgroundImage(card),
-      backgroundSize: card.cardBackgroundImage ? 'cover' : undefined,
-      backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
+      // Keep the solid fallback separate from layered gradients/images.
+      // React warns when the background shorthand and backgroundImage are
+      // updated together on the same element.
+      backgroundColor: card.cardStyle === 'plain' ? bg : '#1e3c72',
+      backgroundImage: backgroundLayers.length ? backgroundLayers.join(', ') : undefined,
+      backgroundSize: uploadedBackground ? 'cover, cover, 100% 100%' : undefined,
+      backgroundPosition: uploadedBackground ? 'center, center, center' : undefined,
       boxShadow: shadow,
-      borderRadius: radius,
+      borderRadius: shapeStyle.borderRadius,
+      aspectRatio: shapeStyle.aspectRatio,
       border: border,
       color: c.text,
       padding: '15px',
@@ -962,10 +1011,7 @@ const fontFamilies: any = {
 
     const c = card.colors
     let bg = c.bg
-    let radius = '15px'
-
-    if (card.cardShape === 'square') radius = '10px'
-    if (card.cardShape === 'rounded') radius = '25px'
+    const shapeStyle = getCardShapeStyle(card.cardShape)
 
     let shadow = card.cardStyle === 'plain' ? 'none' : '0 10px 30px rgba(0,0,0,0.3)'
     let border = card.cardStyle === 'plain' ? '1px solid #d1d5db' : card.borderWidth + 'px ' + card.borderStyle + ' ' + c.border
@@ -986,7 +1032,7 @@ const fontFamilies: any = {
       : fontFamilies.default
 
     const cardHTML = `
-      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${radius}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
+      <div style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: 'header header' 'username info' 'footer footer'; align-items: start; gap: 8px; background: ${bg}; ${getCardBackgroundImage(card) ? 'background-image: ' + getCardBackgroundImage(card) + '; background-size:cover; background-position:center;' : ''} border-radius: ${shapeStyle.borderRadius}; aspect-ratio: ${shapeStyle.aspectRatio}; border: ${border}; padding: 12px; width: 100%; box-sizing: border-box; color: ${c.text}; margin: 0; break-inside: avoid; page-break-inside: avoid; box-shadow: ${shadow}; font-family: ${fontFamily};">
             ${card.cardStyle !== 'plain' ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); width:95%; text-align:center; font-size:16px; line-height:1.8; font-weight:900; color:${c.accent}; opacity:0.12; pointer-events:none; z-index:0;">جساس نت كرت<br>JASSAS NET CARD</div>` : ''}
         <div style="grid-area:header; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; min-width:0; margin-bottom:0;">
           <div style="flex:1; background:${c.panelAlt}; border-radius:12px; padding:10px 15px; text-align:center; border:${card.cardStyle === 'plain' ? '0' : card.borderWidth + 'px ' + card.borderStyle + ' ' + card.borderColor}; margin-right:${card.qrEnabled || card.rechargeText ? '10px' : '0'}; box-shadow:${card.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)'};">
@@ -1057,31 +1103,56 @@ const fontFamilies: any = {
             </div>
           </div>
           <div className="print-cards-header-actions">
-            <AuthThemeToggle />
-            <button type="button" className="print-cards-back" onClick={() => router.push("/dashboard")}>
-              <span aria-hidden="true">→</span>
-              العودة للوحة التحكم
+            <button type="button" className="print-cards-back studio-back-icon" aria-label="الرجوع للصفحة السابقة" title="الرجوع للصفحة السابقة" onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) router.back()
+              else router.push('/dashboard')
+            }}>
+              <span aria-hidden="true">›</span>
             </button>
+            <AuthThemeToggle />
           </div>
         </header>
 
-        {/* المعاينة الديناميكية - ثابتة في الأعلى */}
+        {studioEntry === 'choose' ? (
+          <section className="studio-entry-screen" aria-labelledby="studio-entry-title">
+            <div className="studio-entry-heading">
+              <span className="studio-entry-kicker">JASSAS CARD STUDIO PRO</span>
+              <h2 id="studio-entry-title">ابدأ تصميم كروتك</h2>
+              <p>اختر نوع الكروت، ثم انتقل إلى التصميم أو تجهيز الطباعة.</p>
+            </div>
+            <div className="studio-entry-grid">
+              <button type="button" className="studio-entry-card studio-entry-plain" onClick={() => { setFormData(current => ({ ...current, cardStyle: 'plain' })); setStudioTask('design'); setStudioEntry('workspace') }}>
+                <span className="studio-entry-art"><span>▤</span><i>JASSAS NET</i><small>HOTSPOT VOUCHER</small></span>
+                <strong>الكروت العادية</strong>
+                <small>تصميم عملي واقتصادي، واضح وسهل القراءة</small>
+                <span className="studio-entry-features">قوالب بسيطة · خطوط واضحة · طباعة اقتصادية</span>
+                <b>اختيار الكروت العادية ←</b>
+              </button>
+              <button type="button" className="studio-entry-card studio-entry-color" onClick={() => { setFormData(current => ({ ...current, cardStyle: 'colored' })); setStudioTask('design'); setStudioEntry('workspace') }}>
+                <span className="studio-entry-art"><span>✦</span><i>JASSAS NET</i><small>PREMIUM HOTSPOT</small></span>
+                <strong>الكروت الملونة</strong>
+                <small>ألوان متناسقة وإطارات وتأثيرات فاخرة</small>
+                <span className="studio-entry-features">تدرجات · زخارف · قوالب ملونة</span>
+                <b>اختيار الكروت الملونة ←</b>
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="studio-workspace-topline">
+              <button type="button" onClick={() => setStudioEntry('choose')}>← تغيير نوع الكرت</button>
+              <span>{formData.cardStyle === 'plain' ? 'الكروت العادية' : 'الكروت الملونة'}</span>
+            </div>
+                    {studioTask === 'design' && <>
+        {/* المعاينة الديناميكية - تظهر في وضع التصميم فقط */}
         <div ref={previewRef} className="print-cards-preview studio-preview-dock" style={{
-          position: 'sticky', 
-          top: '10px', 
-          zIndex: 100, 
-          marginBottom: '20px', 
-          background: 'rgba(255,255,255,0.05)', 
-          backdropFilter: 'blur(20px)', 
-          borderRadius: '20px', 
-          padding: '20px', 
-          border: '2px solid rgba(124,58,237,0.45)',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+          position: 'sticky', top: '4px', zIndex: 100, marginBottom: '12px',
+          background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(18px)',
+          borderRadius: '16px', padding: '10px',
+          border: '1px solid rgba(124,58,237,0.38)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.28)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h2 style={{ color: '#FFD700', margin: 0, fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '24px' }}>👁️</span> معاينة الكرت (مباشرة)
-            </h2>
+          <div className="studio-preview-toolbar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '6px' }}>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => { void exportSamplePDF() }} style={{ padding: '8px 15px', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(37,99,235,0.30)' }}>
                 📄 عينة PDF
@@ -1089,7 +1160,7 @@ const fontFamilies: any = {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="print-cards-preview-card" style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: '560px', width: '100%', position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '8px', padding: '12px' }}>
+            <div className="print-cards-preview-card studio-preview-card" data-card-shape={previewCard.cardShape} style={{ ...getCardStyle(previewCard, activeField !== ''), maxWidth: previewCard.cardShape === 'square' ? '280px' : '440px', width: '100%', aspectRatio: previewCard.cardShape === 'square' ? '1 / 1' : '1.78 / 1', height: 'auto', maxHeight: 'none', minHeight: 0, boxSizing: 'border-box', position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)', gridTemplateAreas: '"header header" "username info" "footer footer"', alignItems: 'start', gap: '6px', padding: '10px' }}>
               {previewCard.cardStyle !== 'plain' && <div aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-25deg)', width: '95%', textAlign: 'center', fontSize: '16px', opacity: 0.12, fontWeight: 900, whiteSpace: 'normal', lineHeight: 1.8, pointerEvents: 'none', zIndex: 0, color: previewCard.colors.accent }}>جساس نت كرت<br />JASSAS NET CARD</div>}
               <div style={{ gridArea: 'header', minWidth: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 0 }}>
                 <div style={{ flex: 1, background: previewCard.colors.panelAlt, backdropFilter: 'blur(10px)', borderRadius: '12px', padding: '10px 15px', textAlign: 'center', border: previewCard.cardStyle === 'plain' ? '0' : previewCard.borderWidth + 'px ' + previewCard.borderStyle + ' ' + previewCard.borderColor, marginRight: (previewCard.qrEnabled || previewCard.rechargeText) ? '10px' : '0', boxShadow: previewCard.cardStyle === 'plain' ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
@@ -1164,37 +1235,49 @@ const fontFamilies: any = {
                             {previewCard.textStyles?.warning?.show !== false && <div style={{ gridColumn: '1 / -1', marginTop: 0, position: 'relative', zIndex: 1, lineHeight: 1.6, fontWeight: 600, ...getCardTextStyle(previewCard, 'warning') }}>احتفظ بهذا الكرت بعد التسجيل لاستكمال المدة والاستفادة من الباقة كاملة</div>}
             </div>
           </div>
+          <div className="studio-preview-caption" dir="rtl">
+            <span>👁️ معاينة الكرت</span>
+            <small>تتحدث مباشرة مع كل تعديل</small>
+          </div>
         </div>
 
-        <nav className="studio-section-nav" aria-label="أقسام استوديو تصميم الكروت">
-          {[
-            { id: 'identity', label: 'الشبكة والبروفايل', icon: '🌐', target: 'studio-field-profile' },
-            { id: 'numbers', label: 'أرقام الكروت', icon: '🔢', target: 'studio-field-prefix' },
-            { id: 'duration', label: 'الصلاحية والسعة', icon: '⏱️', target: 'studio-field-validity' },
-            { id: 'time', label: 'الوقت والسعر', icon: '💳', target: 'studio-field-cardTime' },
-            { id: 'content', label: 'النصوص والعروض', icon: '✍️', target: 'studio-field-customMessage' },
-            { id: 'design', label: 'شكل وألوان الكرت', icon: '🎨', target: 'studio-section-design' },
-            { id: 'typography', label: 'الخطوط والتنسيق', icon: '🔤', target: 'studio-section-typography' },
-            { id: 'print', label: 'الكمية والطباعة', icon: '🖨️', target: 'studio-field-count' },
-            { id: 'history', label: 'سجل الدفعات', icon: '🗂️', target: 'batch-history-heading' },
-          ].map((section) => (
+
+        </>}
+
+        <nav className="studio-workspace-tabs" aria-label="مساحة العمل">
+          <button type="button" className={studioTask === 'design' ? 'is-active' : ''} onClick={() => { setStudioTask('design'); goToStudioStep('identity') }}><span>🎨</span><strong>التصميم</strong><small>القوالب والألوان والخطوط</small></button>
+          <button type="button" className={studioTask === 'print' ? 'is-active' : ''} onClick={() => { setStudioTask('print'); goToStudioStep('print') }}><span>🖨️</span><strong>الطباعة</strong><small>المقاسات والتوزيع وملف PDF</small></button>
+        </nav>
+
+        <div className="studio-stepper-wrap" hidden={studioTask === 'print'}>
+          <nav className="studio-section-nav" aria-label="خطوات إعداد تصميم الكرت">
+          {studioSectionSteps.map((section) => (
             <button
               key={section.id}
               type="button"
               className={`studio-section-tab${activeStudioSection === section.id ? ' is-active' : ''}`}
               aria-current={activeStudioSection === section.id ? 'location' : undefined}
-              onClick={() => {
-                setActiveStudioSection(section.id)
-                document.getElementById(section.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
+              onClick={() => goToStudioStep(section.id)}
             >
               <span aria-hidden="true">{section.icon}</span>
               <span>{section.label}</span>
             </button>
           ))}
-        </nav>
+          </nav>
+          <div className="studio-step-controls">
+            <button type="button" onClick={() => {
+              const index = studioSectionSteps.findIndex((item) => item.id === activeStudioSection)
+              goToStudioStep(studioSectionSteps[Math.max(0, index - 1)].id)
+            }} disabled={activeStudioSection === studioSectionSteps[0].id}>السابق</button>
+            <span>{Math.max(1, studioSectionSteps.findIndex((item) => item.id === activeStudioSection) + 1)} / {studioSectionSteps.length}</span>
+            <button type="button" onClick={() => {
+              const index = studioSectionSteps.findIndex((item) => item.id === activeStudioSection)
+              goToStudioStep(studioSectionSteps[Math.min(studioSectionSteps.length - 1, index + 1)].id)
+            }} disabled={activeStudioSection === studioSectionSteps[studioSectionSteps.length - 1].id}>التالي ←</button>
+          </div>
+        </div>
 
-        <section aria-labelledby="batch-history-heading" style={{ marginBottom: '20px', padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(214,173,85,0.45)', boxShadow: '0 8px 28px rgba(0,0,0,0.18)' }}>
+        <section aria-labelledby="batch-history-heading" data-active-step={activeStudioSection} style={{ marginBottom: '20px', padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(214,173,85,0.45)', boxShadow: '0 8px 28px rgba(0,0,0,0.18)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
             <div>
               <h2 id="batch-history-heading" style={{ color: '#f3d58a', margin: 0, fontSize: '19px' }}>🗂️ سجل دفعات الطباعة</h2>
@@ -1275,7 +1358,7 @@ const fontFamilies: any = {
         )}
 
         {/* إعدادات الكرت */}
-        <div className="print-cards-settings" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(124,58,237,0.30)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
+        <div className="print-cards-settings" data-active-step={activeStudioSection} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '2px solid rgba(124,58,237,0.30)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
           <h2 style={{ color: '#FFD700', marginBottom: '20px', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '28px' }}>⚙️</span> إعدادات الكرت
           </h2>
@@ -1396,6 +1479,63 @@ const fontFamilies: any = {
             }} aria-label="عدد الأعمدة من 1 إلى 6" style={{ flex: 1, padding: '12px', background: 'rgba(0,0,0,0.5)', border: '2px solid rgba(124,58,237,0.45)', borderRadius: '10px', color: '#fff', fontSize: '16px', textAlign: 'center', minWidth: 0 }} />
           </InputRow>
 
+          <section id="studio-section-templates" aria-label="مكتبة قوالب التصميم" style={{ margin: '18px 0 22px', padding: '14px', borderRadius: '16px', background: 'rgba(15,23,42,.42)', border: '1px solid rgba(214,173,85,.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '5px' }}>
+              <h3 style={{ margin: 0, color: '#f3d58a', fontSize: '16px', fontWeight: 800 }}>✦ مكتبة قوالب جساس</h3>
+              <span style={{ color: '#94a3b8', fontSize: '11px' }}>قوالب جاهزة قابلة للتعديل</span>
+            </div>
+            <p style={{ margin: '0 0 12px', color: '#cbd5e1', fontSize: '12px', lineHeight: 1.7 }}>اختر نقطة بداية، ثم عدّل الألوان والخطوط والخانات بحرية. القالب يغيّر المظهر فقط ولا يغيّر بيانات الشبكة أو إعدادات إنشاء الكروت.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px' }}>
+              {CARD_DESIGN_TEMPLATES.map((template) => {
+                const selected = activeDesignTemplate === template.id
+                const swatch = template.id === 'classic-clean'
+                  ? 'linear-gradient(135deg,#fff,#e5e7eb)'
+                  : template.id === 'sky-minimal'
+                    ? 'linear-gradient(135deg,#fff,#bfdbfe,#2563eb)'
+                    : template.id === 'emerald-gold'
+                      ? 'linear-gradient(135deg,#134e4a,#65a30d,#facc15)'
+                      : template.id === 'purple-silver'
+                        ? 'linear-gradient(135deg,#312e81,#8b5cf6,#cbd5e1)'
+                        : template.id === 'midnight-gold'
+                          ? 'linear-gradient(135deg,#020617,#1e293b,#facc15)'
+                          : template.id === 'royal-luxury'
+                            ? 'linear-gradient(135deg,#071b3a,#123f78,#d6ad55)'
+                            : 'linear-gradient(135deg,#1e3c72,#2a5298,#d4af37)'
+                return (
+                  <button key={template.id} type="button" aria-pressed={selected}
+                    onClick={() => {
+                      setFormData((current) => ({
+                        ...current,
+                        cardStyle: template.cardStyle,
+                        colorScheme: template.colorScheme,
+                        cardEffect: template.cardEffect,
+                        cardShape: template.cardShape,
+                        borderWidth: template.borderWidth,
+                        borderColor: template.borderColor,
+                        usernameColor: template.accent,
+                        fontFamily: template.fontFamily,
+                        textStyles: {
+                          ...current.textStyles,
+                          network: { ...current.textStyles.network, color: template.textColor, fontFamily: template.fontFamily },
+                          username: { ...current.textStyles.username, color: template.accent, fontFamily: template.fontFamily },
+                        },
+                      }))
+                      setActiveDesignTemplate(template.id)
+                      setActiveField('cardStyle')
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0, minHeight: '64px', padding: '9px', textAlign: 'right', borderRadius: '12px', border: selected ? '2px solid #f7d77a' : '1px solid rgba(148,163,184,.28)', background: selected ? 'rgba(37,99,235,.2)' : 'rgba(15,23,42,.58)', color: '#f8fafc', cursor: 'pointer' }}>
+                    <span aria-hidden="true" style={{ width: '32px', height: '32px', flex: '0 0 32px', borderRadius: '9px', background: swatch, border: '1px solid rgba(255,255,255,.35)' }} />
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                      <strong style={{ fontSize: '12px', lineHeight: 1.4 }}>{template.name}</strong>
+                      <small style={{ color: '#cbd5e1', fontSize: '10px', lineHeight: 1.4 }}>{template.note}</small>
+                    </span>
+                    <span aria-hidden="true" style={{ marginInlineStart: 'auto', color: selected ? '#6ee7b7' : '#64748b', fontWeight: 900 }}>{selected ? '✓' : ''}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
           {/* أوضاع التصميم الأربعة المعتمدة */}
           <h3 id="studio-section-design" style={{ color: '#FFD700', margin: '25px 0 15px 0', fontSize: '18px', fontWeight: 'bold', borderBottom: '2px solid rgba(124,58,237,0.45)', paddingBottom: '10px' }}>🎨 أوضاع تصميم الكرت</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginBottom: '14px' }}>
@@ -1483,11 +1623,20 @@ const fontFamilies: any = {
           )}
 
           <InputRow activeField={activeField} label="شكل الكرت" icon="📱" fieldId="cardShape">
-            <div style={{ display: 'flex', gap: '8px', flex: 1, flexWrap: 'wrap' }}>
-              <button onClick={() => { setFormData({...formData, cardShape: 'rectangle'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'rectangle' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rectangle' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مستطيل</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'square'}); setActiveField('cardShape') }} style={{ flex: 1, padding: '10px', background: formData.cardShape === 'square' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'square' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مربع</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'rounded'}); setActiveField('cardShape') }} style={{ flex: 1, minWidth: '75px', padding: '10px', background: formData.cardShape === 'rounded' ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'rounded' ? '#0f172a' : '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>مدور</button>
-              <button onClick={() => { setFormData({...formData, cardShape: 'triangle'}); setActiveField('cardShape') }} style={{ flex: 1, minWidth: '100px', padding: '10px', background: formData.cardShape === 'triangle' ? 'linear-gradient(135deg, #d6ad55, #8b6a28)' : 'rgba(0,0,0,0.5)', color: formData.cardShape === 'triangle' ? '#101827' : '#fff', border: '1px solid rgba(214,173,85,.55)', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>زخرفة مثلثية</button>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px', flex: 1 }}>
+              {([
+                { value: 'rectangle', label: 'مستطيل', icon: '▭' },
+                { value: 'square', label: 'مربع', icon: '□' },
+              ] as const).map((shape) => {
+                const selected = formData.cardShape === shape.value
+                return (
+                  <button key={shape.value} type="button" aria-pressed={selected}
+                    onClick={() => { setFormData((current) => ({ ...current, cardShape: shape.value })); setActiveField('cardShape') }}
+                    style={{ minHeight: '42px', padding: '8px', background: selected ? 'linear-gradient(135deg, #FFD700, #7c3aed)' : 'rgba(0,0,0,0.5)', color: selected ? '#0f172a' : '#fff', border: selected ? '2px solid #f7d77a' : '1px solid rgba(148,163,184,.3)', borderRadius: '9px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    <span aria-hidden="true" style={{ marginInlineEnd: '6px' }}>{shape.icon}</span>{shape.label}
+                  </button>
+                )
+              })}
             </div>
           </InputRow>
 
@@ -1735,7 +1884,10 @@ const fontFamilies: any = {
                   }}
                 >
                   <option value="default">افتراضي</option>
-                  <option value="arabic">عربي</option>
+                  <option value="arabic">عربي واضح</option>
+                  <option value="kufi">كوفي</option>
+                  <option value="naskh">نسخ</option>
+                  <option value="system">خط النظام</option>
                   <option value="sans">حديث</option>
                   <option value="serif">كلاسيكي</option>
                   <option value="mono">رقمي</option>
@@ -1915,6 +2067,9 @@ const fontFamilies: any = {
             </button>
           </div>
         </div>
+          </>
+        )}
+
 
         {/* نافذة تأكيد الكمية */}
         {showConfirm && printedCards.length > 0 && (

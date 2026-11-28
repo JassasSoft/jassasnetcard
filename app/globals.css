@@ -5563,3 +5563,565 @@ html[data-auth-theme="dark"] .vault-refresh, html[data-auth-theme="dark"] .vault
 @media (prefers-reduced-motion: reduce) {
   .vault-spinner { animation: none; }
 }
+
+
+/* Jassas Studio — premium readable typography */
+.print-cards-shell {
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-text-size-adjust: 100%;
+}
+.print-cards-shell .print-cards-header h1 {
+  color: #174b82 !important;
+  font-size: clamp(23px, 4.5vw, 30px) !important;
+  font-weight: 900 !important;
+  line-height: 1.45;
+  text-shadow: 0 1px 0 rgba(255,255,255,.7);
+}
+.print-cards-shell .print-cards-header p {
+  font-size: 14px !important;
+  line-height: 1.7;
+  font-weight: 700;
+}
+.print-cards-shell .print-cards-preview h2 {
+  color: #d6a83f !important;
+  font-size: clamp(17px, 3.5vw, 21px) !important;
+  font-weight: 900 !important;
+}
+.print-cards-shell .print-cards-settings > h2,
+.print-cards-shell #batch-history-heading {
+  color: #d6ad55 !important;
+  font-size: clamp(21px, 4vw, 25px) !important;
+  font-weight: 900 !important;
+  line-height: 1.55;
+  text-shadow: 0 2px 12px rgba(214,173,85,.16);
+}
+.print-cards-shell .print-cards-settings h3,
+.print-cards-shell #studio-section-design,
+.print-cards-shell #studio-section-typography {
+  color: #2563a6 !important;
+  font-size: clamp(19px, 3.8vw, 22px) !important;
+  font-weight: 900 !important;
+  line-height: 1.6;
+  border-bottom-color: rgba(214,173,85,.7) !important;
+}
+.print-cards-shell .print-cards-row > div:last-child {
+  color: #d6ad55 !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1.55;
+}
+.print-cards-shell .print-cards-settings label,
+.print-cards-shell .print-cards-settings p,
+.print-cards-shell .print-cards-settings small {
+  font-size: 15px;
+  line-height: 1.75;
+}
+.print-cards-shell .print-cards-settings input:not([type="checkbox"]):not([type="range"]):not([type="color"]),
+.print-cards-shell .print-cards-settings select,
+.print-cards-shell .print-cards-settings textarea {
+  font-size: 17px !important;
+  font-weight: 700;
+}
+.print-cards-shell .studio-section-tab {
+  min-height: 46px;
+  padding: 10px 15px;
+  font-size: 15px;
+  font-weight: 900;
+}
+.print-cards-shell button {
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .print-cards-shell .print-cards-header h1 { font-size: 23px !important; }
+  .print-cards-shell .print-cards-settings > h2,
+  .print-cards-shell #batch-history-heading { font-size: 21px !important; }
+  .print-cards-shell .print-cards-settings h3,
+  .print-cards-shell #studio-section-design,
+  .print-cards-shell #studio-section-typography { font-size: 19px !important; }
+  .print-cards-shell .print-cards-row > div:last-child { font-size: 14px !important; }
+  .print-cards-shell .studio-section-tab { min-height: 44px; font-size: 14px; }
+  .print-cards-shell .print-cards-settings label,
+  .print-cards-shell .print-cards-settings p { font-size: 15px; }
+}
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-header h1,
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-settings h3,
+html[data-auth-theme="dark"] .print-cards-shell #studio-section-design,
+html[data-auth-theme="dark"] .print-cards-shell #studio-section-typography {
+  color: #9bc9ff !important;
+}
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-row > div:last-child,
+html[data-auth-theme="dark"] .print-cards-shell .print-cards-settings > h2,
+html[data-auth-theme="dark"] .print-cards-shell #batch-history-heading {
+  color: #f2d58c !important;
+}
+
+
+/* JASSAS CARD STUDIO — compact landscape-first mobile workspace */
+.print-cards-shell .print-cards-header { gap:12px; margin-bottom:12px !important; padding:12px 16px !important; }
+.print-cards-shell .print-cards-header-actions { gap:8px; }
+.print-cards-shell .studio-preview-dock {
+  position:sticky !important; top:max(4px,env(safe-area-inset-top)) !important;
+  max-height:none; overflow:visible;
+}
+.print-cards-shell .studio-preview-toolbar { min-height:34px; }
+.print-cards-shell .studio-preview-card {
+  width:min(100%,620px) !important;  min-height:0 !important;
+  max-height:350px; padding:clamp(7px,1.5vw,12px) !important; gap:6px !important;
+  transform:none !important;
+}
+.print-cards-shell .studio-section-nav {
+  position:relative; top:auto; z-index:20;
+  margin:0 0 14px; background:var(--surface,#102b4c); backdrop-filter:blur(16px);
+}
+.print-cards-shell .print-cards-settings .print-cards-row {
+  min-height:0 !important; margin-bottom:9px !important; padding:10px 12px !important;
+}
+.print-cards-shell #batch-history-heading { scroll-margin-top:100px; }
+@media (max-width:640px) {
+  .print-cards-shell .print-cards-header { align-items:center; flex-direction:row; padding:9px 10px !important; }
+  .print-cards-shell .print-cards-brand { gap:8px; min-width:0; }
+  .print-cards-shell .print-cards-brand .brand-mark { width:42px; height:42px; }
+  .print-cards-shell .print-cards-brand .brand-svg { width:32px; height:32px; }
+  .print-cards-shell .print-cards-header h1 { font-size:16px !important; line-height:1.35 !important; }
+  .print-cards-shell .print-cards-header p { font-size:10px !important; line-height:1.4 !important; }
+  .print-cards-shell .print-cards-header-actions { width:auto; flex-shrink:0; }
+  .print-cards-shell .print-cards-back { min-height:38px; padding:6px 9px; font-size:11px; }
+  .print-cards-shell .studio-preview-dock { max-height:260px; overflow:hidden; padding:8px !important; }
+  .print-cards-shell .studio-preview-toolbar { margin-bottom:5px !important; }
+  .print-cards-shell .studio-preview-toolbar h2 { font-size:13px !important; }
+  .print-cards-shell .studio-preview-toolbar button { min-height:30px; padding:5px 9px !important; font-size:11px !important; }
+  .print-cards-shell .studio-preview-card {
+    width:100% !important; max-height:190px; 
+    padding:6px !important; gap:4px !important; border-radius:10px !important;
+  }
+  .print-cards-shell .studio-section-nav { position:relative; top:auto; padding:5px; gap:5px; margin-bottom:10px; }
+  .print-cards-shell .studio-section-tab { min-height:36px; padding:6px 9px; font-size:11px; }
+  .print-cards-shell .print-cards-settings .print-cards-row {
+    display:flex; flex-direction:column-reverse; align-items:stretch !important;
+    gap:7px !important; padding:9px !important;
+  }
+  .print-cards-shell .print-cards-settings .print-cards-row > div:first-child { width:100%; flex-wrap:wrap; }
+  .print-cards-shell .print-cards-settings .print-cards-row > div:last-child {
+    width:100%; min-width:0; justify-content:flex-start; font-size:13px !important;
+  }
+  .print-cards-shell .print-cards-settings { gap:8px; }
+}
+@media (max-width:380px) {
+  .print-cards-shell .studio-preview-dock { max-height:225px; }
+  .print-cards-shell .studio-preview-card { max-height:160px; }
+}
+
+
+/* JASSAS STUDIO — guided mobile workspace */
+.print-cards-shell .print-cards-header {
+  align-items:center;
+  min-height:52px;
+  margin:0 0 8px !important;
+  padding:6px 8px !important;
+}
+.print-cards-shell .print-cards-header-actions {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.print-cards-shell .studio-back-icon {
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  min-height:42px !important;
+  padding:0 !important;
+  border-radius:13px !important;
+  font-size:30px !important;
+  line-height:1;
+  order:0;
+}
+.print-cards-shell .studio-preview-dock {
+  position:sticky !important;
+  top:max(2px, env(safe-area-inset-top)) !important;
+  z-index:100 !important;
+  align-self:start;
+  max-height:none !important;
+  overflow:visible !important;
+  margin:0 0 9px !important;
+  padding:8px !important;
+  isolation:isolate;
+}
+.print-cards-shell .studio-preview-toolbar {
+  min-height:0 !important;
+  margin:0 0 4px !important;
+}
+.print-cards-shell .studio-preview-toolbar button {
+  min-height:30px;
+  padding:5px 10px !important;
+  font-size:11px !important;
+}
+.print-cards-shell .studio-preview-card {
+  width:min(100%,620px) !important;
+  
+  max-height:190px !important;
+  min-height:0 !important;
+  padding:6px !important;
+  gap:4px !important;
+}
+.print-cards-shell .studio-preview-caption {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  direction:ltr;
+  margin-top:4px;
+  padding:0 3px;
+  color:var(--muted,#cbd5e1);
+  font-size:11px;
+  line-height:1.4;
+}
+.print-cards-shell .studio-preview-caption span {
+  color:var(--accent,#f3d58a);
+  font-weight:800;
+}
+.print-cards-shell .studio-preview-caption small {
+  font-size:10px;
+  opacity:.78;
+}
+.print-cards-shell .studio-design-mode {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:0 0 10px;
+}
+.print-cards-shell .studio-mode-card {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  min-height:68px;
+  padding:10px;
+  text-align:right;
+  border:1px solid rgba(148,163,184,.28);
+  border-radius:14px;
+  background:var(--surface,rgba(15,23,42,.75));
+  color:var(--foreground,#f8fafc);
+  cursor:pointer;
+  transition:border-color .18s ease,background .18s ease,transform .18s ease;
+}
+.print-cards-shell .studio-mode-card.is-active {
+  border:2px solid var(--accent,#d6ad55);
+  background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(124,58,237,.16));
+  box-shadow:0 6px 18px rgba(37,99,235,.14);
+}
+.print-cards-shell .studio-mode-card > span:nth-child(2) {
+  display:flex;
+  flex:1;
+  min-width:0;
+  flex-direction:column;
+  gap:3px;
+}
+.print-cards-shell .studio-mode-card strong {
+  font-size:13px;
+  line-height:1.4;
+}
+.print-cards-shell .studio-mode-card small {
+  color:var(--muted,#cbd5e1);
+  font-size:10px;
+  line-height:1.5;
+}
+.print-cards-shell .studio-mode-icon {
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:10px;
+  background:rgba(148,163,184,.14);
+  color:var(--accent,#f3d58a);
+  font-size:22px;
+}
+.print-cards-shell .studio-mode-color-icon {
+  color:#fbbf24;
+  background:linear-gradient(135deg,rgba(37,99,235,.3),rgba(124,58,237,.3));
+}
+.print-cards-shell .studio-mode-check {
+  width:20px;
+  flex:0 0 20px;
+  color:#34d399;
+  font-weight:900;
+}
+.print-cards-shell .studio-stepper-wrap {
+  margin:0 0 12px;
+  padding:7px;
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:14px;
+  background:var(--surface,rgba(15,23,42,.88));
+}
+.print-cards-shell .studio-section-nav {
+  display:flex;
+  flex-wrap:nowrap;
+  width:100%;
+  max-width:100%;
+  gap:6px;
+  margin:0;
+  padding:0 0 6px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  direction:rtl;
+  touch-action:pan-x pan-y;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.print-cards-shell .studio-section-tab {
+  flex:0 0 auto;
+  min-height:38px;
+  padding:7px 11px;
+  white-space:nowrap;
+  font-size:12px;
+}
+.print-cards-shell .studio-step-controls {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding-top:6px;
+  border-top:1px solid rgba(148,163,184,.16);
+}
+.print-cards-shell .studio-step-controls button {
+  min-height:34px;
+  padding:6px 13px;
+  border:1px solid rgba(96,165,250,.42);
+  border-radius:10px;
+  background:rgba(37,99,235,.16);
+  color:var(--foreground,#f8fafc);
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+}
+.print-cards-shell .studio-step-controls button:disabled {
+  opacity:.35;
+  cursor:not-allowed;
+}
+.print-cards-shell .studio-step-controls span {
+  color:var(--muted,#cbd5e1);
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+}
+.print-cards-shell [id^="studio-field-"],
+.print-cards-shell #studio-section-design,
+.print-cards-shell #studio-section-typography,
+.print-cards-shell #batch-history-heading {
+  scroll-margin-top:260px;
+}
+@media (max-width:640px) {
+  .print-cards-shell .print-cards-header { padding:4px 3px !important; }
+  .print-cards-shell .studio-back-icon { width:38px; min-width:38px; height:38px; min-height:38px !important; }
+  .print-cards-shell .studio-preview-dock { overflow:visible !important; max-height:none !important; }
+  .print-cards-shell .studio-preview-card { max-height:clamp(135px,32vw,190px) !important; }
+  .print-cards-shell .studio-design-mode { gap:7px; }
+  .print-cards-shell .studio-mode-card { min-height:64px; padding:8px; gap:6px; }
+  .print-cards-shell .studio-mode-card strong { font-size:12px; }
+  .print-cards-shell .studio-mode-card small { font-size:9px; }
+  .print-cards-shell .studio-mode-icon { width:29px; height:29px; flex-basis:29px; font-size:19px; }
+  .print-cards-shell .studio-section-nav { scroll-snap-type:x proximity; }
+  .print-cards-shell .studio-section-tab { scroll-snap-align:start; }
+}
+@media (max-width:360px) {
+  .print-cards-shell .studio-mode-card { flex-wrap:wrap; }
+  .print-cards-shell .studio-mode-card small { display:none; }
+  .print-cards-shell .studio-preview-caption small { display:none; }
+}
+
+
+/* Keep viewport sticky positioning working while clipping horizontal overflow. */
+html,
+body {
+  overflow-x:clip !important;
+}
+
+
+/* Each editor tab is a focused settings page; keep the live preview outside it. */
+.print-cards-settings[data-active-step] > .print-cards-row,
+.print-cards-settings[data-active-step] > #studio-section-design,
+.print-cards-settings[data-active-step] > #studio-section-design + div,
+.print-cards-settings[data-active-step] > #studio-section-typography,
+.print-cards-settings[data-active-step] > div:last-child {
+  display:none !important;
+}
+.print-cards-settings[data-active-step="identity"] > #studio-field-profile,
+.print-cards-settings[data-active-step="identity"] > #studio-field-network,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-prefix,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-length,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-usernameColor,
+.print-cards-settings[data-active-step="duration"] > #studio-field-validity,
+.print-cards-settings[data-active-step="duration"] > #studio-field-userDuration,
+.print-cards-settings[data-active-step="duration"] > #studio-field-dataPackage,
+.print-cards-settings[data-active-step="time"] > #studio-field-cardTime,
+.print-cards-settings[data-active-step="time"] > #studio-field-price,
+.print-cards-settings[data-active-step="time"] > #studio-field-distributor,
+.print-cards-settings[data-active-step="content"] > #studio-field-recharge,
+.print-cards-settings[data-active-step="content"] > #studio-field-special,
+.print-cards-settings[data-active-step="content"] > #studio-field-customMessage,
+.print-cards-settings[data-active-step="design"] > #studio-section-design,
+.print-cards-settings[data-active-step="design"] > #studio-section-design + div,
+.print-cards-settings[data-active-step="design"] > #studio-field-colorScheme,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardBackgroundImage,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardEffect,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardShape,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderStyle,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderWidth,
+.print-cards-settings[data-active-step="design"] > #studio-field-qr,
+.print-cards-settings[data-active-step="design"] > #studio-field-qrSize,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderColor,
+.print-cards-settings[data-active-step="typography"] > #studio-section-typography,
+.print-cards-settings[data-active-step="print"] > #studio-field-count,
+.print-cards-settings[data-active-step="print"] > #studio-field-cols,
+.print-cards-settings[data-active-step="print"] > div:last-child {
+  display:block !important;
+}
+.print-cards-settings[data-active-step="design"] > #studio-section-design + div {
+  display:grid !important;
+}
+.print-cards-settings[data-active-step="typography"] > #studio-section-typography {
+  display:block !important;
+}
+.print-cards-settings[data-active-step="print"] > div:last-child {
+  display:grid !important;
+}
+.print-cards-shell > div > section[aria-labelledby="batch-history-heading"] {
+  display:none;
+}
+.print-cards-shell > div > section[aria-labelledby="batch-history-heading"][data-active-step="history"] {
+  display:block;
+}
+.print-cards-settings[data-active-step="history"] {
+  display:none !important;
+}
+.print-cards-settings[data-active-step] > h2 {
+  margin-bottom:12px !important;
+  font-size:18px !important;
+}
+.print-cards-settings[data-active-step="identity"] > #studio-field-profile,
+.print-cards-settings[data-active-step="identity"] > #studio-field-network,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-prefix,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-length,
+.print-cards-settings[data-active-step="numbers"] > #studio-field-usernameColor,
+.print-cards-settings[data-active-step="duration"] > #studio-field-validity,
+.print-cards-settings[data-active-step="duration"] > #studio-field-userDuration,
+.print-cards-settings[data-active-step="duration"] > #studio-field-dataPackage,
+.print-cards-settings[data-active-step="time"] > #studio-field-cardTime,
+.print-cards-settings[data-active-step="time"] > #studio-field-price,
+.print-cards-settings[data-active-step="time"] > #studio-field-distributor,
+.print-cards-settings[data-active-step="content"] > #studio-field-recharge,
+.print-cards-settings[data-active-step="content"] > #studio-field-special,
+.print-cards-settings[data-active-step="content"] > #studio-field-customMessage,
+.print-cards-settings[data-active-step="design"] > #studio-field-colorScheme,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardBackgroundImage,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardEffect,
+.print-cards-settings[data-active-step="design"] > #studio-field-cardShape,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderStyle,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderWidth,
+.print-cards-settings[data-active-step="design"] > #studio-field-qr,
+.print-cards-settings[data-active-step="design"] > #studio-field-qrSize,
+.print-cards-settings[data-active-step="design"] > #studio-field-borderColor,
+.print-cards-settings[data-active-step="print"] > #studio-field-count,
+.print-cards-settings[data-active-step="print"] > #studio-field-cols {
+  display:flex !important;
+}
+
+/* Keep the template library inside the Design step only. */
+.print-cards-settings[data-active-step] > #studio-section-templates {
+  display:none !important;
+}
+.print-cards-settings[data-active-step="design"] > #studio-section-templates {
+  display:block !important;
+}
+
+/* Live card preview: preserve the selected physical card ratio without clipping. */
+.print-cards-shell .studio-preview-dock {
+  max-height:none !important;
+  overflow:visible !important;
+}
+.print-cards-shell .studio-preview-card {
+  height:auto !important;
+  max-height:none !important;
+  min-height:0 !important;
+  box-sizing:border-box !important;
+  flex:none;
+}
+
+
+/* JASSAS CARD STUDIO — guided entry and task switcher */
+.print-cards-shell .studio-entry-screen {
+  margin: 8px 0 18px;
+  padding: clamp(16px, 3vw, 26px);
+  border: 1px solid rgba(214,173,85,.42);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(20,57,96,.96), rgba(9,27,52,.96));
+  box-shadow: 0 18px 42px rgba(2,8,23,.24), inset 0 1px rgba(255,255,255,.08);
+}
+.print-cards-shell .studio-entry-heading { text-align:center; margin:0 auto 18px; }
+.print-cards-shell .studio-entry-kicker { color:#e7c66c; font-size:11px; font-weight:900; letter-spacing:.14em; }
+.print-cards-shell .studio-entry-heading h2 { margin:7px 0; color:#fff; font-size:clamp(22px,5vw,30px); font-weight:900; }
+.print-cards-shell .studio-entry-heading p { margin:0; color:#c5d7eb; font-size:13px; line-height:1.8; }
+.print-cards-shell .studio-entry-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.print-cards-shell .studio-entry-card {
+  display:flex; flex-direction:column; align-items:stretch; gap:9px; min-width:0;
+  padding:13px; text-align:right; color:#f8fafc; border-radius:18px;
+  border:1px solid rgba(214,173,85,.55); cursor:pointer;
+  background:linear-gradient(155deg,rgba(255,255,255,.11),rgba(2,8,23,.25));
+  box-shadow:0 9px 22px rgba(2,8,23,.2); transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+.print-cards-shell .studio-entry-card:active { transform:scale(.985); }
+.print-cards-shell .studio-entry-card:focus-visible,
+.print-cards-shell .studio-workspace-tabs button:focus-visible { outline:3px solid #f7d77a; outline-offset:3px; }
+.print-cards-shell .studio-entry-art {
+  display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px;
+  min-height:105px; border:2px solid #e6c35c; border-radius:10px;
+  background:linear-gradient(130deg,#102b50,#275a8a); color:#f7d77a;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.25);
+}
+.print-cards-shell .studio-entry-color .studio-entry-art { background:linear-gradient(125deg,#172554,#5b3a91,#087e83); }
+.print-cards-shell .studio-entry-art span { font-size:23px; }
+.print-cards-shell .studio-entry-art i { font-style:normal; font-size:15px; font-weight:900; letter-spacing:.08em; }
+.print-cards-shell .studio-entry-art small { color:#e2e8f0; font-size:9px; letter-spacing:.12em; }
+.print-cards-shell .studio-entry-card > strong { font-size:17px; color:#f8dda0; }
+.print-cards-shell .studio-entry-card > small { min-height:38px; color:#d7e5f4; font-size:11px; line-height:1.7; }
+.print-cards-shell .studio-entry-features { color:#f0d78d; font-size:10px; line-height:1.7; }
+.print-cards-shell .studio-entry-card > b { margin-top:auto; padding-top:8px; border-top:1px solid rgba(255,255,255,.13); color:#fff; font-size:12px; }
+.print-cards-shell .studio-workspace-topline {
+  display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 9px;
+  color:#f5d88a; font-size:13px; font-weight:800;
+}
+.print-cards-shell .studio-workspace-topline button {
+  min-height:36px; padding:7px 12px; border-radius:10px; border:1px solid rgba(214,173,85,.45);
+  background:rgba(15,35,63,.8); color:#e7d49c; font-weight:800;
+}
+.print-cards-shell .studio-workspace-tabs {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin:0 0 12px;
+  padding:7px; border:1px solid rgba(214,173,85,.28); border-radius:15px;
+  background:rgba(5,18,38,.78);
+}
+.print-cards-shell .studio-workspace-tabs button {
+  display:grid; grid-template-columns:30px 1fr; grid-template-rows:auto auto; align-items:center;
+  gap:1px 8px; min-height:56px; padding:8px 11px; text-align:right; border-radius:11px;
+  border:1px solid transparent; background:transparent; color:#dbeafe;
+}
+.print-cards-shell .studio-workspace-tabs button > span { grid-row:1 / 3; font-size:22px; }
+.print-cards-shell .studio-workspace-tabs button strong { font-size:14px; }
+.print-cards-shell .studio-workspace-tabs button small { color:#9fb5ce; font-size:10px; }
+.print-cards-shell .studio-workspace-tabs button.is-active {
+  color:#fff; border-color:rgba(247,215,122,.75);
+  background:linear-gradient(135deg,rgba(37,99,235,.72),rgba(30,64,175,.55));
+  box-shadow:0 5px 16px rgba(37,99,235,.2);
+}
+.print-cards-shell .studio-preview-dock { margin-top:0 !important; }
+.print-cards-shell .studio-preview-card { max-width:min(100%,440px) !important; }
+@media(max-width:420px) {
+  .print-cards-shell .studio-entry-grid { gap:8px; }
+  .print-cards-shell .studio-entry-card { padding:9px; gap:7px; }
+  .print-cards-shell .studio-entry-art { min-height:88px; }
+  .print-cards-shell .studio-entry-card > strong { font-size:14px; }
+  .print-cards-shell .studio-entry-card > small { font-size:10px; }
+}

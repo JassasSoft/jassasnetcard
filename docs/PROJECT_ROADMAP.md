@@ -1,13 +1,13 @@
 # Jassas Net Card — Project Roadmap
 
-Last updated: 2026-11-24
+Last updated: 2026-11-28
 
 ## Project identity
 - Product: Jassas Net Card / جساس نت كرت
 - Service brand: JASSAS SOFT PRO
 - Repository: JassasSoft/jassasnetcard
 - Production branch: production
-- Active feature branch: studio-four-design-modes
+- Canonical working branch: production (single working branch; no side branches for page updates)
 - Stack: Next.js 16, React 19, Supabase, MikroTik RouterOS
 - Primary interface: Arabic RTL, with English LTR option
 - Light theme: calm, cool, readable colors
@@ -15,13 +15,13 @@ Last updated: 2026-11-24
 
 ## Working rules
 - Preserve existing working features and uncommitted changes.
-- Never overwrite files without inspecting their current contents.
-- Make small, focused changes and test after each feature.
+- For an approved page update, inspect the complete current page and replace that page file with one complete, coherent implementation; avoid accumulating scattered patches.
+- Keep each page release coherent and self-contained; update shared styles only when required by the page implementation.
 - Do not add dependencies unless there is a clear need.
 - Back up important files before editing.
 - Keep final project backups outside the repository.
 - Verify changes with git status, git diff --check, TypeScript and production build.
-- Do not push or deploy without explicit approval.
+- Apply user-approved code updates directly to production; do not create side branches or manually trigger deployments without explicit approval.
 
 ## Approved product features
 
@@ -93,7 +93,7 @@ Last updated: 2026-11-24
   7. Shapes, borders and decorations
   8. Templates and design styles
   9. Card size, layout and printing
-- Card shapes: rectangle, square, rounded and triangle; verify the triangle as a true silhouette, not only a corner ornament.
+- Card shapes: rectangle and square only. Do not reintroduce circle, rounded, or triangle shapes.
 - Four approved modes: كروت عادي، كروت عادي فاخر، كروت ملونه، كروت ملونه فخمه.
 - Plain mode stays neutral and undecorated; luxury mode uses restrained accents; color mode uses a coordinated 3–4 color gradient; full-color luxury mode supports optional compressed image backgrounds.
 - Keep persisted style IDs backward compatible: plain, luxury, three-color and colored.
@@ -128,11 +128,12 @@ Last updated: 2026-11-24
 8. Complete the four Card Studio design modes, image backgrounds, true shape geometry, and single-source preview/PDF rendering.
 9. Run full security, mobile, performance and production-build checks; merge only after review.
 
-## Current feature-branch work
-- Active branch: studio-four-design-modes (created from production).
-- app/dashboard/print-cards/page.tsx has the first implementation of the four modes and optional compressed background image.
-- app/globals.css and app/api/print-cards/route.ts were not changed in this phase.
-- Local TypeScript, production build, Android preview, PDF, restore and reprint tests are still pending.
+## Current production workflow
+- `production` is the only canonical working branch.
+- Page updates are delivered as complete replacements of the target page file, not a trail of isolated edits.
+- Keep the working tree synchronized with `git switch production` and `git pull --ff-only origin production`.
+- Preserve server APIs, Supabase transactions, balance charging, idempotency, QR, PDF, batch history, restore and reprint behavior.
+- Do not create side branches for routine page updates.
 
 ## Status convention
 - APPROVED: product direction confirmed.
