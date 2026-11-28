@@ -792,11 +792,19 @@ const fontFamilies: any = {
       shadow = '0 0 0 4px rgba(124,58,237,0.45), ' + shadow
       extraStyle.transform = 'scale(1.02)'
     }
+    const uploadedBackground = getCardBackgroundImage(card)
+    const backgroundLayers = [uploadedBackground, bg].filter(
+      (layer): layer is string => typeof layer === 'string' && layer.length > 0
+    )
+
     return {
-      background: bg,
-      backgroundImage: getCardBackgroundImage(card),
-      backgroundSize: card.cardBackgroundImage ? 'cover' : undefined,
-      backgroundPosition: card.cardBackgroundImage ? 'center' : undefined,
+      // Keep the solid fallback separate from layered gradients/images.
+      // React warns when the background shorthand and backgroundImage are
+      // updated together on the same element.
+      backgroundColor: card.cardStyle === 'plain' ? bg : '#1e3c72',
+      backgroundImage: backgroundLayers.length ? backgroundLayers.join(', ') : undefined,
+      backgroundSize: card.cardBackgroundImage ? 'cover, cover, 100% 100%' : undefined,
+      backgroundPosition: card.cardBackgroundImage ? 'center, center, center' : undefined,
       boxShadow: shadow,
       borderRadius: shapeStyle.borderRadius,
       aspectRatio: shapeStyle.aspectRatio,
